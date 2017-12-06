@@ -1,4 +1,5 @@
-from utils.dicts import TypeList 
+from hinabe.utils.dicts import ProDict
+import re
 
 class CaboChunk(object):
     """Class for chunks"""
