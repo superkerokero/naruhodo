@@ -18,7 +18,7 @@ class Subprocess(object):
         }
         try:
             env = os.environ.copy()
-            self.proc = sp.Popen('bash -c {0}'.format(cmd), env=env,
+            self.proc = sp.Popen('bash -c "{0}"'.format(cmd), env=env,
                                 shell=True, **subproc_args)
         except OSError:
             raise
