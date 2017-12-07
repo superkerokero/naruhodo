@@ -16,6 +16,8 @@ class CaboChunk(object):
         self.interjs = list() # interjections 感動詞
         self.signs = list()   # signs 記号
         self.advs = list()    # adverbs 副詞
+        self.connects = list() # connects 連体詞
+        self.headings = list() # headings 接頭詞
         self.main = ""
         self.func = ""
         """
@@ -78,6 +80,10 @@ class CaboChunk(object):
             self.signs.append(elem)
         elif inp[1] == "副詞":
             self.advs.append(elem)
+        elif inp[1] == "連体詞":
+            self.connects.append(elem)
+        elif inp[1] == "接頭詞":
+            self.headings.append(elem)
         else:
             pass
         
@@ -92,12 +98,16 @@ class CaboChunk(object):
         del self.interjs
         del self.signs
         del self.advs
+        del self.connects
+        del self.headings
         
     def _getMain(self):
         """Get the main component of the chunk."""
-        if len(self.nouns) > 0:
-            self.main = "".join([x['lemma'] for x in self.nouns])
+        if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立' and self.nouns[0]['labels'][0] != '接尾':
+            self.main = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
+            if len(self.adjs) > 0:
+                self.main += "：" + self.adjs[0]['lemma']
             # Corrections for special patterns.
             if self.nouns[0]['labels'][0] == 'サ変接続':
                 self.type = 2
@@ -135,28 +145,46 @@ class CaboChunk(object):
                 self.main = "".join([x['surface'] for x in self.nouns])
             else:
                 pass
-        elif len(self.adjs):
+        elif len(self.adjs) > 0:
             self.main = self.adjs[0]['lemma']
             self.type = 1
         elif len(self.verbs) > 0:
             self.main = self.verbs[0]['lemma']
             self.type = 2
-        elif len(self.conjs):
+        elif len(self.conjs) > 0:
             self.main = self.conjs[0]['lemma']
             self.type = 3
-        elif len(self.interjs):
+        elif len(self.interjs) > 0:
             self.main = self.interjs[0]['lemma']
             self.type = 4
-        elif len(self.advs):
+        elif len(self.advs) > 0:
             self.main = self.advs[0]['lemma']
             self.type = 5
+        elif len(self.connects) > 0:
+            self.main = self.connects[0]['lemma']
+            self.type = 6
+        elif len(self.postps) > 0:
+            self.main = self.postps[0]['lemma']
+        elif len(self.auxvs) > 0:
+            self.main = self.auxvs[0]['lemma']
+        elif len(self.signs) > 0:
+            if len(self.nouns) > 0:
+                self.main = self.nouns[0]['lemma']
+            else:
+                self.main = self.signs[0]['lemma']
         else:
-            pass
+            self.main = 'UNKNOWN'
+        if len(self.headings) > 0:
+            self.main = "".join([x['surface'] for x in self.headings]) + self.main
         
     def _getFunc(self):
         """Get the func component of the chunk."""
+        if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立':
+            self.func = "".join([x['surface'] for x in self.verbs])
+        else:
+            self.func = ""
         if len(self.auxvs) > 0:
-            self.func = "・".join([x['lemma'] for x in self.auxvs])
+            self.func += "・".join([x['surface'] for x in self.auxvs])
             for elem in self.postps:
                 if elem['labels'][0] == "終助詞" or elem['labels'][0] == "副助詞／並立助詞／終助詞" :
                     self.func += "~" + elem['lemma']
@@ -166,7 +194,10 @@ class CaboChunk(object):
                 [x['lemma'] for x in self.auxvs].count('ぬ')
             ])
             if neg == 1:
-                self.main += "(否定)"
+                if len(self.signs) > 0 and self.signs[0]['surface'] == '？':
+                    pass
+                else:
+                    self.main += "(否定)"
             elif neg > 1:
                 if neg % 2 == 0:
                     self.main += "(二重否定・強賛同)"
@@ -175,9 +206,10 @@ class CaboChunk(object):
             else:
                 pass
         elif len(self.postps) > 0:
-            self.func = "・".join([x['lemma'] for x in self.postps])
+            self.func += "・".join([x['surface'] for x in self.postps])
         else:
             pass
+        self.func += "".join([x['surface'] for x in self.signs])
         
     def processChunk(self):
         """Process the chunk to get main and func component of it."""

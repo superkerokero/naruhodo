@@ -13,6 +13,7 @@ class NScraper(object):
         req = urllib.request.Request(url=url, headers=self.headers)
         try:
             soup = bs(urllib.request.urlopen(req), "lxml")
-            return [content.text for content in soup.find_all(['p', ])]
+            return ["".join([content.text for content in soup.find_all(['p', ])])]
+            #return [content.text for content in soup.find_all(['p', ])]
         except:
             return ['503: service unavailable, try again later.']

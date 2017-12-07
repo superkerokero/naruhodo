@@ -11,5 +11,5 @@ ProDict = {
     'inclusive': ["皆", "みんな", "みな"]
 }
 
-TypeList = ['名詞', '形容詞', '動詞', '接続詞', '感動詞', '副詞']
+TypeList = ['名詞', '形容詞', '動詞', '接続詞', '感動詞', '副詞', '連体詞', '接頭詞']
 NEList = ['PERSON', 'LOCATION', 'ORGANIZATION']
