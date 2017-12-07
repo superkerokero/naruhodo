@@ -79,6 +79,18 @@ class CaboChunk(object):
             self.advs.append(elem)
         else:
             pass
+
+    def cleanUp(self):
+        """Clean up all the lists stored in the object that is no longer needed."""
+        del self.nouns
+        del self.verbs
+        del self.adjs
+        del self.postps
+        del self.auxvs
+        del self.conjs
+        del self.interjs
+        del self.signs
+        del self.advs
         
     def _getMain(self):
         """Get the main component of the chunk."""
@@ -183,11 +195,13 @@ class CabochaClient(object):
             if elem[0] == '*':
                 if ck is not None:
                     ck.processChunk()
+                    ck.cleanUp()
                     self.chunks.append(ck)
                 ck = CaboChunk(*self._processHead(elem))
             else:
                 ck.add(self.rsplit.split(elem))
         ck.processChunk()
+        ck.cleanUp()
         self.chunks.append(ck)
                 
     def _processHead(self, inp):
