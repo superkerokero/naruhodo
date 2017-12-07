@@ -56,7 +56,8 @@ class CaboChunk(object):
     def add(self, inp):
         """Add components to chunk lists."""
         elem = {
-            'surface': inp[7],
+            'surface': inp[0],
+            'lemma' : inp[7],
             'labels': inp[2:7],
         }
         if inp[1] == "名詞":
@@ -79,7 +80,7 @@ class CaboChunk(object):
             self.advs.append(elem)
         else:
             pass
-
+        
     def cleanUp(self):
         """Clean up all the lists stored in the object that is no longer needed."""
         del self.nouns
@@ -95,7 +96,7 @@ class CaboChunk(object):
     def _getMain(self):
         """Get the main component of the chunk."""
         if len(self.nouns) > 0:
-            self.main = "".join([x['surface'] for x in self.nouns])
+            self.main = "".join([x['lemma'] for x in self.nouns])
             self.type = 0
             # Corrections for special patterns.
             if self.nouns[0]['labels'][0] == 'サ変接続':
@@ -114,38 +115,40 @@ class CaboChunk(object):
                     pass
             # Pronoun identification(for correference analysis.)
             elif self.nouns[0]['labels'][0] == '代名詞':
-                if self.nouns[0]['surface'] in ProDict['demonstrative-loc']:
+                if self.nouns[0]['lemma'] in ProDict['demonstrative-loc']:
                     self.pro = 0
-                elif self.nouns[0]['surface'] in ProDict['demonstrative-obj']:
+                elif self.nouns[0]['lemma'] in ProDict['demonstrative-obj']:
                     self.pro = 1
-                elif self.nouns[0]['surface'] in ProDict['personal1st']:
+                elif self.nouns[0]['lemma'] in ProDict['personal1st']:
                     self.pro = 2
-                elif self.nouns[0]['surface'] in ProDict['personal2nd']:
+                elif self.nouns[0]['lemma'] in ProDict['personal2nd']:
                     self.pro = 3
-                elif self.nouns[0]['surface'] in ProDict['personal3rd']:
+                elif self.nouns[0]['lemma'] in ProDict['personal3rd']:
                     self.pro = 4
-                elif self.nouns[0]['surface'] in ProDict['indefinite']:
+                elif self.nouns[0]['lemma'] in ProDict['indefinite']:
                     self.pro = 5
-                elif self.nouns[0]['surface'] in ProDict['inclusive']:
+                elif self.nouns[0]['lemma'] in ProDict['inclusive']:
                     self.pro = 6
                 else:
                     pass
+            elif self.nouns[0]['labels'][0] == '数':
+                self.main = "".join([x['surface'] for x in self.nouns])
             else:
                 pass
         elif len(self.adjs):
-            self.main = self.adjs[0]['surface']
+            self.main = self.adjs[0]['lemma']
             self.type = 1
         elif len(self.verbs) > 0:
-            self.main = self.verbs[0]['surface']
+            self.main = self.verbs[0]['lemma']
             self.type = 2
         elif len(self.conjs):
-            self.main = self.conjs[0]['surface']
+            self.main = self.conjs[0]['lemma']
             self.type = 3
         elif len(self.interjs):
-            self.main = self.interjs[0]['surface']
+            self.main = self.interjs[0]['lemma']
             self.type = 4
         elif len(self.advs):
-            self.main = self.advs[0]['surface']
+            self.main = self.advs[0]['lemma']
             self.type = 5
         else:
             pass
@@ -153,14 +156,14 @@ class CaboChunk(object):
     def _getFunc(self):
         """Get the func component of the chunk."""
         if len(self.auxvs) > 0:
-            self.func = "・".join([x['surface'] for x in self.auxvs])
+            self.func = "・".join([x['lemma'] for x in self.auxvs])
             for elem in self.postps:
                 if elem['labels'][0] == "終助詞" or elem['labels'][0] == "副助詞／並立助詞／終助詞" :
-                    self.func += "~" + elem['surface']
+                    self.func += "~" + elem['lemma']
             neg = sum([
-                [x['surface'] for x in self.auxvs].count('ん'), 
-                [x['surface'] for x in self.auxvs].count('ない'),
-                [x['surface'] for x in self.auxvs].count('ぬ')
+                [x['lemma'] for x in self.auxvs].count('ん'), 
+                [x['lemma'] for x in self.auxvs].count('ない'),
+                [x['lemma'] for x in self.auxvs].count('ぬ')
             ])
             if neg == 1:
                 self.main += "(否定)"
@@ -172,7 +175,7 @@ class CaboChunk(object):
             else:
                 pass
         elif len(self.postps) > 0:
-            self.func = "・".join([x['surface'] for x in self.postps])
+            self.func = "・".join([x['lemma'] for x in self.postps])
         else:
             pass
         
