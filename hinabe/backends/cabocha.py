@@ -104,15 +104,21 @@ class CaboChunk(object):
     def _getMain(self):
         """Get the main component of the chunk."""
         if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立' and self.nouns[0]['labels'][0] != '接尾':
-            self.main = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
+            self.main = "\n".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
             if len(self.adjs) > 0:
                 self.main += "：" + self.adjs[0]['lemma']
             # Corrections for special patterns.
             if self.nouns[0]['labels'][0] == 'サ変接続':
-                self.type = 2
+                if len(self.nouns) > 1:
+                    self.type = 0
+                else: 
+                    self.type = 2
             elif self.nouns[0]['labels'][0] == '形容動詞語幹':
-                self.type = 1
+                if len(self.nouns) > 1:
+                    self.type = 0
+                else:
+                    self.type = 1
             # NE recognition.
             elif self.nouns[0]['labels'][0] == '固有名詞':
                 if self.nouns[0]['labels'][1] == '人名':
@@ -142,7 +148,7 @@ class CaboChunk(object):
                 else:
                     pass
             elif self.nouns[0]['labels'][0] == '数':
-                self.main = "".join([x['surface'] for x in self.nouns])
+                self.main = "\n".join([x['surface'] for x in self.nouns])
             else:
                 pass
         elif len(self.adjs) > 0:
@@ -175,15 +181,22 @@ class CaboChunk(object):
         else:
             self.main = 'UNKNOWN'
         if len(self.headings) > 0:
-            self.main = "".join([x['surface'] for x in self.headings]) + self.main
+            self.main = "\n".join([x['surface'] for x in self.headings]) + self.main
         
     def _getFunc(self):
         """Get the func component of the chunk."""
         if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立':
-            self.func = "".join([x['surface'] for x in self.verbs])
-        else:
-            self.func = ""
-        if len(self.auxvs) > 0:
+            if len(self.verbs) > 1 and len(self.postps) > 0:
+                for item in self.verbs:
+                    if item['labels'][0] == '接尾':
+                        self.func += self.postps[0]['surface'] + item['surface']
+                    else:
+                        self.func += item['surface']
+            elif len(self.postps) > 0:
+                self.func = self.postps[0]['surface'] + "".join([x['surface'] for x in self.verbs])
+            else:
+                self.func = "".join([x['surface'] for x in self.verbs])
+        elif len(self.auxvs) > 0:
             self.func += "・".join([x['surface'] for x in self.auxvs])
             for elem in self.postps:
                 if elem['labels'][0] == "終助詞" or elem['labels'][0] == "副助詞／並立助詞／終助詞" :
@@ -197,12 +210,12 @@ class CaboChunk(object):
                 if len(self.signs) > 0 and self.signs[0]['surface'] == '？':
                     pass
                 else:
-                    self.main += "(否定)"
+                    self.main += "\n(否定)"
             elif neg > 1:
                 if neg % 2 == 0:
-                    self.main += "(二重否定・強賛同)"
+                    self.main += "\n(二重否定・強賛同)"
                 else:
-                    self.main += "(多重否定)"
+                    self.main += "\n(多重否定)"
             else:
                 pass
         elif len(self.postps) > 0:
