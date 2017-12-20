@@ -13,7 +13,7 @@ class Subprocess(object):
             'stdout': sp.PIPE,
             'stderr': sp.STDOUT, 
             'cwd': '.', 
-            'universal_newlines': True,
+            #'universal_newlines': True,
             'close_fds': sys.platform != "win32"
         }
         try:
@@ -37,11 +37,11 @@ class Subprocess(object):
     def query(self, inp):
         """Query an input through stdin and get a response from stdout."""
         pattern = r'EOS'
-        self.proc.stdin.write(inp + '\n')
+        self.proc.stdin.write(inp.encode('utf-8') + six.b('\n'))
         self.proc.stdin.flush()
         result = ""
         while True:
-            line = self.stdout.readline()[:-1]
+            line = self.stdout.readline()[:-1].decode('utf-8')
             if re.search(pattern, line):
                 break
             result = "{0}{1}\n".format(result, line)
