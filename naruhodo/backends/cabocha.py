@@ -1,4 +1,4 @@
-from hinabe.utils.dicts import ProDict
+from naruhodo.utils.dicts import ProDict
 import re
 
 class CaboChunk(object):

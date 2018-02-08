@@ -1,5 +1,5 @@
 import unittest
-from hinabe.backends.cabocha import CabochaClient
+from naruhodo.backends.cabocha import CabochaClient
 
 class TestCabochaClient(unittest.TestCase):
     def test_add(self):

@@ -1,5 +1,5 @@
 import unittest
-from hinabe.utils.scraper import NScraper
+from naruhodo.utils.scraper import NScraper
 
 class TestScraper(unittest.TestCase):
     def test_getUrlContent(self):
