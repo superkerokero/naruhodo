@@ -1,4 +1,4 @@
-from naruhodo.utils.dicts import ProDict
+from naruhodo.utils.dicts import ProDict, MeaninglessDict
 import re
 
 class CaboChunk(object):
@@ -18,8 +18,14 @@ class CaboChunk(object):
         self.advs = list()    # adverbs 副詞
         self.connects = list() # connects 連体詞
         self.headings = list() # headings 接頭詞
-        self.main = ""
-        self.func = ""
+        self.main = "" # Main component
+        self.func = "" # Functional component
+        self.surface = "" # Original surface
+        self.negative = 0 # If chunk is negative 1, elif chunk double negtive(strong positive) -1, else 0 
+        self.passive = 0 # If chunk is passive 1, else 0.
+        self.compulsory = 0 # If chunk is compulsory 1, else 0.
+        self.question = 0 # If chunk contains ? 1, else 0.
+        self.tense = 0 # If chunk has no tense or present 0, elif past -1, elif present continuous 1
         """
         Type of this chunk.
         -------------------
@@ -30,8 +36,18 @@ class CaboChunk(object):
          3: conjective
          4: interjection
          5: adverb
+         6: connect
         """
         self.type = -1
+        """
+        2nd type of this chunk.
+        -----------------------
+        -1: no 2nd type
+         0: noun
+         1: adjective
+         2: verb
+        """
+        self.type2 = -1
         """
         Named entity type of this chunk.
         --------------------------------
@@ -57,6 +73,8 @@ class CaboChunk(object):
     
     def add(self, inp):
         """Add components to chunk lists."""
+        if inp[1] != "記号" or inp[0] == "？":
+            self.surface += inp[0]
         elem = {
             'surface': inp[0],
             'lemma' : inp[7],
@@ -114,11 +132,13 @@ class CaboChunk(object):
                     self.type = 0
                 else: 
                     self.type = 2
+                    self.type2 = 0
             elif self.nouns[0]['labels'][0] == '形容動詞語幹':
                 if len(self.nouns) > 1:
                     self.type = 0
                 else:
-                    self.type = 1
+                    self.type = 2
+                    self.type2 = 1
             # NE recognition.
             elif self.nouns[0]['labels'][0] == '固有名詞':
                 if self.nouns[0]['labels'][1] == '人名':
@@ -148,15 +168,23 @@ class CaboChunk(object):
                 else:
                     pass
             elif self.nouns[0]['labels'][0] == '数':
-                self.main = "\n".join([x['surface'] for x in self.nouns])
+                self.main = "".join([x['surface'] for x in self.nouns])
             else:
                 pass
+        elif len(self.nouns) > 0 and self.nouns[0]['surface'] == 'こと':
+            self.main = self.nouns[0]['surface']
+            self.type = 0
         elif len(self.adjs) > 0:
             self.main = self.adjs[0]['lemma']
             self.type = 1
+            if self.adjs[0]['lemma'] == "ない":
+                self.negative = 1
         elif len(self.verbs) > 0:
             self.main = self.verbs[0]['lemma']
             self.type = 2
+        elif len(self.nouns) > 0 and self.nouns[0]['labels'][0] == '非自立':
+            self.main = self.nouns[0]['surface']
+            self.type = 0
         elif len(self.conjs) > 0:
             self.main = self.conjs[0]['lemma']
             self.type = 3
@@ -185,21 +213,35 @@ class CaboChunk(object):
         
     def _getFunc(self):
         """Get the func component of the chunk."""
-        if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立':
-            if len(self.verbs) > 1 and len(self.postps) > 0:
-                for item in self.verbs:
-                    if item['labels'][0] == '接尾':
-                        self.func += self.postps[0]['surface'] + item['surface']
-                    else:
-                        self.func += item['surface']
-            elif len(self.postps) > 0:
-                self.func = self.postps[0]['surface'] + "".join([x['surface'] for x in self.verbs])
-            else:
-                self.func = "".join([x['surface'] for x in self.verbs])
-        elif len(self.auxvs) > 0:
+        # if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立':
+        #     if len(self.verbs) > 1 and len(self.postps) > 0:
+        #         for item in self.verbs:
+        #             if item['labels'][0] == '接尾':
+        #                 self.func += self.postps[0]['surface'] + item['surface']
+        #             else:
+        #                 self.func += item['surface']
+        #     elif len(self.postps) > 0:
+        #         self.func = self.postps[0]['surface'] + "".join([x['surface'] for x in self.verbs])
+        #     else:
+        #         self.func = "".join([x['surface'] for x in self.verbs])
+        if len(self.verbs) > 0:
+            for item in self.verbs:
+                if item['labels'][0] == '接尾':
+                    if item['lemma'] == "れる" or item['lemma'] == "られる":
+                        self.passive = 1
+                    elif item['lemma'] == "させる":
+                        self.compulsory = 1
+                    self.func += item['surface']
+                elif len(self.nouns) > 0 and item['labels'][0] == '自立':
+                    self.func += item['surface']
+                elif item['labels'][0] == "非自立":
+                    self.func += item['surface']
+                    if item['lemma'] == "いる":
+                        self.tense = 1
+        if len(self.auxvs) > 0:
             self.func += "・".join([x['surface'] for x in self.auxvs])
             for elem in self.postps:
-                if elem['labels'][0] == "終助詞" or elem['labels'][0] == "副助詞／並立助詞／終助詞" :
+                if elem['labels'][0] == "終助詞" or elem['labels'][0] == "副助詞／並立助詞／終助詞" or elem['labels'][0] == "接続助詞":
                     self.func += "~" + elem['lemma']
             neg = sum([
                 [x['lemma'] for x in self.auxvs].count('ん'), 
@@ -207,22 +249,29 @@ class CaboChunk(object):
                 [x['lemma'] for x in self.auxvs].count('ぬ')
             ])
             if neg == 1:
-                if len(self.signs) > 0 and self.signs[0]['surface'] == '？':
+                if len(self.signs) > 0 and any([self.signs[x]['surface'] == '？' for x in range(len(self.signs))]):
                     pass
                 else:
-                    self.main += "\n(否定)"
+                    self.main += "(否定)"
+                    self.negative = 1
             elif neg > 1:
                 if neg % 2 == 0:
-                    self.main += "\n(二重否定・強賛同)"
+                    self.main += "(二重否定)"
+                    self.negative = -1
                 else:
-                    self.main += "\n(多重否定)"
+                    self.main += "(多重否定)"
             else:
                 pass
-        elif len(self.postps) > 0:
+            if any([self.auxvs[x]['lemma'] == "た" for x in range(len(self.auxvs))]):
+                self.tense = -1
+        if len(self.postps) > 0:
             self.func += "・".join([x['surface'] for x in self.postps])
-        else:
-            pass
-        self.func += "".join([x['surface'] for x in self.signs])
+        if len(self.signs) > 0:
+            for item in self.signs:
+                if item['surface'] ==  '？':
+                    self.func += item['surface']
+                    self.question = 1
+        # self.func += "".join([x['surface'] for x in self.signs])
         
     def processChunk(self):
         """Process the chunk to get main and func component of it."""
@@ -235,7 +284,9 @@ class CabochaClient(object):
     def __init__(self):
         """Initialize a native database."""
         self.rsplit = re.compile(r'[,]+|\t')
+        self.re_parentheses = re.compile('\([^)]*\)')
         self.chunks = list()
+        self.root = None
                 
     def add(self, inp):
         """Takes in the block output from CaboCha and add it to native database."""
@@ -250,8 +301,32 @@ class CabochaClient(object):
                 ck.add(self.rsplit.split(elem))
         ck.processChunk()
         self.chunks.append(ck)
+        # Get children list and store in self.childrenList
+        self._getChildrenList()
+        self._processMeaningless()
                 
     def _processHead(self, inp):
         """Takes in the head of the chunk and process ids / parents."""
         elem = inp.split()
         return int(elem[1]), int(elem[2][:-1])
+
+    def _getChildrenList(self):
+        """Process to get the list of children for each chunk."""
+        nck = len(self.chunks)
+        self.childrenList = [list() for x in range(nck)]
+        for i in range(nck):
+            pid = self.chunks[i].parent
+            if pid == -1:
+                self.root = i
+            else:
+                self.childrenList[pid].append(i)
+
+    def _processMeaningless(self):
+        """This function makes meaningless words tagged with its meaning."""
+        nck = len(self.chunks)
+        for i in range(nck):
+            if self.re_parentheses.sub("", self.chunks[i].main) in MeaninglessDict:
+                self.chunks[i].main = "[{0}]\n{1}".format(
+                    self.chunks[self.childrenList[i][-1]].surface,
+                    self.chunks[i].main
+                )
