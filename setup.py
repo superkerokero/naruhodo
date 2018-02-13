@@ -16,6 +16,7 @@ setup(
     install_requires = [
         'networkx',
         'beautifulsoup4',
-        'nxpd'
+        'nxpd',
+        'lxml'
     ],
 )
