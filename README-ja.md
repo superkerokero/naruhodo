@@ -56,18 +56,18 @@ Naruhodo は　`pip` でGithubからインストールする事ができます:
 pip install git+https://github.com/superkerokero/naruhodo.git
 ```
 
-Naruhodo は外部プログラムで形態素解析と依存構造解析を行います。故にNaruhodoをつかうためには、対応している外部プログラムをインストールする事も必要です。
+Naruhodo は外部プログラムで形態素解析と依存構造解析を行います。故にNaruhodoをつかうためには、対応している外部プログラムをインストールする事も必要です。
 
 Naruhodo は複数のバックエンドプログラムに対応できるように設計されていますが、今は　`mecab` + `cabocha` のみをサポートしています。
 
-`mecab` と `cabocha` のインストールについては、この記事を参照してください：
+`mecab` と `cabocha` のインストールについては、この記事を参照してください：
 
 [Amazon Linux に MeCab と CaboCha をインストール](https://qiita.com/january108/items/85c80769ea870c190eaa)
 
-他のバックエンドプログラム（`KNP` など）へのサポートはこれから追加する予定です。
+他のバックエンドプログラム（`KNP` など）へのサポートはこれから追加する予定です。
 
 ## チュートリアル
 
-Naruhodo のチュートリアルはリポジトリのルートフォルダに　`ipynb` ファィルとして用意されています。ブラウザから直接閲覧する事も可能です。このチュートリアルは　Naruhodo の主な機能をすべて紹介しています。
+Naruhodo のチュートリアルはリポジトリのルートフォルダに　`ipynb` ファィルとして用意されています。ブラウザから直接閲覧する事も可能です。このチュートリアルには　Naruhodo の主な機能をすべて紹介しています。
 
 [チュートリアルのノートブック](https://github.com/superkerokero/naruhodo/blob/master/Tutorial.ipynb)
