@@ -7,6 +7,7 @@ class CaboChunk(object):
         """Initialize a chunk."""
         self.id = chunk_id    # id
         self.parent = parent  # parent chunk
+        self.children = None # list of children
         self.nouns = list()   # nouns 名詞
         self.verbs = list()   # verbs 動詞
         self.adjs = list()    # adjectives 形容詞
@@ -320,6 +321,8 @@ class CabochaClient(object):
                 self.root = i
             else:
                 self.childrenList[pid].append(i)
+        for i in range(nck):
+            self.chunks[i].children = self.childrenList[i]
 
     def _processMeaningless(self):
         """This function makes meaningless words tagged with its meaning."""

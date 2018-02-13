@@ -11,7 +11,7 @@ def exportToJsonObj(G):
     ret = dict()
     ret['nodes'] = [{
         'id': item['id'],
-        'label': item['rep'],
+        'label': item['label'],
         'value': item['width'],
         'title': item['count'],
         'shape': NodeShapeDictN2Json[item['shape']],
@@ -68,6 +68,7 @@ def getNodeProperties(info):
     else:
         ret['shape'] = 'underline'
         ret['color'] = '#ffffff'
+    ret['label'] = info['rep']
     ret['style'] = 'filled'
     ret['fixedsize'] = True 
     ret['fontsize'] = (5.0 + 20.0 / info['len']) * info['count']

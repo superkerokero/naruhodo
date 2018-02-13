@@ -3,6 +3,7 @@ import itertools
 import networkx as nx
 from nxpd import draw
 from naruhodo.utils.scraper import NScraper
+from naruhodo.utils.misc import exportToJsonFile
 
 class AnalyzerBase(object):
     """Prototype of the analyzer classes."""
@@ -42,6 +43,16 @@ class AnalyzerBase(object):
                 for line in block.splitlines():
                     ret = list(itertools.chain(ret, self._parseToSents(line)))
         return ret
+
+    def reset(self):
+        """Reset the content of generated graph to empty."""
+        self.G = nx.DiGraph()
+        self.nodes = dict()
+        self.edges = dict()
+
+    def exportJSON(self, filename):
+        """Export current graph to a JSON file on disk."""
+        exportToJsonFile(self.G, filename)
 
     def plotDiGraphNotebook(self):
         '''Plot directional graph in jupyter notebook using nxpd.'''
