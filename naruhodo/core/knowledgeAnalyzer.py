@@ -144,7 +144,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 'count': 1,
                 'type': ctype,
                 'rep': rep,
-                'len': len(name)
+                'len': len(rep)
             }
             
     def _updateKG(self):
