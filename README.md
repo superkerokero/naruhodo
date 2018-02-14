@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/superkerokero/naruhodo.svg?branch=master)](https://travis-ci.org/superkerokero/naruhodo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI version](https://badge.fury.io/py/naruhodo.svg)](https://badge.fury.io/py/naruhodo)
 
 [日本語はこちら](README-ja.md)
 
@@ -48,10 +49,10 @@ This is an example of KG generated from [Wikipedia-ja: LLVM](https://ja.wikipedi
 
 ## Installation
 
-You can install the library directly from github using pip:
+You can install the library directly using pip:
 
 ```bash
-pip install git+https://github.com/superkerokero/naruhodo.git
+pip install naruhodo
 ```
 
 Naruhodo relies on external programs to do Japanese word and dependency parsing, so you need to have corresponding programs installed as well.
@@ -69,3 +70,9 @@ Support for other parsers such as `KNP` is planned in the future.
 The tutorial of naruhodo is provided as a `ipynb` file in the root folder. You can view it directly in your browser. This tutorial covers all the main functionalities of naruhodo.
 
 [Tutorial notebook](https://github.com/superkerokero/naruhodo/blob/master/Tutorial.ipynb)
+
+## Python-API
+
+* class: naruhodo.dependencyAnalyzer()
+    * properties
+        

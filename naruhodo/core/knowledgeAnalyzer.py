@@ -6,14 +6,14 @@ from naruhodo.core.base import AnalyzerBase
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
 class KnowledgeAnalyzer(AnalyzerBase):
-    """Use cabocha as backend to analyze the input text and store the information into a DMG(Directed multi-graph)."""
+    """Analyze the input text and store the information into a knowledge graph(KG)."""
     def __init__(self):
-        """Setup a subprocess for using CaboCha as backend."""
+        """Setup a subprocess for backend."""
         super().__init__()
         self.proc = Subprocess('cabocha -f1')
         
     def addToKG(self, inp):
-        """Take in a string input and add it to the knowledge gragh(KG) using CaboCha as backend."""
+        """Take in a string input and add it to the knowledge gragh(KG)."""
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp))
         pool = [cabo.root]
@@ -157,7 +157,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             self.G.add_edge(*key, **getEdgeProperties(val))
             
     def addUrlsToKG(self, urls):
-        """Add the information from given urls to DAG."""
+        """Add the information from given urls to KG."""
         context = self._grabTextFromUrls(urls)
         for sent in context:
             self.addToKG(sent)

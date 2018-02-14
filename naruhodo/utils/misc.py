@@ -6,7 +6,7 @@ import networkx as nx
 from naruhodo.utils.dicts import NodeShapeDictN2Json
 
 def exportToJsonObj(G):
-    """Export given networkx graph to JSON object."""
+    """Export given networkx graph to JSON object(dict object in python)."""
     raw = nx.node_link_data(G)
     ret = dict()
     ret['nodes'] = [{

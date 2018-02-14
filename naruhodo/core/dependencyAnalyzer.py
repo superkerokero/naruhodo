@@ -6,14 +6,14 @@ from naruhodo.core.base import AnalyzerBase
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
 class DependencyAnalyzer(AnalyzerBase):
-    """Use cabocha as backend to analyze the input text and store the information into a DAG(s)."""
+    """Analyze the input text and store the information into a dependency graph(DG)."""
     def __init__(self):
-        """Setup a subprocess for using CaboCha as backend."""
+        """Setup a subprocess for backend."""
         super().__init__()
         self.proc = Subprocess('cabocha -f1')
         
     def addToDG(self, inp):
-        """Take in a string input and add it to the DAG using CaboCha as backend."""
+        """Take in a string input and add it to the DG."""
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp))
         for chunk in cabo.chunks:
@@ -53,7 +53,7 @@ class DependencyAnalyzer(AnalyzerBase):
             self.G.add_edge(*key, **getEdgeProperties(val))
             
     def addUrlsToDG(self, urls):
-        """Add the information from given urls to DAG."""
+        """Add the information from given urls to DG."""
         context = self._grabTextFromUrls(urls)
         for sent in context:
             self.addToDG(sent)

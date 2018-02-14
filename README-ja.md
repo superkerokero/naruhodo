@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/superkerokero/naruhodo.svg?branch=master)](https://travis-ci.org/superkerokero/naruhodo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI version](https://badge.fury.io/py/naruhodo.svg)](https://badge.fury.io/py/naruhodo)
 
 [English version](README.md)
 
@@ -50,10 +51,10 @@ KGで使えるメソッドはDGとほぼ同じです。
 
 ## インストール
 
-Naruhodo は　`pip` でGithubからインストールする事ができます:
+Naruhodo は　`pip` でインストールできます:
 
 ```bash
-pip install git+https://github.com/superkerokero/naruhodo.git
+pip install naruhodo
 ```
 
 Naruhodo は外部プログラムで形態素解析と依存構造解析を行います。故にNaruhodoをつかうためには、対応している外部プログラムをインストールする事も必要です。

@@ -2,31 +2,120 @@ from naruhodo.utils.dicts import ProDict, MeaninglessDict
 import re
 
 class CaboChunk(object):
-    """Class for chunks"""
+    """Class for cabocha chunks"""
     def __init__(self, chunk_id, parent):
         """Initialize a chunk."""
-        self.id = chunk_id    # id
-        self.parent = parent  # parent chunk
-        self.children = None # list of children
-        self.nouns = list()   # nouns 名詞
-        self.verbs = list()   # verbs 動詞
-        self.adjs = list()    # adjectives 形容詞
-        self.postps = list()  # postpositions 助詞
-        self.auxvs = list()   # auxilary verbs 助動詞
-        self.conjs = list()   # conjection 接続詞
-        self.interjs = list() # interjections 感動詞
-        self.signs = list()   # signs 記号
-        self.advs = list()    # adverbs 副詞
-        self.connects = list() # connects 連体詞
-        self.headings = list() # headings 接頭詞
-        self.main = "" # Main component
-        self.func = "" # Functional component
-        self.surface = "" # Original surface
-        self.negative = 0 # If chunk is negative 1, elif chunk double negtive(strong positive) -1, else 0 
-        self.passive = 0 # If chunk is passive 1, else 0.
-        self.compulsory = 0 # If chunk is compulsory 1, else 0.
-        self.question = 0 # If chunk contains ? 1, else 0.
-        self.tense = 0 # If chunk has no tense or present 0, elif past -1, elif present continuous 1
+        self.id = chunk_id    
+        """
+        id of the chunk.
+        """
+
+        self.parent = parent  
+        """
+        parent id of this chunk.
+        """
+
+        self.children = None 
+        """
+        list of children of this chunk.
+        """
+
+        self.nouns = list()   
+        """
+        list of nouns 名詞
+        """
+
+        self.verbs = list()   
+        """
+        list of verbs 動詞
+        """
+
+        self.adjs = list()    
+        """
+        list of adjectives 形容詞
+        """
+
+        self.postps = list()  
+        """
+        list of postpositions 助詞
+        """
+
+        self.auxvs = list()   
+        """
+        list of auxilary verbs 助動詞
+        """
+
+        self.conjs = list()   
+        """
+        list of conjection 接続詞
+        """
+
+        self.interjs = list() 
+        """
+        list of interjections 感動詞
+        """
+
+        self.signs = list()   
+        """
+        list of signs 記号
+        """
+
+        self.advs = list()    
+        """
+        list of adverbs 副詞
+        """
+
+        self.connects = list() 
+        """
+        list of connects 連体詞
+        """
+
+        self.headings = list() 
+        """
+        list of headings 接頭詞
+        """
+
+        self.main = "" 
+        """
+        Main component of the chunk.
+        """
+
+        self.func = "" 
+        """
+        Functional component of the chunk.
+        """
+
+        self.surface = "" 
+        """
+        Original surface of the chunk.
+        """
+
+        self.negative = 0 
+        """
+        If chunk is negative 1, elif chunk double negtive(strong positive) -1, else 0 
+        """
+
+        self.passive = 0 
+        """
+        If chunk is passive 1, else 0.
+        """
+
+        self.compulsory = 0 
+        """
+        If chunk is compulsory 1, else 0.
+        """
+
+        self.question = 0 
+        """
+        If chunk contains ? 1, else 0.
+        """
+
+        self.tense = 0 
+        """
+        If chunk has no tense or present 0, elif past -1, elif present continuous 1
+        """
+        
+        self.type = -1
         """
         Type of this chunk.
         -------------------
@@ -39,7 +128,8 @@ class CaboChunk(object):
          5: adverb
          6: connect
         """
-        self.type = -1
+        
+        self.type2 = -1
         """
         2nd type of this chunk.
         -----------------------
@@ -48,7 +138,8 @@ class CaboChunk(object):
          1: adjective
          2: verb
         """
-        self.type2 = -1
+        
+        self.NE = -1
         """
         Named entity type of this chunk.
         --------------------------------
@@ -57,7 +148,8 @@ class CaboChunk(object):
          1: location
          2: organization
         """
-        self.NE = -1
+        
+        self.pro = -1
         """
         Pronoun type of this chunk. 
         ---------------------------
@@ -70,7 +162,6 @@ class CaboChunk(object):
          5: indefinite
          6: inclusive
         """
-        self.pro = -1
     
     def add(self, inp):
         """Add components to chunk lists."""

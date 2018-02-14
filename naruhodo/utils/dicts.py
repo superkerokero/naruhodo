@@ -1,6 +1,8 @@
 """
-Pronoun identification dictionary.
+This module contains various dicts used in naruhodo.
 """
+
+
 ProDict = {
     'demonstrative-loc': ["ここ", "そこ", "あそこ", "こっち", "そっち", "あっち", "こちら", "そちら", "あちら"],
     'demonstrative-obj': ["これ", "それ", "あれ", "こいつ", "そいつ", "あいつ"],
@@ -10,21 +12,23 @@ ProDict = {
     'indefinite': ["どこ", "どれ", "どっち", "どなた", "どちら"],
     'inclusive': ["皆", "みんな", "みな"]
 }
+"""
+Pronoun identification dictionary.
+"""
 
 
+TypeList = ['名詞', '形容詞', '動詞', '接続詞', '感動詞', '副詞', '連体詞', '接頭詞']
 """
 Dict of word types.
 """
-TypeList = ['名詞', '形容詞', '動詞', '接続詞', '感動詞', '副詞', '連体詞', '接頭詞']
 
+
+NEList = ['PERSON', 'LOCATION', 'ORGANIZATION']
 """
 Dict of named entity types.
 """
-NEList = ['PERSON', 'LOCATION', 'ORGANIZATION']
 
-"""
-Dict to convert the node shape from notebook to vis.js json format.
-"""
+
 NodeShapeDictN2Json = {
     "square": "circle",
     "Mdiamond": "circle",
@@ -35,14 +39,21 @@ NodeShapeDictN2Json = {
     "circle": "square",
     "underline": "text"
 }
+"""
+Dict to convert the node shape from notebook to vis.js json format.
+"""
 
-"""
-Dict of common words that are not cumulatively counted.
-"""
+
 UncountedDict = set([
     "なる", "ある", "よる", "する", "ない", "前", "後", "こと", "もの", "ため"
 ])
+"""
+Dict of common words that are not cumulatively counted.
+"""
 
 MeaninglessDict = set([
     "前", "後", "こと", "もの", "ため", "意", "中", "する"
 ])
+"""
+Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
+"""

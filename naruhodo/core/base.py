@@ -10,10 +10,30 @@ class AnalyzerBase(object):
     def __init__(self):
         """Constructor."""
         self.G = nx.DiGraph()
+        """
+        Graph object of this analyzer.
+        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.
+        """
+
         self.nodes = dict()
+        """
+        Native list of nodes in the graph.
+        """
+
         self.edges = dict()
+        """
+        Native list of edges in the graph.
+        """
+
         self.re_sent = re.compile('([^　！？。]*[！？。])')
+        """
+        Precompiled regular expression for separating sentences.
+        """
+
         self.re_parentheses = re.compile('\（[^)]*\）')
+        """
+        Precompiled regular expression for getting rid of em parenthesis.
+        """
 
     def _parseToSents(self, context):
         """Parse given context into list of individual sentences."""
