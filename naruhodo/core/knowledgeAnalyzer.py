@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CabochaClient
-from naruhodo.utils.dicts import UncountedDict
+from naruhodo.utils.dicts import MeaninglessDict
 from naruhodo.core.base import AnalyzerBase
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
@@ -93,12 +93,19 @@ class KnowledgeAnalyzer(AnalyzerBase):
                     obj = child
                 else:
                     aux += "\n{0}".format(child.surface)
-            elif child.func in ["で", "によって"]:
+            elif child.func in ["で", "によって", "による", "により"]:
                 aux += "\n{0}".format(child.surface)
             else:
                 pass
         if not sub and not obj:
             return
+        # Entities deemed as nouns.
+        if sub:
+            sub.type = 0
+        if obj:
+            obj.type = 0
+
+        # Modify parent name with entities.
         pname = "{0}\n[{1}=>{2}]".format(parent.main, sub.main if sub else "None", obj.main if obj else "None")
         self._addNode(pname, parent.type, parent.main)
         for i in range(len(parent.children)):
@@ -121,7 +128,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
     def _addEdge(self, parent, child, label=""):
         """Add edge to edge list"""
         try:
-            if parent not in UncountedDict and child not in UncountedDict:
+            if parent not in MeaninglessDict and child not in MeaninglessDict:
                 self.edges[(parent, child)]['weight'] +=1
             else:
                 self.edges[(parent, child)]['weight'] == 1
@@ -135,7 +142,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         """Add node to node list"""
         try:
             if ctype in [0, 1, 2, 3, 4, 5]:
-                if name not in UncountedDict: 
+                if name not in MeaninglessDict: 
                     self.nodes[name]['count'] += 1
                 else:
                     self.nodes[name]['count'] == 1

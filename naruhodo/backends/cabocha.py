@@ -426,10 +426,11 @@ class CabochaClient(object):
         nck = len(self.chunks)
         for i in range(nck):
             if self.re_parentheses.sub("", self.chunks[i].main) in MeaninglessDict:
-                self.chunks[i].main = "[{0}]\n{1}".format(
-                    self.chunks[self.childrenList[i][-1]].surface,
-                    self.chunks[i].main
-                )
+                if len(self.childrenList[i]) > 0:
+                    self.chunks[i].main = "[{0}]\n{1}".format(
+                        self.chunks[self.childrenList[i][-1]].surface,
+                        self.chunks[i].main
+                    )
 
     def _processNegative(self):
         """This function makes the words that has negative child tagged negative."""

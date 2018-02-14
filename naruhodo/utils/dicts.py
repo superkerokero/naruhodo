@@ -44,15 +44,8 @@ Dict to convert the node shape from notebook to vis.js json format.
 """
 
 
-UncountedDict = set([
-    "なる", "ある", "よる", "する", "ない", "前", "後", "こと", "もの", "ため"
-])
-"""
-Dict of common words that are not cumulatively counted.
-"""
-
 MeaninglessDict = set([
-    "前", "後", "こと", "もの", "ため", "意", "中", "する"
+    "前", "後", "こと", "もの", "ため", "意", "中", "なる", "ある", "よる", "する", "ない"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.

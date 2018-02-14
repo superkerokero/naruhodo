@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CabochaClient
-from naruhodo.utils.dicts import UncountedDict
+from naruhodo.utils.dicts import MeaninglessDict
 from naruhodo.core.base import AnalyzerBase
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
@@ -21,7 +21,7 @@ class DependencyAnalyzer(AnalyzerBase):
             # print(chunk.id, chunk.surface, chunk.type, chunk.parent)
             try:
                 if chunk.type in [0, 1, 2, 6]:
-                    if chunk.main not in UncountedDict: 
+                    if chunk.main not in MeaninglessDict: 
                         self.nodes[chunk.main]['count'] += 1
                     else:
                         self.nodes[chunk.main]['count'] == 1
@@ -36,7 +36,7 @@ class DependencyAnalyzer(AnalyzerBase):
             try:
                 if chunk.type in [0, 1, 2, 3, 4, 5, 6] and cabo.chunks[chunk.parent].type in [0, 1, 2, 3, 4, 5, 6]:
                     if True:#chunk.main != cabo.chunks[chunk.parent].main:
-                        if chunk.main not in UncountedDict and cabo.chunks[chunk.parent].main not in UncountedDict:
+                        if chunk.main not in MeaninglessDict and cabo.chunks[chunk.parent].main not in MeaninglessDict:
                             self.edges[(chunk.main, cabo.chunks[chunk.parent].main)]['weight'] +=1
                         else:
                             self.edges[(chunk.main, cabo.chunks[chunk.parent].main)]['weight'] == 1
