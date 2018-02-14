@@ -1045,6 +1045,7 @@ table {
   <ul>
     <li class="mono"><a href="#naruhodo.backends.cabocha.MeaninglessDict">MeaninglessDict</a></li>
     <li class="mono"><a href="#naruhodo.backends.cabocha.ProDict">ProDict</a></li>
+    <li class="mono"><a href="#naruhodo.backends.cabocha.VerbLikeFuncDict">VerbLikeFuncDict</a></li>
   </ul>
 
     </li>
@@ -1092,7 +1093,7 @@ table {
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.backends.cabocha', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.backends.cabocha" class="source">
-    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">ProDict</span><span class="p">,</span> <span class="n">MeaninglessDict</span>
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">ProDict</span><span class="p">,</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">VerbLikeFuncDict</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
 <span class="k">class</span> <span class="nc">CaboChunk</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -1452,6 +1453,11 @@ table {
                 <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="s2">&quot;・&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">])</span>
+
+        <span class="c1"># Fix for nouns used as verbs.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">VerbLikeFuncDict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">2</span>
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s1">&#39;？&#39;</span><span class="p">:</span>
@@ -1490,6 +1496,7 @@ table {
         <span class="c1"># Get children list and store in self.childrenList</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getChildrenList</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processMeaningless</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processNegative</span><span class="p">()</span>
                 
     <span class="k">def</span> <span class="nf">_processHead</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Takes in the head of the chunk and process ids / parents.&quot;&quot;&quot;</span>
@@ -1518,6 +1525,14 @@ table {
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span>
                 <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_processNegative</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This function makes the words that has negative child tagged negative.&quot;&quot;&quot;</span>
+        <span class="n">nck</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nck</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="p">]:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;（否定）&quot;</span>
 </pre></div>
 
   </div>
@@ -1536,6 +1551,14 @@ table {
       </div>
       <div class="item">
       <p id="naruhodo.backends.cabocha.ProDict" class="name">var <span class="ident">ProDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.backends.cabocha.VerbLikeFuncDict" class="name">var <span class="ident">VerbLikeFuncDict</span></p>
       
   
   <div class="source_cont">
@@ -1911,6 +1934,11 @@ table {
                 <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="s2">&quot;・&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">])</span>
+
+        <span class="c1"># Fix for nouns used as verbs.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">VerbLikeFuncDict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">2</span>
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s1">&#39;？&#39;</span><span class="p">:</span>
@@ -2519,6 +2547,7 @@ table {
         <span class="c1"># Get children list and store in self.childrenList</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getChildrenList</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processMeaningless</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processNegative</span><span class="p">()</span>
                 
     <span class="k">def</span> <span class="nf">_processHead</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Takes in the head of the chunk and process ids / parents.&quot;&quot;&quot;</span>
@@ -2547,6 +2576,14 @@ table {
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span>
                 <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_processNegative</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This function makes the words that has negative child tagged negative.&quot;&quot;&quot;</span>
+        <span class="n">nck</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nck</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="p">]:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;（否定）&quot;</span>
 </pre></div>
 
   </div>
@@ -2615,6 +2652,7 @@ table {
     <span class="c1"># Get children list and store in self.childrenList</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_getChildrenList</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_processMeaningless</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_processNegative</span><span class="p">()</span>
 </pre></div>
 
   </div>

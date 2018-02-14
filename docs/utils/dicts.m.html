@@ -1049,6 +1049,7 @@ table {
     <li class="mono"><a href="#naruhodo.utils.dicts.ProDict">ProDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.TypeList">TypeList</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.UncountedDict">UncountedDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.VerbLikeFuncDict">VerbLikeFuncDict</a></li>
   </ul>
 
     </li>
@@ -1130,6 +1131,10 @@ table {
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">VerbLikeFuncDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;しいるて&quot;</span><span class="p">,</span> <span class="s2">&quot;し&quot;</span><span class="p">,</span> <span class="s2">&quot;した&quot;</span><span class="p">,</span> <span class="s2">&quot;しいるて・が&quot;</span><span class="p">,</span> <span class="s2">&quot;いるて&quot;</span>
+<span class="p">])</span>
 </pre></div>
 
   </div>
@@ -1188,6 +1193,14 @@ table {
       
   
     <div class="desc"><p>Dict of common words that are not cumulatively counted.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.VerbLikeFuncDict" class="name">var <span class="ident">VerbLikeFuncDict</span></p>
+      
+  
   <div class="source_cont">
 </div>
 
