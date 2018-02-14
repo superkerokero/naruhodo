@@ -77,7 +77,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         aux = ""
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
-            if child.type in [2, 3, 4, 6]:
+            if child.type in [2, 3, 4, 6] and child.type2 == -1:
                 continue
             if child.func in ["は", "には", "にも", "の"]:
                 sub = child
@@ -99,7 +99,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 pass
         if not sub and not obj:
             return
-        pname = "{0}\n[{1}=>{2}]".format(parent.main, sub.main[0] if sub else "None", obj.main[0] if obj else "None")
+        pname = "{0}\n[{1}=>{2}]".format(parent.main, sub.main if sub else "None", obj.main if obj else "None")
         self._addNode(pname, parent.type, parent.main)
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]

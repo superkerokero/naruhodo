@@ -57,3 +57,7 @@ MeaninglessDict = set([
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
 """
+
+VerbLikeFuncDict = set([
+    "する", "しいるて", "し", "した", "しいるて・が", "いるて"
+])

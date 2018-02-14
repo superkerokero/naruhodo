@@ -1,4 +1,4 @@
-from naruhodo.utils.dicts import ProDict, MeaninglessDict
+from naruhodo.utils.dicts import ProDict, MeaninglessDict, VerbLikeFuncDict
 import re
 
 class CaboChunk(object):
@@ -358,6 +358,11 @@ class CaboChunk(object):
                 self.tense = -1
         if len(self.postps) > 0:
             self.func += "・".join([x['surface'] for x in self.postps])
+
+        # Fix for nouns used as verbs.
+        if self.func in VerbLikeFuncDict:
+            self.type = 2
+
         if len(self.signs) > 0:
             for item in self.signs:
                 if item['surface'] ==  '？':
@@ -396,6 +401,7 @@ class CabochaClient(object):
         # Get children list and store in self.childrenList
         self._getChildrenList()
         self._processMeaningless()
+        self._processNegative()
                 
     def _processHead(self, inp):
         """Takes in the head of the chunk and process ids / parents."""
@@ -424,3 +430,11 @@ class CabochaClient(object):
                     self.chunks[self.childrenList[i][-1]].surface,
                     self.chunks[i].main
                 )
+
+    def _processNegative(self):
+        """This function makes the words that has negative child tagged negative."""
+        nck = len(self.chunks)
+        for i in range(nck):
+            if self.chunks[i].main in ["ない", ]:
+                pid = self.chunks[i].parent
+                self.chunks[pid].main += "（否定）"
