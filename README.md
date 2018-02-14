@@ -77,7 +77,7 @@ The complete python API document for naruhodo can be found here:
 
 [Naruhodo Python API Reference](https://superkerokero.github.io/naruhodo).
 
-This document if generated automatically from source code using [pdoc](https://github.com/BurntSushi/pdoc), so it is up-to-date at any time.
+This document is generated automatically from source code using [pdoc](https://github.com/BurntSushi/pdoc), so it is up-to-date at any time.
 
 ## Development status and some personal comments
 

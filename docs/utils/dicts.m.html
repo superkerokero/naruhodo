@@ -1048,7 +1048,6 @@ table {
     <li class="mono"><a href="#naruhodo.utils.dicts.NodeShapeDictN2Json">NodeShapeDictN2Json</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ProDict">ProDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.TypeList">TypeList</a></li>
-    <li class="mono"><a href="#naruhodo.utils.dicts.UncountedDict">UncountedDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.VerbLikeFuncDict">VerbLikeFuncDict</a></li>
   </ul>
 
@@ -1118,15 +1117,8 @@ table {
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="n">UncountedDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span>
-<span class="p">])</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Dict of common words that are not cumulatively counted.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
 <span class="n">MeaninglessDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span>
+    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</span>
@@ -1184,15 +1176,6 @@ table {
       
   
     <div class="desc"><p>Dict of word types.</p></div>
-  <div class="source_cont">
-</div>
-
-      </div>
-      <div class="item">
-      <p id="naruhodo.utils.dicts.UncountedDict" class="name">var <span class="ident">UncountedDict</span></p>
-      
-  
-    <div class="desc"><p>Dict of common words that are not cumulatively counted.</p></div>
   <div class="source_cont">
 </div>
 

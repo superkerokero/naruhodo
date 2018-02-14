@@ -1043,7 +1043,7 @@ table {
     <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
       
   <ul>
-    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.UncountedDict">UncountedDict</a></li>
+    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.MeaninglessDict">MeaninglessDict</a></li>
   </ul>
 
     </li>
@@ -1088,7 +1088,7 @@ table {
     <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.communication</span> <span class="kn">import</span> <span class="n">Subprocess</span>
 <span class="kn">from</span> <span class="nn">naruhodo.backends.cabocha</span> <span class="kn">import</span> <span class="n">CabochaClient</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">UncountedDict</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span>
 <span class="kn">from</span> <span class="nn">naruhodo.core.base</span> <span class="kn">import</span> <span class="n">AnalyzerBase</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">getNodeProperties</span><span class="p">,</span> <span class="n">getEdgeProperties</span>
 
@@ -1180,12 +1180,19 @@ table {
                     <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">aux</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;で&quot;</span><span class="p">,</span> <span class="s2">&quot;によって&quot;</span><span class="p">]:</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;で&quot;</span><span class="p">,</span> <span class="s2">&quot;によって&quot;</span><span class="p">,</span> <span class="s2">&quot;による&quot;</span><span class="p">,</span> <span class="s2">&quot;により&quot;</span><span class="p">]:</span>
                 <span class="n">aux</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
             <span class="k">return</span>
+        <span class="c1"># Entities deemed as nouns.</span>
+        <span class="k">if</span> <span class="n">sub</span><span class="p">:</span>
+            <span class="n">sub</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Modify parent name with entities.</span>
         <span class="n">pname</span> <span class="o">=</span> <span class="s2">&quot;{0}</span><span class="se">\n</span><span class="s2">[{1}=&gt;{2}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">sub</span><span class="o">.</span><span class="n">main</span> <span class="k">if</span> <span class="n">sub</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">main</span> <span class="k">if</span> <span class="n">obj</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
@@ -1208,7 +1215,7 @@ table {
     <span class="k">def</span> <span class="nf">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add edge to edge list&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">UncountedDict</span> <span class="ow">and</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">UncountedDict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span> <span class="ow">and</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span><span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
@@ -1222,7 +1229,7 @@ table {
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ctype</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">UncountedDict</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span> 
                     <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
@@ -1257,7 +1264,7 @@ table {
   <section id="section-items">
     <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
-      <p id="naruhodo.core.knowledgeAnalyzer.UncountedDict" class="name">var <span class="ident">UncountedDict</span></p>
+      <p id="naruhodo.core.knowledgeAnalyzer.MeaninglessDict" class="name">var <span class="ident">MeaninglessDict</span></p>
       
   
   <div class="source_cont">
@@ -1364,12 +1371,19 @@ table {
                     <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">aux</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;で&quot;</span><span class="p">,</span> <span class="s2">&quot;によって&quot;</span><span class="p">]:</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;で&quot;</span><span class="p">,</span> <span class="s2">&quot;によって&quot;</span><span class="p">,</span> <span class="s2">&quot;による&quot;</span><span class="p">,</span> <span class="s2">&quot;により&quot;</span><span class="p">]:</span>
                 <span class="n">aux</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
             <span class="k">return</span>
+        <span class="c1"># Entities deemed as nouns.</span>
+        <span class="k">if</span> <span class="n">sub</span><span class="p">:</span>
+            <span class="n">sub</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Modify parent name with entities.</span>
         <span class="n">pname</span> <span class="o">=</span> <span class="s2">&quot;{0}</span><span class="se">\n</span><span class="s2">[{1}=&gt;{2}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">sub</span><span class="o">.</span><span class="n">main</span> <span class="k">if</span> <span class="n">sub</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">main</span> <span class="k">if</span> <span class="n">obj</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
@@ -1392,7 +1406,7 @@ table {
     <span class="k">def</span> <span class="nf">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add edge to edge list&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">UncountedDict</span> <span class="ow">and</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">UncountedDict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span> <span class="ow">and</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span><span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
@@ -1406,7 +1420,7 @@ table {
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ctype</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">UncountedDict</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span> 
                     <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
