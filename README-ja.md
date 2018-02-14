@@ -69,6 +69,6 @@ Naruhodo は複数のバックエンドプログラムに対応できるよう�
 
 ## チュートリアル
 
-Naruhodo のチュートリアルはリポジトリのルートフォルダに　`ipynb` ファィルとして用意されています。ブラウザから直接閲覧する事も可能です。このチュートリアルには　Naruhodo の主な機能をすべて紹介しています。
+Naruhodo のチュートリアルはリポジトリの`tutorial`フォルダに　`ipynb` ファィルとして用意されています。ブラウザから直接閲覧する事も可能です。このチュートリアルには　Naruhodo の主な機能をすべて紹介しています。
 
-[チュートリアルのノートブック](https://github.com/superkerokero/naruhodo/blob/master/Tutorial.ipynb)
+[チュートリアルのノートブック](https://github.com/superkerokero/naruhodo/blob/master/tutorial/Tutorial.ipynb)

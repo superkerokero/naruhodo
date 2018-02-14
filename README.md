@@ -67,12 +67,33 @@ Support for other parsers such as `KNP` is planned in the future.
 
 ## Tutorial
 
-The tutorial of naruhodo is provided as a `ipynb` file in the root folder. You can view it directly in your browser. This tutorial covers all the main functionalities of naruhodo.
+The tutorial of naruhodo is provided as a `ipynb` file in the tutorial folder. You can view it directly in your browser. This tutorial covers all the main functionalities of naruhodo.
 
-[Tutorial notebook](https://github.com/superkerokero/naruhodo/blob/master/Tutorial.ipynb)
+[Tutorial notebook](https://github.com/superkerokero/naruhodo/blob/master/tutorial/Tutorial.ipynb)
 
 ## Python-API
 
-* class: naruhodo.dependencyAnalyzer()
-    * properties
-        
+The complete python API document for naruhodo can be found here:
+
+[Naruhodo Python API Reference](https://superkerokero.github.io/naruhodo).
+
+This document if generated automatically from source code using [pdoc](https://github.com/BurntSushi/pdoc), so it is up-to-date at any time.
+
+## Development status
+
+Naruhodo is still in development state(especially KG related part), so you might find it outputs weird results sometimes. If you like the idea and want to help improve the library, feel free to create a pull request on github.
+
+Here are some of my thoughts on the development of naruhodo :
+
+* ### Improvement on the quality of generated graph (~0.2)
+    current
+
+* ### Add
+    pass
+
+* ### Add
+    pass
+
+* ### Add
+    pass
+
