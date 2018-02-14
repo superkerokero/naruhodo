@@ -79,7 +79,7 @@ Python API ドキュメントはここ:
 
 [Naruhodo Python API Reference](https://superkerokero.github.io/naruhodo).
 
-このドキュメントは [pdoc](https://github.com/BurntSushi/pdoc)を使って自動的にソースコードから生成されたので、常に最新のデータに更新されています。
+このドキュメントは [pdoc](https://github.com/BurntSushi/pdoc)を使って自動的にソースコードから生成されるので、常に最新のデータに更新されています。
 
 ## 開発状況とコメント
 
