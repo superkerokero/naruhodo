@@ -82,7 +82,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             child = chunks[parent.children[i]]
             if child.type in [2, 3, 4, 6] and child.type2 == -1:
                 continue
-            if child.func in ["は", "には", "にも", "の"]:
+            if child.func in ["は", "に・は", "に・も", "の"]:
                 sub = child
             elif child.func in ["を", ]:
                 obj = child

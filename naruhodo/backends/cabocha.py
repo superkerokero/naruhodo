@@ -277,15 +277,15 @@ class CaboChunk(object):
         elif len(self.nouns) > 0 and self.nouns[0]['labels'][0] == '非自立':
             self.main = self.nouns[0]['surface']
             self.type = 0
+        elif len(self.advs) > 0:
+            self.main = self.advs[0]['lemma']
+            self.type = 5
         elif len(self.conjs) > 0:
             self.main = self.conjs[0]['lemma']
             self.type = 3
         elif len(self.interjs) > 0:
             self.main = self.interjs[0]['lemma']
             self.type = 4
-        elif len(self.advs) > 0:
-            self.main = self.advs[0]['lemma']
-            self.type = 5
         elif len(self.connects) > 0:
             self.main = self.connects[0]['lemma']
             self.type = 6
