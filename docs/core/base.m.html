@@ -1051,9 +1051,9 @@ table {
   <ul>
     <li class="mono"><a href="#naruhodo.core.base.AnalyzerBase.__init__">__init__</a></li>
     <li class="mono"><a href="#naruhodo.core.base.AnalyzerBase.exportJSON">exportJSON</a></li>
-    <li class="mono"><a href="#naruhodo.core.base.AnalyzerBase.plotDiGraph">plotDiGraph</a></li>
-    <li class="mono"><a href="#naruhodo.core.base.AnalyzerBase.plotDiGraphNotebook">plotDiGraphNotebook</a></li>
+    <li class="mono"><a href="#naruhodo.core.base.AnalyzerBase.plotToFile">plotToFile</a></li>
     <li class="mono"><a href="#naruhodo.core.base.AnalyzerBase.reset">reset</a></li>
+    <li class="mono"><a href="#naruhodo.core.base.AnalyzerBase.show">show</a></li>
   </ul>
 
         </li>
@@ -1152,12 +1152,12 @@ table {
         <span class="sd">&quot;&quot;&quot;Export current graph to a JSON file on disk.&quot;&quot;&quot;</span>
         <span class="n">exportToJsonFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">plotDiGraphNotebook</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Plot directional graph in jupyter notebook using nxpd.&#39;&#39;&#39;</span>
         <span class="c1"># span = list(nx.weakly_connected_component_subgraphs(self.G))</span>
         <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">plotDiGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Output directional graph to a png file using nxpd.&#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
 </pre></div>
@@ -1248,12 +1248,12 @@ table {
         <span class="sd">&quot;&quot;&quot;Export current graph to a JSON file on disk.&quot;&quot;&quot;</span>
         <span class="n">exportToJsonFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">plotDiGraphNotebook</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Plot directional graph in jupyter notebook using nxpd.&#39;&#39;&#39;</span>
         <span class="c1"># span = list(nx.weakly_connected_component_subgraphs(self.G))</span>
         <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">plotDiGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Output directional graph to a png file using nxpd.&#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
 </pre></div>
@@ -1337,8 +1337,8 @@ table {
   
             
   <div class="item">
-    <div class="name def" id="naruhodo.core.base.AnalyzerBase.plotDiGraph">
-    <p>def <span class="ident">plotDiGraph</span>(</p><p>self, filename)</p>
+    <div class="name def" id="naruhodo.core.base.AnalyzerBase.plotToFile">
+    <p>def <span class="ident">plotToFile</span>(</p><p>self, filename)</p>
     </div>
     
 
@@ -1346,35 +1346,11 @@ table {
   
     <div class="desc"><p>Output directional graph to a png file using nxpd.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.base.AnalyzerBase.plotDiGraph', this);">Show source &equiv;</a></p>
-  <div id="source-naruhodo.core.base.AnalyzerBase.plotDiGraph" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotDiGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.base.AnalyzerBase.plotToFile', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.base.AnalyzerBase.plotToFile" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Output directional graph to a png file using nxpd.&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="naruhodo.core.base.AnalyzerBase.plotDiGraphNotebook">
-    <p>def <span class="ident">plotDiGraphNotebook</span>(</p><p>self)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Plot directional graph in jupyter notebook using nxpd.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.base.AnalyzerBase.plotDiGraphNotebook', this);">Show source &equiv;</a></p>
-  <div id="source-naruhodo.core.base.AnalyzerBase.plotDiGraphNotebook" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotDiGraphNotebook</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Plot directional graph in jupyter notebook using nxpd.&#39;&#39;&#39;</span>
-    <span class="c1"># span = list(nx.weakly_connected_component_subgraphs(self.G))</span>
-    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1400,6 +1376,30 @@ table {
     <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.core.base.AnalyzerBase.show">
+    <p>def <span class="ident">show</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Plot directional graph in jupyter notebook using nxpd.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.base.AnalyzerBase.show', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.base.AnalyzerBase.show" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Plot directional graph in jupyter notebook using nxpd.&#39;&#39;&#39;</span>
+    <span class="c1"># span = list(nx.weakly_connected_component_subgraphs(self.G))</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
 </pre></div>
 
   </div>

@@ -74,11 +74,11 @@ class AnalyzerBase(object):
         """Export current graph to a JSON file on disk."""
         exportToJsonFile(self.G, filename)
 
-    def plotDiGraphNotebook(self):
+    def show(self):
         '''Plot directional graph in jupyter notebook using nxpd.'''
         # span = list(nx.weakly_connected_component_subgraphs(self.G))
         return draw(self.G, show='ipynb')
     
-    def plotDiGraph(self, filename):
+    def plotToFile(self, filename):
         '''Output directional graph to a png file using nxpd.'''
         return draw(self.G, filename=filename)

@@ -40,7 +40,7 @@ def exportToJsonFile(G, filename):
         json.dump(exportToJsonObj(G), outfile)
     
 def getNodeProperties(info):
-    """Test function for node drawing."""
+    """Convert node properties for node drawing using nxpd."""
     ret = dict()
     ret['fontcolor'] = '#000000'
     if info['type'] == 0:
@@ -77,7 +77,7 @@ def getNodeProperties(info):
     return ret
     
 def getEdgeProperties(info):
-    """Test function for node drawing."""
+    """Convert edge properties for node drawing using nxpd."""
     ret = dict()
     ret['label'] = info['label']
     ret['penwidth'] = info['weight'] * 2.0

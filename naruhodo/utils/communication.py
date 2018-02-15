@@ -1,3 +1,7 @@
+"""
+This module provides communication capabilities with external program using subprocess.
+"""
+
 import subprocess as sp
 import os
 import sys

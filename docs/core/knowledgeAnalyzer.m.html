@@ -1057,12 +1057,12 @@ table {
           
   <ul>
     <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.__init__">__init__</a></li>
-    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addToKG">addToKG</a></li>
-    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrlsToKG">addUrlsToKG</a></li>
+    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.add">add</a></li>
+    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrls">addUrls</a></li>
     <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.exportJSON">exportJSON</a></li>
-    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraph">plotDiGraph</a></li>
-    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraphNotebook">plotDiGraphNotebook</a></li>
+    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotToFile">plotToFile</a></li>
     <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.reset">reset</a></li>
+    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.show">show</a></li>
   </ul>
 
         </li>
@@ -1093,14 +1093,17 @@ table {
 <span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">getNodeProperties</span><span class="p">,</span> <span class="n">getEdgeProperties</span>
 
 <span class="k">class</span> <span class="nc">KnowledgeAnalyzer</span><span class="p">(</span><span class="n">AnalyzerBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge graph(KG).&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge structure graph(KSG).&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Setup a subprocess for backend.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">Subprocess</span><span class="p">(</span><span class="s1">&#39;cabocha -f1&#39;</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Communicator to backend for KnowledgeAnalyzer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
-    <span class="k">def</span> <span class="nf">addToKG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the knowledge gragh(KG).&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the knowledge structure gragh(KSG).&quot;&quot;&quot;</span>
         <span class="n">cabo</span> <span class="o">=</span> <span class="n">CabochaClient</span><span class="p">()</span>
         <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
         <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span>
@@ -1112,7 +1115,7 @@ table {
             <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">pid</span><span class="p">]:</span>
                 <span class="n">pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addChildren</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updateKG</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">()</span>
             
     <span class="k">def</span> <span class="nf">_addChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add children following rules.&quot;&quot;&quot;</span>
@@ -1241,8 +1244,8 @@ table {
                 <span class="s1">&#39;len&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span>
             <span class="p">}</span>
             
-    <span class="k">def</span> <span class="nf">_updateKG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update DMG using node/edge list.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update KSG using node/edge list.&quot;&quot;&quot;</span>
         <span class="c1"># Add nodes to DAG.</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getNodeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
@@ -1250,11 +1253,11 @@ table {
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getEdgeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
             
-    <span class="k">def</span> <span class="nf">addUrlsToKG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add the information from given urls to KG.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">addUrls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the information from given urls to KSG.&quot;&quot;&quot;</span>
         <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grabTextFromUrls</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">addToKG</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1279,19 +1282,22 @@ table {
       <p id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer" class="name">class <span class="ident">KnowledgeAnalyzer</span></p>
       
   
-    <div class="desc"><p>Analyze the input text and store the information into a knowledge graph(KG).</p></div>
+    <div class="desc"><p>Analyze the input text and store the information into a knowledge structure graph(KSG).</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer" class="source">
     <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">KnowledgeAnalyzer</span><span class="p">(</span><span class="n">AnalyzerBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge graph(KG).&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge structure graph(KSG).&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Setup a subprocess for backend.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">Subprocess</span><span class="p">(</span><span class="s1">&#39;cabocha -f1&#39;</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Communicator to backend for KnowledgeAnalyzer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
-    <span class="k">def</span> <span class="nf">addToKG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the knowledge gragh(KG).&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the knowledge structure gragh(KSG).&quot;&quot;&quot;</span>
         <span class="n">cabo</span> <span class="o">=</span> <span class="n">CabochaClient</span><span class="p">()</span>
         <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
         <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span>
@@ -1303,7 +1309,7 @@ table {
             <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">pid</span><span class="p">]:</span>
                 <span class="n">pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addChildren</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updateKG</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">()</span>
             
     <span class="k">def</span> <span class="nf">_addChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add children following rules.&quot;&quot;&quot;</span>
@@ -1432,8 +1438,8 @@ table {
                 <span class="s1">&#39;len&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span>
             <span class="p">}</span>
             
-    <span class="k">def</span> <span class="nf">_updateKG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update DMG using node/edge list.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update KSG using node/edge list.&quot;&quot;&quot;</span>
         <span class="c1"># Add nodes to DAG.</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getNodeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
@@ -1441,11 +1447,11 @@ table {
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getEdgeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
             
-    <span class="k">def</span> <span class="nf">addUrlsToKG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add the information from given urls to KG.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">addUrls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the information from given urls to KSG.&quot;&quot;&quot;</span>
         <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grabTextFromUrls</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">addToKG</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1477,6 +1483,9 @@ table {
     <span class="sd">&quot;&quot;&quot;Setup a subprocess for backend.&quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">Subprocess</span><span class="p">(</span><span class="s1">&#39;cabocha -f1&#39;</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Communicator to backend for KnowledgeAnalyzer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 </pre></div>
 
   </div>
@@ -1486,19 +1495,19 @@ table {
   
             
   <div class="item">
-    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addToKG">
-    <p>def <span class="ident">addToKG</span>(</p><p>self, inp)</p>
+    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.add">
+    <p>def <span class="ident">add</span>(</p><p>self, inp)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Take in a string input and add it to the knowledge gragh(KG).</p></div>
+    <div class="desc"><p>Take in a string input and add it to the knowledge structure gragh(KSG).</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addToKG', this);">Show source &equiv;</a></p>
-  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addToKG" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">addToKG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the knowledge gragh(KG).&quot;&quot;&quot;</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.add', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.add" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the knowledge structure gragh(KSG).&quot;&quot;&quot;</span>
     <span class="n">cabo</span> <span class="o">=</span> <span class="n">CabochaClient</span><span class="p">()</span>
     <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
     <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span>
@@ -1510,7 +1519,7 @@ table {
         <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">pid</span><span class="p">]:</span>
             <span class="n">pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addChildren</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateKG</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -1520,22 +1529,22 @@ table {
   
             
   <div class="item">
-    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrlsToKG">
-    <p>def <span class="ident">addUrlsToKG</span>(</p><p>self, urls)</p>
+    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrls">
+    <p>def <span class="ident">addUrls</span>(</p><p>self, urls)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Add the information from given urls to KG.</p></div>
+    <div class="desc"><p>Add the information from given urls to KSG.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrlsToKG', this);">Show source &equiv;</a></p>
-  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrlsToKG" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">addUrlsToKG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add the information from given urls to KG.&quot;&quot;&quot;</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrls', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.addUrls" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">addUrls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add the information from given urls to KSG.&quot;&quot;&quot;</span>
     <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grabTextFromUrls</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addToKG</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1568,8 +1577,8 @@ table {
   
             
   <div class="item">
-    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraph">
-    <p>def <span class="ident">plotDiGraph</span>(</p><p>self, filename)</p>
+    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotToFile">
+    <p>def <span class="ident">plotToFile</span>(</p><p>self, filename)</p>
     </div>
     
 
@@ -1577,35 +1586,11 @@ table {
   
     <div class="desc"><p>Output directional graph to a png file using nxpd.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraph', this);">Show source &equiv;</a></p>
-  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraph" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotDiGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotToFile', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotToFile" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Output directional graph to a png file using nxpd.&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraphNotebook">
-    <p>def <span class="ident">plotDiGraphNotebook</span>(</p><p>self)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Plot directional graph in jupyter notebook using nxpd.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraphNotebook', this);">Show source &equiv;</a></p>
-  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.plotDiGraphNotebook" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotDiGraphNotebook</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Plot directional graph in jupyter notebook using nxpd.&#39;&#39;&#39;</span>
-    <span class="c1"># span = list(nx.weakly_connected_component_subgraphs(self.G))</span>
-    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1638,6 +1623,30 @@ table {
 
   </div>
   
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.show">
+    <p>def <span class="ident">show</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Plot directional graph in jupyter notebook using nxpd.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.show', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.show" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Plot directional graph in jupyter notebook using nxpd.&#39;&#39;&#39;</span>
+    <span class="c1"># span = list(nx.weakly_connected_component_subgraphs(self.G))</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
           <h3>Instance variables</h3>
             <div class="item">
             <p id="naruhodo.core.knowledgeAnalyzer.KnowledgeAnalyzer.proc" class="name">var <span class="ident">proc</span></p>
@@ -1645,6 +1654,7 @@ table {
 
             
   
+    <div class="desc"><p>Communicator to backend for KnowledgeAnalyzer.</p></div>
   <div class="source_cont">
 </div>
 

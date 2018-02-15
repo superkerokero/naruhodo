@@ -6,14 +6,17 @@ from naruhodo.core.base import AnalyzerBase
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
 class KnowledgeAnalyzer(AnalyzerBase):
-    """Analyze the input text and store the information into a knowledge graph(KG)."""
+    """Analyze the input text and store the information into a knowledge structure graph(KSG)."""
     def __init__(self):
         """Setup a subprocess for backend."""
         super().__init__()
         self.proc = Subprocess('cabocha -f1')
+        """
+        Communicator to backend for KnowledgeAnalyzer.
+        """
         
-    def addToKG(self, inp):
-        """Take in a string input and add it to the knowledge gragh(KG)."""
+    def add(self, inp):
+        """Take in a string input and add it to the knowledge structure gragh(KSG)."""
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp))
         pool = [cabo.root]
@@ -25,7 +28,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             for cid in cabo.childrenList[pid]:
                 pool.append(cid)
             self._addChildren(pid, cabo.chunks)
-        self._updateKG()
+        self._update()
             
     def _addChildren(self, pid, chunks):
         """Add children following rules."""
@@ -154,8 +157,8 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 'len': len(rep)
             }
             
-    def _updateKG(self):
-        """Update DMG using node/edge list."""
+    def _update(self):
+        """Update KSG using node/edge list."""
         # Add nodes to DAG.
         for key, val in self.nodes.items():
             self.G.add_node(key, **getNodeProperties(val))
@@ -163,8 +166,8 @@ class KnowledgeAnalyzer(AnalyzerBase):
         for key, val in self.edges.items():
             self.G.add_edge(*key, **getEdgeProperties(val))
             
-    def addUrlsToKG(self, urls):
-        """Add the information from given urls to KG."""
+    def addUrls(self, urls):
+        """Add the information from given urls to KSG."""
         context = self._grabTextFromUrls(urls)
         for sent in context:
-            self.addToKG(sent)
+            self.add(sent)
