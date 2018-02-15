@@ -118,7 +118,7 @@ Naruhodo このライブラリーはまだ開発の途中（特にKSG部分）�
 
 * ### 統計的手法を入れる(?~)
     
-    It seems that everybody is excited about machine learning these days. And I do see huge application potential in techniques like reinforcement learning and generative adversarial models. And I do have some thoughts about the applications of these techniques to some specific knowledge retrieval problems. For example, the coreference problem is obviously outside the reach of any rule-based systems. A reinforcement learning approach seems quite attractive in this case(if we have real-time feedbacks from, for example, the users).  
+    It seems that everybody is excited about machine learning these days. And I do see huge application potential in techniques like reinforcement learning and generative adversarial models. And I do have some thoughts about the applications of these techniques to some specific knowledge retrieval problems. For example, the coreference problem is obviously outside the reach of any rule-based systems, and a reinforcement learning based approach seems quite attractive in this case(provided that we have a real-time feedback system from users).
     
     As my understanding of machine learning techniques improves, some statistics-based approaches may be added in the future.
 

@@ -16,7 +16,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         """
         
     def add(self, inp):
-        """Take in a string input and add it to the knowledge structure gragh(KSG)."""
+        """Take in a string input and add it to the knowledge structure graph(KSG)."""
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp))
         pool = [cabo.root]
