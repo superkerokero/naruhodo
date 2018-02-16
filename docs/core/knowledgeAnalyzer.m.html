@@ -1049,6 +1049,7 @@ table {
     <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.ObjDict">ObjDict</a></li>
     <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.ObjPassiveSubDict">ObjPassiveSubDict</a></li>
     <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.SubDict">SubDict</a></li>
+    <li class="mono"><a href="#naruhodo.core.knowledgeAnalyzer.SubPassiveObjDict">SubPassiveObjDict</a></li>
   </ul>
 
     </li>
@@ -1093,7 +1094,7 @@ table {
     <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.communication</span> <span class="kn">import</span> <span class="n">Subprocess</span>
 <span class="kn">from</span> <span class="nn">naruhodo.backends.cabocha</span> <span class="kn">import</span> <span class="n">CabochaClient</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">AuxDict</span><span class="p">,</span> <span class="n">SubDict</span><span class="p">,</span> <span class="n">ObjDict</span><span class="p">,</span> <span class="n">ObjPassiveSubDict</span><span class="p">,</span> <span class="n">MultiRoleDict</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">AuxDict</span><span class="p">,</span> <span class="n">SubDict</span><span class="p">,</span> <span class="n">ObjDict</span><span class="p">,</span> <span class="n">ObjPassiveSubDict</span><span class="p">,</span> <span class="n">MultiRoleDict</span><span class="p">,</span> <span class="n">SubPassiveObjDict</span>
 <span class="kn">from</span> <span class="nn">naruhodo.core.base</span> <span class="kn">import</span> <span class="n">AnalyzerBase</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">getNodeProperties</span><span class="p">,</span> <span class="n">getEdgeProperties</span>
 
@@ -1145,11 +1146,11 @@ table {
     <span class="k">def</span> <span class="nf">_addChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add children following rules.&quot;&quot;&quot;</span>
         <span class="n">parent</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
             <span class="c1"># When parent node is noun/connect.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNoun</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
-            <span class="c1"># When parent node is adj/verb/adverb.</span>
+        <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="c1"># When parent node is adj/verb.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addVerbAdj</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;verb&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span>
@@ -1167,7 +1168,7 @@ table {
         <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;ため&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;因果関係&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;cause&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addToVList</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
         
     <span class="k">def</span> <span class="nf">_addNoun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
@@ -1180,7 +1181,7 @@ table {
             <span class="n">child</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
             <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
                 <span class="k">continue</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addToVList</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
@@ -1214,15 +1215,28 @@ table {
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">AuxDict</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                        <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                        <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
+                <span class="c1"># elif child.func in AuxDict:</span>
+                <span class="c1">#     aux.append(child)</span>
+                <span class="c1">#     auxlabel += &quot;\n{0}&quot;.format(child.surface)</span>
+                <span class="k">else</span><span class="p">:</span>
                     <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                     <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">pass</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubDict</span><span class="p">:</span>
                 <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjDict</span><span class="p">:</span>
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                    <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">MultiRoleDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
                     <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
@@ -1234,11 +1248,12 @@ table {
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                     <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">AuxDict</span><span class="p">:</span>
+            <span class="c1"># elif child.func in AuxDict:</span>
+            <span class="c1">#     aux.append(child)</span>
+            <span class="c1">#     auxlabel += &quot;\n{0}&quot;.format(child.surface)</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                 <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">pass</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
@@ -1251,8 +1266,8 @@ table {
             <span class="n">sub</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span> <span class="o">=</span> <span class="n">sub</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共同主語&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;autosub&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共同主語&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;autosub&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1272,7 +1287,7 @@ table {
         <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="o">=</span> <span class="bp">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rootname</span> <span class="o">=</span> <span class="n">pname</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共同主語&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;autosub&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
@@ -1281,6 +1296,9 @@ table {
         <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">main</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vlist</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vlist</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vlist</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span>
+        <span class="c1"># Add func edge for root.</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_processAux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">pname</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Process aux words and vlist if any.&quot;&quot;&quot;</span>
@@ -1390,6 +1408,14 @@ table {
 </div>
 
       </div>
+      <div class="item">
+      <p id="naruhodo.core.knowledgeAnalyzer.SubPassiveObjDict" class="name">var <span class="ident">SubPassiveObjDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
 
 
     <h2 class="section-title" id="header-classes">Classes</h2>
@@ -1450,11 +1476,11 @@ table {
     <span class="k">def</span> <span class="nf">_addChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add children following rules.&quot;&quot;&quot;</span>
         <span class="n">parent</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
             <span class="c1"># When parent node is noun/connect.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNoun</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
-            <span class="c1"># When parent node is adj/verb/adverb.</span>
+        <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="c1"># When parent node is adj/verb.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addVerbAdj</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;verb&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span>
@@ -1472,7 +1498,7 @@ table {
         <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;ため&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;因果関係&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;cause&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addToVList</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
         
     <span class="k">def</span> <span class="nf">_addNoun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
@@ -1485,7 +1511,7 @@ table {
             <span class="n">child</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
             <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
                 <span class="k">continue</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addToVList</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
@@ -1519,15 +1545,28 @@ table {
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">AuxDict</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                        <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                        <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
+                <span class="c1"># elif child.func in AuxDict:</span>
+                <span class="c1">#     aux.append(child)</span>
+                <span class="c1">#     auxlabel += &quot;\n{0}&quot;.format(child.surface)</span>
+                <span class="k">else</span><span class="p">:</span>
                     <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                     <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">pass</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubDict</span><span class="p">:</span>
                 <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjDict</span><span class="p">:</span>
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                    <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">MultiRoleDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
                     <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
@@ -1539,11 +1578,12 @@ table {
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                     <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">AuxDict</span><span class="p">:</span>
+            <span class="c1"># elif child.func in AuxDict:</span>
+            <span class="c1">#     aux.append(child)</span>
+            <span class="c1">#     auxlabel += &quot;\n{0}&quot;.format(child.surface)</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                 <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">pass</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
@@ -1556,8 +1596,8 @@ table {
             <span class="n">sub</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span> <span class="o">=</span> <span class="n">sub</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共同主語&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;autosub&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共同主語&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;autosub&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1577,7 +1617,7 @@ table {
         <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">root_has_no_sub</span> <span class="o">=</span> <span class="bp">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rootname</span> <span class="o">=</span> <span class="n">pname</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">type2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootsub</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共同主語&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;autosub&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
@@ -1586,6 +1626,9 @@ table {
         <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">main</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vlist</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vlist</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vlist</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="o">*</span><span class="n">item</span><span class="p">)</span>
+        <span class="c1"># Add func edge for root.</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_processAux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">pname</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Process aux words and vlist if any.&quot;&quot;&quot;</span>

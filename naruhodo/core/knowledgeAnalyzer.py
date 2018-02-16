@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CabochaClient
-from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, MultiRoleDict
+from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, MultiRoleDict, SubPassiveObjDict
 from naruhodo.core.base import AnalyzerBase
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
@@ -53,11 +53,11 @@ class KnowledgeAnalyzer(AnalyzerBase):
     def _addChildren(self, pid, chunks):
         """Add children following rules."""
         parent = chunks[pid]
-        if parent.type in [0, 6]:
+        if parent.type in [0, 5, 6]:
             # When parent node is noun/connect.
             self._addNoun(pid, chunks)
-        elif parent.type in [1, 2, 5]:
-            # When parent node is adj/verb/adverb.
+        elif parent.type in [1, 2]:
+            # When parent node is adj/verb.
             self._addVerbAdj(pid, chunks, mode="verb")
         else:
             pass
@@ -75,7 +75,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         if child.main[-2:] == "ため":
             self._addNode(child.main, child.type, child.main)
             self._addEdge(child.main, pname, label="因果関係", etype="cause")
-        elif child.type in [2, ]:
+        elif child.type in [1, 2]:
             self._addToVList(pname, child)
         
     def _addNoun(self, pid, chunks):
@@ -88,7 +88,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             child = chunks[parent.children[i]]
             if child.type in [3, 4, 6]:
                 continue
-            elif child.type == 2:
+            elif child.type in [1, 2]:
                 self._addToVList(parent.main, child)
             else:
                 self._addNode(child.main, child.type, child.main)
@@ -122,15 +122,28 @@ class KnowledgeAnalyzer(AnalyzerBase):
                     else:
                         aux.append(child)
                         auxlabel += "\n{0}".format(child.surface)
-                elif child.func in AuxDict:
+                elif child.func in SubPassiveObjDict:
+                    if not obj:
+                        obj = child
+                    else:
+                        aux.append(child)
+                        auxlabel += "\n{0}".format(child.surface)
+                # elif child.func in AuxDict:
+                #     aux.append(child)
+                #     auxlabel += "\n{0}".format(child.surface)
+                else:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
-                else:
-                    pass
             elif child.func in SubDict:
                 sub = child
             elif child.func in ObjDict:
                 obj = child
+            elif child.func in SubPassiveObjDict:
+                if not sub:
+                    sub = child
+                else:
+                    aux.append(child)
+                    auxlabel += "\n{0}".format(child.surface)
             elif child.func in MultiRoleDict:
                 if not sub:
                     sub = child
@@ -142,11 +155,12 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 else:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
-            elif child.func in AuxDict:
+            # elif child.func in AuxDict:
+            #     aux.append(child)
+            #     auxlabel += "\n{0}".format(child.surface)
+            else:
                 aux.append(child)
                 auxlabel += "\n{0}".format(child.surface)
-            else:
-                pass
 
         if len(parent.children) == 0 and parent.parent == -1:
             for i in range(len(parent.children)):
@@ -159,8 +173,8 @@ class KnowledgeAnalyzer(AnalyzerBase):
             sub.type = 0
             if not self.rootsub:
                 self.rootsub = sub
-            if self.root_has_no_sub and parent.type2 != 0:
-                self._addEdge(sub.main, self.rootname, label="共同主語", etype="autosub")
+            if self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
+                self._addEdge(self.rootsub.main, self.rootname, label="共同主語", etype="autosub")
                 self.root_has_no_sub = False
         if obj:
             obj.type = 0
@@ -180,7 +194,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         elif parent.parent == -1:
             self.root_has_no_sub = True
             self.rootname = pname
-        elif self.rootsub and parent.type2 != 0:
+        elif self.rootsub and parent.type == 2 and parent.type2 != 0:
             self._addEdge(self.rootsub.main, pname, label="共同主語", etype="autosub")
         if obj:
             self._addNode(obj.main, obj.type, obj.main)
@@ -189,6 +203,9 @@ class KnowledgeAnalyzer(AnalyzerBase):
         if parent.main in self.vlist and len(self.vlist[parent.main]) > 0:
             for item in self.vlist[parent.main]:
                 self._addEdge(pname, *item)
+        # Add func edge for root.
+        if parent.parent == -1:
+            self._addEdge(pname, pname, label=parent.func, etype="none")
 
     def _processAux(self, aux, pname):
         """Process aux words and vlist if any."""

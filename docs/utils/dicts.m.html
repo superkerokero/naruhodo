@@ -1054,6 +1054,7 @@ table {
     <li class="mono"><a href="#naruhodo.utils.dicts.ObjPassiveSubDict">ObjPassiveSubDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ProDict">ProDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.SubDict">SubDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.SubPassiveObjDict">SubPassiveObjDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.TypeList">TypeList</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.VerbLikeFuncDict">VerbLikeFuncDict</a></li>
   </ul>
@@ -1149,7 +1150,8 @@ table {
 
 
 <span class="n">MeaninglessDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span>
+    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;事&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;物&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</span>
@@ -1163,14 +1165,16 @@ table {
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">AuxDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;には&quot;</span><span class="p">,</span> <span class="s2">&quot;にも&quot;</span><span class="p">,</span> <span class="s2">&quot;だと&quot;</span><span class="p">,</span> <span class="s2">&quot;の&quot;</span><span class="p">,</span> <span class="s2">&quot;に&quot;</span><span class="p">,</span> <span class="s2">&quot;で&quot;</span><span class="p">,</span> <span class="s2">&quot;によって&quot;</span><span class="p">,</span> <span class="s2">&quot;による&quot;</span><span class="p">,</span> <span class="s2">&quot;により&quot;</span><span class="p">,</span> <span class="s2">&quot;で・の&quot;</span><span class="p">,</span> <span class="s2">&quot;で・あるから&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;まで&quot;</span><span class="p">,</span> <span class="s2">&quot;も&quot;</span><span class="p">,</span> <span class="s2">&quot;として&quot;</span>
+    <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;には&quot;</span><span class="p">,</span> <span class="s2">&quot;にも&quot;</span><span class="p">,</span> <span class="s2">&quot;だと&quot;</span><span class="p">,</span> <span class="s2">&quot;の&quot;</span><span class="p">,</span> <span class="s2">&quot;に&quot;</span><span class="p">,</span> <span class="s2">&quot;で&quot;</span><span class="p">,</span> <span class="s2">&quot;によって&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;による&quot;</span><span class="p">,</span> <span class="s2">&quot;により&quot;</span><span class="p">,</span> <span class="s2">&quot;で・の&quot;</span><span class="p">,</span> <span class="s2">&quot;で・あるから&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;まで&quot;</span><span class="p">,</span> <span class="s2">&quot;も&quot;</span><span class="p">,</span> <span class="s2">&quot;として&quot;</span><span class="p">,</span> <span class="s2">&quot;しよするうとは&quot;</span><span class="p">,</span> <span class="s2">&quot;だけ&quot;</span><span class="p">,</span> <span class="s2">&quot;なので&quot;</span><span class="p">,</span> <span class="s2">&quot;ですから&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains functional words of auxilaries.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">SubDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;は&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;は&quot;</span><span class="p">,</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains functional words of subjects.</span>
@@ -1185,6 +1189,13 @@ table {
 
 <span class="n">ObjPassiveSubDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
     <span class="s2">&quot;へ&quot;</span><span class="p">,</span> <span class="s2">&quot;と&quot;</span><span class="p">,</span> <span class="s2">&quot;ないと&quot;</span><span class="p">,</span> <span class="s2">&quot;とは&quot;</span>
+<span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">SubPassiveObjDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;も&quot;</span><span class="p">,</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. </span>
@@ -1299,6 +1310,15 @@ table {
       
   
     <div class="desc"><p>Dict that contains functional words of subjects.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.SubPassiveObjDict" class="name">var <span class="ident">SubPassiveObjDict</span></p>
+      
+  
+    <div class="desc"><p>Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs.</p></div>
   <div class="source_cont">
 </div>
 

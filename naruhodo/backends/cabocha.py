@@ -229,8 +229,8 @@ class CaboChunk(object):
                 if len(self.nouns) > 1:
                     self.type = 0
                 else:
-                    self.type = 2
-                    self.type2 = 1
+                    self.type = 1
+                    self.type2 = 2
             # NE recognition.
             elif self.nouns[0]['labels'][0] == '固有名詞':
                 if self.nouns[0]['labels'][1] == '人名':
@@ -370,6 +370,10 @@ class CaboChunk(object):
                 if item['surface'] ==  '？':
                     self.func += item['surface']
                     self.question = 1
+
+        # Fix for special words.
+        if self.main == "できる" and self.func not in ["た", "ます", "いるて"]:
+            self.type = 5
         # self.func += "".join([x['surface'] for x in self.signs])
         
     def processChunk(self):

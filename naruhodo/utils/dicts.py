@@ -69,7 +69,8 @@ Dict to convert the edge type to edge color.
 
 
 MeaninglessDict = set([
-    "前", "後", "こと", "もの", "ため", "意", "中", "なる", "ある", "よる", "する", "ない", "から", "だから"
+    "前", "後", "こと", "事", "もの", "物", "ため", "意", "中", 
+    "なる", "ある", "よる", "する", "ない", "から", "だから"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
@@ -83,14 +84,16 @@ Dict that contains verb-like functional words.
 """
 
 AuxDict = set([
-    "", "には", "にも", "だと", "の", "に", "で", "によって", "による", "により", "で・の", "で・あるから", "だから", "から", "まで", "も", "として"
+    "", "には", "にも", "だと", "の", "に", "で", "によって", 
+    "による", "により", "で・の", "で・あるから", "だから", "から", 
+    "まで", "も", "として", "しよするうとは", "だけ", "なので", "ですから"
 ])
 """
 Dict that contains functional words of auxilaries.
 """
 
 SubDict = set([
-    "は", 
+    "は",
 ])
 """
 Dict that contains functional words of subjects.
@@ -105,6 +108,13 @@ Dict that contains functional words of objects.
 
 ObjPassiveSubDict = set([
     "へ", "と", "ないと", "とは"
+])
+"""
+Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. 
+"""
+
+SubPassiveObjDict = set([
+    "も",
 ])
 """
 Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. 
