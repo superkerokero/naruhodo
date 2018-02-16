@@ -17,6 +17,7 @@ class DependencyAnalyzer(AnalyzerBase):
         
     def add(self, inp):
         """Take in a string input and add it to the DSG."""
+        inp = self._preprocessText(inp)
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp))
         for chunk in cabo.chunks:

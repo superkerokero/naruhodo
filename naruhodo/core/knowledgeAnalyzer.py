@@ -30,6 +30,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
     def add(self, inp):
         """Take in a string input and add it to the knowledge structure graph(KSG)."""
         # Reset rootsub everytime you add a new piece of text.
+        inp = self._preprocessText(inp)
         self.rootsub = None
         self.root_has_no_sub = False
         self.rootname = ""
@@ -103,7 +104,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         auxlabel = ""
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
-            if child.type in [2, 3, 4, 6]: # and child.type2 == -1:
+            if child.type in [3, 4, 6]: # and child.type2 == -1:
                 continue
             # Deal with passive form verb.
             if parent.passive == 1:

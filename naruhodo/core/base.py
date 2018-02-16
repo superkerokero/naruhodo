@@ -30,9 +30,12 @@ class AnalyzerBase(object):
         Precompiled regular expression for separating sentences.
         """
 
-        self.re_parentheses = re.compile('\（[^)]*\）')
+        # self.re_parentheses = re.compile('\（[^)]*\）')
+        self._re1 = re.compile('\（[^)]*\）')
+        self._re2 = re.compile('\[[^)]*\]')
+        self._re3 = re.compile('\([^)]*\)')
         """
-        Precompiled regular expression for getting rid of em parenthesis.
+        Precompiled regular expressions for getting rid of parenthesis.
         """
 
     def _parseToSents(self, context):
@@ -69,6 +72,13 @@ class AnalyzerBase(object):
         self.G = nx.DiGraph()
         self.nodes = dict()
         self.edges = dict()
+
+    def _preprocessText(self, text):
+        """Get rid of weird parts from the text that interferes analysis."""
+        text = self._re1.sub("", text)
+        text = self._re2.sub("", text)
+        text = self._re3.sub("", text)
+        return text
 
     def exportJSON(self, filename):
         """Export current graph to a JSON file on disk."""
