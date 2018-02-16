@@ -66,7 +66,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 self._addToVList(parent.main, child)
             else:
                 self._addNode(child.main, child.type, child.main)
-                self._addEdge(child.main, parent.main, child.func)
+                self._addEdge(child.main, parent.main, label=child.func)
             
     def _addAdj(self, pid, chunks):
         """Adding node/edge when parent node is adj/adv."""
@@ -135,7 +135,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             for item in self.vlist[parent.main]:
                 self._addEdge(pname, *item)
             
-    def _addEdge(self, parent, child, label="", etype="None"):
+    def _addEdge(self, parent, child, label="", etype="none"):
         """Add edge to edge list"""
         try:
             if parent not in MeaninglessDict and child not in MeaninglessDict:
@@ -149,10 +149,10 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 'type': etype
             }
             
-    def _addNode(self, name, ctype, rep):
+    def _addNode(self, name, ntype, rep):
         """Add node to node list"""
         try:
-            if ctype in [0, 1, 2, 3, 4, 5]:
+            if ntype in [0, 1, 2, 3, 4, 5]:
                 if name not in MeaninglessDict: 
                     self.nodes[name]['count'] += 1
                 else:
@@ -160,7 +160,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         except KeyError:
             self.nodes[name] = {
                 'count': 1,
-                'type': ctype,
+                'type': ntype,
                 'rep': rep,
                 'len': len(rep)
             }

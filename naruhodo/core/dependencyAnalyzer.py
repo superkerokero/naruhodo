@@ -46,7 +46,8 @@ class DependencyAnalyzer(AnalyzerBase):
             except KeyError:
                 self.edges[(chunk.main, cabo.chunks[chunk.parent].main)] = {
                     'weight': 1,
-                    'label': chunk.func + ' '
+                    'label': chunk.func + ' ',
+                    'type': "none"
                 }
         # Add nodes to DAG.
         for key, val in self.nodes.items():

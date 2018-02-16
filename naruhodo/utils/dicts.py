@@ -29,7 +29,7 @@ Dict of named entity types.
 """
 
 
-NodeShapeDictN2Json = {
+NodeShape2JsonDict = {
     "square": "circle",
     "Mdiamond": "circle",
     "doublecircle": "circle",
@@ -41,6 +41,16 @@ NodeShapeDictN2Json = {
 }
 """
 Dict to convert the node shape from notebook to vis.js json format.
+"""
+
+EdgeType2StyleDict = {
+    "none": "solid",
+    "sub": "bold",
+    "obj": "solid",
+    "aux": "dashed"
+}
+"""
+Dict to convert the edge type to edge style.
 """
 
 

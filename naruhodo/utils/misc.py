@@ -3,7 +3,7 @@ Module for miscellaneous utility functions.
 """
 import json
 import networkx as nx
-from naruhodo.utils.dicts import NodeShapeDictN2Json
+from naruhodo.utils.dicts import NodeShape2JsonDict, EdgeType2StyleDict
 
 def exportToJsonObj(G):
     """Export given networkx graph to JSON object(dict object in python)."""
@@ -14,7 +14,7 @@ def exportToJsonObj(G):
         'label': item['label'],
         'value': item['width'],
         'title': item['count'],
-        'shape': NodeShapeDictN2Json[item['shape']],
+        'shape': NodeShape2JsonDict[item['shape']],
         'color': {
             'background': item['fillcolor'],
             'highlight': '#ff9647',
@@ -30,7 +30,8 @@ def exportToJsonObj(G):
         'label': item['label'],
         'arrows': 'to',
         'value': item['penwidth'],
-        'title': item['weight']
+        'title': item['weight'],
+        'style': item['style']
     } for item in raw['links']]
     return ret
 
@@ -82,4 +83,5 @@ def getEdgeProperties(info):
     ret['label'] = info['label']
     ret['penwidth'] = info['weight'] * 2.0
     ret['weight'] = info['weight']
+    ret['style'] = EdgeType2StyleDict[info['type']]
     return ret  
