@@ -77,7 +77,8 @@ class KnowledgeAnalyzer(AnalyzerBase):
         parent = chunks[pid]
         sub = None
         obj = None
-        aux = ""
+        aux = list()
+        auxlabel = ""
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
             if child.type in [2, 3, 4, 6] and child.type2 == -1:
@@ -96,8 +97,9 @@ class KnowledgeAnalyzer(AnalyzerBase):
                     obj = child
                 else:
                     aux += "\n{0}".format(child.surface)
-            elif child.func in ["で", "によって", "による", "により"]:
-                aux += "\n{0}".format(child.surface)
+            elif child.func in ["で", "によって", "による", "により", "で・の"]:
+                aux.append(child)
+                auxlabel += "\n{0}".format(child.surface)
             else:
                 pass
         if not sub and not obj:
@@ -117,18 +119,22 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 self._addToVList(pname, child)
         if sub:
             self._addNode(sub.main, sub.type, sub.main)
-            self._addEdge(sub.main, pname)
+            self._addEdge(sub.main, pname, label=sub.func, etype="sub")
         elif parent.parent == -1:
             self._addNode("*省略される主語", 0, "*省略される主語")
-            self._addEdge("*省略される主語", pname)
+            self._addEdge("*省略される主語", pname, label="は", etype="sub")
         if obj:
             self._addNode(obj.main, obj.type, obj.main)
-            self._addEdge(pname, obj.main, aux)
+            self._addEdge(pname, obj.main, label=auxlabel, etype="obj")
+        if len(aux) > 0:
+            for item in aux:
+                self._addNode(item.main, item.type, item.main)
+                self._addEdge(item.main, pname, label=item.func, etype="aux")
         if parent.main in self.vlist and len(self.vlist[parent.main]) > 0:
             for item in self.vlist[parent.main]:
                 self._addEdge(pname, *item)
             
-    def _addEdge(self, parent, child, label=""):
+    def _addEdge(self, parent, child, label="", etype="None"):
         """Add edge to edge list"""
         try:
             if parent not in MeaninglessDict and child not in MeaninglessDict:
@@ -138,7 +144,8 @@ class KnowledgeAnalyzer(AnalyzerBase):
         except KeyError:
             self.edges[(parent, child)] = {
                 'weight': 1,
-                'label': label + ' ' # Add an empty character to avoid issues in javascript libraries.
+                'label': label + ' ', # Add an empty character to avoid issues in javascript libraries.
+                'type': etype
             }
             
     def _addNode(self, name, ctype, rep):
