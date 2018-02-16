@@ -132,9 +132,11 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 # elif child.func in AuxDict:
                 #     aux.append(child)
                 #     auxlabel += "\n{0}".format(child.surface)
-                else:
+                elif child.type not in [1, 2]:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
+                else:
+                    pass
             elif child.func in SubDict:
                 sub = child
             elif child.func in ObjDict:
@@ -159,9 +161,11 @@ class KnowledgeAnalyzer(AnalyzerBase):
             # elif child.func in AuxDict:
             #     aux.append(child)
             #     auxlabel += "\n{0}".format(child.surface)
-            else:
+            elif child.type not in [1, 2]:
                 aux.append(child)
                 auxlabel += "\n{0}".format(child.surface)
+            else:
+                pass
 
         if len(parent.children) == 0 and parent.parent == -1:
             for i in range(len(parent.children)):
