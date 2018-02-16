@@ -73,9 +73,9 @@ class KnowledgeAnalyzer(AnalyzerBase):
     def _addSpecial(self, pname, child):
         """Add special child node with extra information."""
         # Take care of special child that contains extra information
-        if child.main[-2:] == "ため":
+        if child.main[-2:] in ["ため", "爲", "為", "為め", "爲め"]:
             self._addNode(child.main, child.type, child.main)
-            self._addEdge(child.main, pname, label="因果関係", etype="cause")
+            self._addEdge(child.main, pname, label="因果関係候補", etype="aux")
         elif child.type in [1, 2]:
             self._addToVList(pname, child)
         
@@ -179,7 +179,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             if not self.rootsub:
                 self.rootsub = sub
             if self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
-                self._addEdge(self.rootsub.main, self.rootname, label="共同主語", etype="autosub")
+                self._addEdge(self.rootsub.main, self.rootname, label="主語候補", etype="autosub")
                 self.root_has_no_sub = False
         if obj:
             obj.type = 0
@@ -200,7 +200,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             self.root_has_no_sub = True
             self.rootname = pname
         elif self.rootsub and parent.type == 2 and parent.type2 != 0:
-            self._addEdge(self.rootsub.main, pname, label="共同主語", etype="autosub")
+            self._addEdge(self.rootsub.main, pname, label="主語候補", etype="autosub")
         if obj:
             self._addNode(obj.main, obj.type, obj.main)
             self._addEdge(pname, obj.main, label=auxlabel, etype="obj")
