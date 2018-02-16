@@ -213,14 +213,14 @@ class CaboChunk(object):
         
     def _getMain(self):
         """Get the main component of the chunk."""
-        if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立' and self.nouns[0]['labels'][0] != '接尾':
+        if len(self.nouns) > 0 and self.nouns[0]['labels'][0] not in ['非自立', '接尾']:
             self.main = "\n".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
             if len(self.adjs) > 0:
                 self.main += "：" + self.adjs[0]['lemma']
             # Corrections for special patterns.
             if self.nouns[0]['labels'][0] == 'サ変接続':
-                if len(self.nouns) > 1:
+                if len(self.nouns) > 1 and len(self.verbs) == 0:
                     self.type = 0
                 else: 
                     self.type = 2

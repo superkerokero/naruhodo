@@ -47,20 +47,17 @@ class KnowledgeAnalyzer(AnalyzerBase):
             self._addChildren(pid, cabo.chunks)
         if self.root_has_no_sub:
             self._addNode("*省略される主語", 0, "*省略される主語")
-            self._addEdge("*省略される主語", self.rootname, label="は", etype="sub")
+            self._addEdge("*省略される主語", self.rootname, label="（省略）は", etype="sub")
         self._update()
             
     def _addChildren(self, pid, chunks):
         """Add children following rules."""
         parent = chunks[pid]
-        if parent.type == 0:
-            # When parent node is noun.
+        if parent.type in [0, 6]:
+            # When parent node is noun/connect.
             self._addNoun(pid, chunks)
-        elif parent.type in [1, 5, 6]:
-            # When parent node is adj.
-            self._addVerbAdj(pid, chunks, mode="verb")
-        elif parent.type == 2:
-            # When parent node is verb.
+        elif parent.type in [1, 2, 5]:
+            # When parent node is adj/verb/adverb.
             self._addVerbAdj(pid, chunks, mode="verb")
         else:
             pass
@@ -106,7 +103,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         auxlabel = ""
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
-            if child.type in [2, 3, 4, 6] and child.type2 == -1:
+            if child.type in [2, 3, 4, 6]: # and child.type2 == -1:
                 continue
             # Deal with passive form verb.
             if parent.passive == 1:
@@ -151,7 +148,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             else:
                 pass
 
-        if not sub and not obj:
+        if len(parent.children) == 0 and parent.parent == -1:
             for i in range(len(parent.children)):
                 child = chunks[parent.children[i]]
                 self._addSpecial(parent.main, child)
@@ -162,7 +159,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             sub.type = 0
             if not self.rootsub:
                 self.rootsub = sub
-            if self.root_has_no_sub:
+            if self.root_has_no_sub and parent.type2 != 0:
                 self._addEdge(sub.main, self.rootname, label="共同主語", etype="autosub")
                 self.root_has_no_sub = False
         if obj:
@@ -183,7 +180,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         elif parent.parent == -1:
             self.root_has_no_sub = True
             self.rootname = pname
-        elif self.rootsub:
+        elif self.rootsub and parent.type2 != 0:
             self._addEdge(self.rootsub.main, pname, label="共同主語", etype="autosub")
         if obj:
             self._addNode(obj.main, obj.type, obj.main)
@@ -216,6 +213,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
             
     def _addNode(self, name, ntype, rep):
         """Add node to node list"""
+        # print("Add node", name, ntype, rep)
         try:
             if ntype in [0, 1, 2, 3, 4, 5]:
                 if name not in MeaninglessDict: 
