@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # set default commit message
-if [ ! -z $1 ]; then
-    msg=$1
-else
-    msg="Default git commit message used."
-fi
+# if [ ! -z $1 ]; then
+#     msg=$1
+# else
+#     msg="Default git commit message used."
+# fi
 
 # Install develop version of the repo
 pip uninstall -y naruhodo
@@ -35,5 +35,5 @@ rm -rf naruhodo.egg-info
 
 # Push to github repo
 git add -A
-git commit -m "${msg}"
+git commit
 git push origin master
