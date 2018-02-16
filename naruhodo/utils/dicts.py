@@ -45,17 +45,31 @@ Dict to convert the node shape from notebook to vis.js json format.
 
 EdgeType2StyleDict = {
     "none": "solid",
-    "sub": "bold",
-    "obj": "solid",
-    "aux": "dashed"
+    "sub": "solid",
+    "autosub": "solid",
+    "obj": "dashed",
+    "aux": "dotted",
+    "cause": "dotted"
 }
 """
 Dict to convert the edge type to edge style.
 """
 
+EdgeType2ColorDict = {
+    "none": "#000000",
+    "sub": "#000000",
+    "autosub": "#aaaaaa",
+    "obj": "#000000",
+    "aux": "#ff7777",
+    "cause": "#91027e"
+}
+"""
+Dict to convert the edge type to edge color.
+"""
+
 
 MeaninglessDict = set([
-    "前", "後", "こと", "もの", "ため", "意", "中", "なる", "ある", "よる", "する", "ない"
+    "前", "後", "こと", "もの", "ため", "意", "中", "なる", "ある", "よる", "する", "ない", "から", "だから"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
@@ -64,3 +78,41 @@ Dict that contains meaningless entities that has to be integrated with its child
 VerbLikeFuncDict = set([
     "する", "しいるて", "し", "した", "しいるて・が", "いるて"
 ])
+"""
+Dict that contains verb-like functional words.
+"""
+
+AuxDict = set([
+    "で", "によって", "による", "により", "で・の", "で・あるから", "だから", "から", "まで"
+])
+"""
+Dict that contains functional words of auxilaries.
+"""
+
+SubDict = set([
+    "は", "には", "にも", "の", "だと"
+])
+"""
+Dict that contains functional words of subjects.
+"""
+
+ObjDict = set([
+    "を", 
+])
+"""
+Dict that contains functional words of objects.
+"""
+
+ObjPassiveSubDict = set([
+    "に", "へ", "と", "ないと", "とは"
+])
+"""
+Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. 
+"""
+
+MultiRoleDict = set([
+    "が", 
+])
+"""
+Dict that contains functional words that has multiple roles.
+"""

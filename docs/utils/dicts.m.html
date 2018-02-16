@@ -1043,10 +1043,17 @@ table {
     <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
       
   <ul>
+    <li class="mono"><a href="#naruhodo.utils.dicts.AuxDict">AuxDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.EdgeType2ColorDict">EdgeType2ColorDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.EdgeType2StyleDict">EdgeType2StyleDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.MeaninglessDict">MeaninglessDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.MultiRoleDict">MultiRoleDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.NEList">NEList</a></li>
-    <li class="mono"><a href="#naruhodo.utils.dicts.NodeShapeDictN2Json">NodeShapeDictN2Json</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.NodeShape2JsonDict">NodeShape2JsonDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.ObjDict">ObjDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.ObjPassiveSubDict">ObjPassiveSubDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ProDict">ProDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.SubDict">SubDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.TypeList">TypeList</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.VerbLikeFuncDict">VerbLikeFuncDict</a></li>
   </ul>
@@ -1102,7 +1109,7 @@ table {
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="n">NodeShapeDictN2Json</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">NodeShape2JsonDict</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;square&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Mdiamond&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
     <span class="s2">&quot;doublecircle&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
@@ -1116,9 +1123,33 @@ table {
 <span class="sd">Dict to convert the node shape from notebook to vis.js json format.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">EdgeType2StyleDict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;none&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;autosub&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aux&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cause&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict to convert the edge type to edge style.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">EdgeType2ColorDict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;none&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;autosub&quot;</span><span class="p">:</span> <span class="s2">&quot;#aaaaaa&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aux&quot;</span><span class="p">:</span> <span class="s2">&quot;#ff7777&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cause&quot;</span><span class="p">:</span> <span class="s2">&quot;#91027e&quot;</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict to convert the edge type to edge color.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 
 <span class="n">MeaninglessDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span>
+    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</span>
@@ -1127,6 +1158,44 @@ table {
 <span class="n">VerbLikeFuncDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
     <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;しいるて&quot;</span><span class="p">,</span> <span class="s2">&quot;し&quot;</span><span class="p">,</span> <span class="s2">&quot;した&quot;</span><span class="p">,</span> <span class="s2">&quot;しいるて・が&quot;</span><span class="p">,</span> <span class="s2">&quot;いるて&quot;</span>
 <span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains verb-like functional words.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">AuxDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;で&quot;</span><span class="p">,</span> <span class="s2">&quot;によって&quot;</span><span class="p">,</span> <span class="s2">&quot;による&quot;</span><span class="p">,</span> <span class="s2">&quot;により&quot;</span><span class="p">,</span> <span class="s2">&quot;で・の&quot;</span><span class="p">,</span> <span class="s2">&quot;で・あるから&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;まで&quot;</span>
+<span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains functional words of auxilaries.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">SubDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;は&quot;</span><span class="p">,</span> <span class="s2">&quot;には&quot;</span><span class="p">,</span> <span class="s2">&quot;にも&quot;</span><span class="p">,</span> <span class="s2">&quot;の&quot;</span><span class="p">,</span> <span class="s2">&quot;だと&quot;</span>
+<span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains functional words of subjects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">ObjDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;を&quot;</span><span class="p">,</span> 
+<span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains functional words of objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">ObjPassiveSubDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;に&quot;</span><span class="p">,</span> <span class="s2">&quot;へ&quot;</span><span class="p">,</span> <span class="s2">&quot;と&quot;</span><span class="p">,</span> <span class="s2">&quot;ないと&quot;</span><span class="p">,</span> <span class="s2">&quot;とは&quot;</span>
+<span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">MultiRoleDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;が&quot;</span><span class="p">,</span> 
+<span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains functional words that has multiple roles.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
 
   </div>
@@ -1136,10 +1205,46 @@ table {
   <section id="section-items">
     <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
+      <p id="naruhodo.utils.dicts.AuxDict" class="name">var <span class="ident">AuxDict</span></p>
+      
+  
+    <div class="desc"><p>Dict that contains functional words of auxilaries.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.EdgeType2ColorDict" class="name">var <span class="ident">EdgeType2ColorDict</span></p>
+      
+  
+    <div class="desc"><p>Dict to convert the edge type to edge color.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.EdgeType2StyleDict" class="name">var <span class="ident">EdgeType2StyleDict</span></p>
+      
+  
+    <div class="desc"><p>Dict to convert the edge type to edge style.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
       <p id="naruhodo.utils.dicts.MeaninglessDict" class="name">var <span class="ident">MeaninglessDict</span></p>
       
   
     <div class="desc"><p>Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.MultiRoleDict" class="name">var <span class="ident">MultiRoleDict</span></p>
+      
+  
+    <div class="desc"><p>Dict that contains functional words that has multiple roles.</p></div>
   <div class="source_cont">
 </div>
 
@@ -1154,10 +1259,28 @@ table {
 
       </div>
       <div class="item">
-      <p id="naruhodo.utils.dicts.NodeShapeDictN2Json" class="name">var <span class="ident">NodeShapeDictN2Json</span></p>
+      <p id="naruhodo.utils.dicts.NodeShape2JsonDict" class="name">var <span class="ident">NodeShape2JsonDict</span></p>
       
   
     <div class="desc"><p>Dict to convert the node shape from notebook to vis.js json format.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.ObjDict" class="name">var <span class="ident">ObjDict</span></p>
+      
+  
+    <div class="desc"><p>Dict that contains functional words of objects.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.ObjPassiveSubDict" class="name">var <span class="ident">ObjPassiveSubDict</span></p>
+      
+  
+    <div class="desc"><p>Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs.</p></div>
   <div class="source_cont">
 </div>
 
@@ -1167,6 +1290,15 @@ table {
       
   
     <div class="desc"><p>Pronoun identification dictionary.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.SubDict" class="name">var <span class="ident">SubDict</span></p>
+      
+  
+    <div class="desc"><p>Dict that contains functional words of subjects.</p></div>
   <div class="source_cont">
 </div>
 
@@ -1184,6 +1316,7 @@ table {
       <p id="naruhodo.utils.dicts.VerbLikeFuncDict" class="name">var <span class="ident">VerbLikeFuncDict</span></p>
       
   
+    <div class="desc"><p>Dict that contains verb-like functional words.</p></div>
   <div class="source_cont">
 </div>
 

@@ -333,7 +333,7 @@ class CaboChunk(object):
         if len(self.auxvs) > 0:
             self.func += "・".join([x['surface'] for x in self.auxvs])
             for elem in self.postps:
-                if elem['labels'][0] == "終助詞" or elem['labels'][0] == "副助詞／並立助詞／終助詞" or elem['labels'][0] == "接続助詞":
+                if elem['labels'][0] in ["終助詞", "副助詞／並立助詞／終助詞"]:
                     self.func += "~" + elem['lemma']
             neg = sum([
                 [x['lemma'] for x in self.auxvs].count('ん'), 
@@ -357,7 +357,9 @@ class CaboChunk(object):
             if any([self.auxvs[x]['lemma'] == "た" for x in range(len(self.auxvs))]):
                 self.tense = -1
         if len(self.postps) > 0:
-            self.func += "・".join([x['surface'] for x in self.postps])
+            for elem in self.postps:
+                if elem['labels'][0] not in  ["終助詞", "副助詞／並立助詞／終助詞"]:
+                    self.func += elem['lemma']
 
         # Fix for nouns used as verbs.
         if self.func in VerbLikeFuncDict:

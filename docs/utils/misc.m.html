@@ -1043,7 +1043,9 @@ table {
     <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
       
   <ul>
-    <li class="mono"><a href="#naruhodo.utils.misc.NodeShapeDictN2Json">NodeShapeDictN2Json</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.EdgeType2ColorDict">EdgeType2ColorDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.EdgeType2StyleDict">EdgeType2StyleDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.NodeShape2JsonDict">NodeShape2JsonDict</a></li>
   </ul>
 
     </li>
@@ -1081,7 +1083,7 @@ table {
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NodeShapeDictN2Json</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NodeShape2JsonDict</span><span class="p">,</span> <span class="n">EdgeType2StyleDict</span><span class="p">,</span> <span class="n">EdgeType2ColorDict</span>
 
 <span class="k">def</span> <span class="nf">exportToJsonObj</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export given networkx graph to JSON object(dict object in python).&quot;&quot;&quot;</span>
@@ -1092,7 +1094,7 @@ table {
         <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
         <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
         <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="n">NodeShapeDictN2Json</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]],</span>
+        <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="n">NodeShape2JsonDict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]],</span>
         <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;background&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">],</span>
             <span class="s1">&#39;highlight&#39;</span><span class="p">:</span> <span class="s1">&#39;#ff9647&#39;</span><span class="p">,</span>
@@ -1108,7 +1110,8 @@ table {
         <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
         <span class="s1">&#39;arrows&#39;</span><span class="p">:</span> <span class="s1">&#39;to&#39;</span><span class="p">,</span>
         <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;penwidth&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span>
     <span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">]]</span>
     <span class="k">return</span> <span class="n">ret</span>
 
@@ -1160,6 +1163,8 @@ table {
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;penwidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">2.0</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2ColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
     <span class="k">return</span> <span class="n">ret</span>  
 </pre></div>
 
@@ -1170,7 +1175,23 @@ table {
   <section id="section-items">
     <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
-      <p id="naruhodo.utils.misc.NodeShapeDictN2Json" class="name">var <span class="ident">NodeShapeDictN2Json</span></p>
+      <p id="naruhodo.utils.misc.EdgeType2ColorDict" class="name">var <span class="ident">EdgeType2ColorDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.misc.EdgeType2StyleDict" class="name">var <span class="ident">EdgeType2StyleDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.misc.NodeShape2JsonDict" class="name">var <span class="ident">NodeShape2JsonDict</span></p>
       
   
   <div class="source_cont">
@@ -1225,7 +1246,7 @@ table {
         <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
         <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
         <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="n">NodeShapeDictN2Json</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]],</span>
+        <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="n">NodeShape2JsonDict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]],</span>
         <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;background&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">],</span>
             <span class="s1">&#39;highlight&#39;</span><span class="p">:</span> <span class="s1">&#39;#ff9647&#39;</span><span class="p">,</span>
@@ -1241,7 +1262,8 @@ table {
         <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
         <span class="s1">&#39;arrows&#39;</span><span class="p">:</span> <span class="s1">&#39;to&#39;</span><span class="p">,</span>
         <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;penwidth&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span>
     <span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">]]</span>
     <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
@@ -1270,6 +1292,8 @@ table {
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;penwidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">2.0</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2ColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
     <span class="k">return</span> <span class="n">ret</span>  
 </pre></div>
 

@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CabochaClient
-from naruhodo.utils.dicts import MeaninglessDict
+from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, MultiRoleDict
 from naruhodo.core.base import AnalyzerBase
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
@@ -14,9 +14,26 @@ class KnowledgeAnalyzer(AnalyzerBase):
         """
         Communicator to backend for KnowledgeAnalyzer.
         """
-        
+        self.rootsub = None
+        """
+        The subject node of the root. Used to assign subject node to parent nodes other than the root.
+        """
+        self.root_has_no_sub = False
+        """
+        If True, it means that root has no subject and has to transfer its children's subject(if any) to root.
+        """
+        self.rootname = ""
+        """
+        Name of the root node.
+        """
+
     def add(self, inp):
         """Take in a string input and add it to the knowledge structure graph(KSG)."""
+        # Reset rootsub everytime you add a new piece of text.
+        self.rootsub = None
+        self.root_has_no_sub = False
+        self.rootname = ""
+        # Call backend for dependency parsing.
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp))
         pool = [cabo.root]
@@ -28,6 +45,9 @@ class KnowledgeAnalyzer(AnalyzerBase):
             for cid in cabo.childrenList[pid]:
                 pool.append(cid)
             self._addChildren(pid, cabo.chunks)
+        if self.root_has_no_sub:
+            self._addNode("*省略される主語", 0, "*省略される主語")
+            self._addEdge("*省略される主語", self.rootname, label="は", etype="sub")
         self._update()
             
     def _addChildren(self, pid, chunks):
@@ -38,10 +58,10 @@ class KnowledgeAnalyzer(AnalyzerBase):
             self._addNoun(pid, chunks)
         elif parent.type in [1, 5, 6]:
             # When parent node is adj.
-            self._addVerb(pid, chunks)
+            self._addVerbAdj(pid, chunks, mode="verb")
         elif parent.type == 2:
             # When parent node is verb.
-            self._addVerb(pid, chunks)
+            self._addVerbAdj(pid, chunks, mode="verb")
         else:
             pass
 
@@ -51,6 +71,15 @@ class KnowledgeAnalyzer(AnalyzerBase):
             self.vlist[child.main].append([pname, child.func])
         except KeyError:
             self.vlist[child.main] = [[pname, child.func]]
+
+    def _addSpecial(self, pname, child):
+        """Add special child node with extra information."""
+        # Take care of special child that contains extra information
+        if child.main[-2:] == "ため":
+            self._addNode(child.main, child.type, child.main)
+            self._addEdge(child.main, pname, label="因果関係", etype="cause")
+        elif child.type in [2, ]:
+            self._addToVList(pname, child)
         
     def _addNoun(self, pid, chunks):
         """Adding node/edge when parent node is noun."""
@@ -66,13 +95,9 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 self._addToVList(parent.main, child)
             else:
                 self._addNode(child.main, child.type, child.main)
-                self._addEdge(child.main, parent.main, label=child.func)
-            
-    def _addAdj(self, pid, chunks):
-        """Adding node/edge when parent node is adj/adv."""
-        pass
+                self._addEdge(child.main, parent.main, label=child.func, etype="none")
     
-    def _addVerb(self, pid, chunks):
+    def _addVerbAdj(self, pid, chunks, mode="verb"):
         """Adding node/edge when parent node is verb."""
         parent = chunks[pid]
         sub = None
@@ -83,57 +108,97 @@ class KnowledgeAnalyzer(AnalyzerBase):
             child = chunks[parent.children[i]]
             if child.type in [2, 3, 4, 6] and child.type2 == -1:
                 continue
-            if child.func in ["は", "に・は", "に・も", "の"]:
+            # Deal with passive form verb.
+            if parent.passive == 1:
+                if child.func in SubDict:
+                    sub = child
+                elif child.func in ObjDict:
+                    obj = child
+                elif child.func in MultiRoleDict:
+                    if not sub:
+                        sub = child
+                    else:
+                        obj = child
+                elif child.func in ObjPassiveSubDict:
+                    if not sub:
+                        sub = child
+                    else:
+                        aux.append(child)
+                        auxlabel += "\n{0}".format(child.surface)
+                elif child.func in AuxDict:
+                    aux.append(child)
+                    auxlabel += "\n{0}".format(child.surface)
+                else:
+                    pass
+            elif child.func in SubDict:
                 sub = child
-            elif child.func in ["を", ]:
+            elif child.func in ObjDict:
                 obj = child
-            elif child.func in ["が", ]:
+            elif child.func in MultiRoleDict:
                 if not sub:
                     sub = child
                 else:
                     obj = child
-            elif child.func in ["に", "へ", "と", "ないと", "と・は"]:
+            elif child.func in ObjPassiveSubDict:
                 if not obj:
                     obj = child
                 else:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
-            elif child.func in ["で", "によって", "による", "により", "で・の"]:
+            elif child.func in AuxDict:
                 aux.append(child)
                 auxlabel += "\n{0}".format(child.surface)
             else:
                 pass
+
         if not sub and not obj:
+            for i in range(len(parent.children)):
+                child = chunks[parent.children[i]]
+                self._addSpecial(parent.main, child)
+            self._processAux(aux, parent.main)
             return
         # Entities deemed as nouns.
         if sub:
             sub.type = 0
+            if not self.rootsub:
+                self.rootsub = sub
+            if self.root_has_no_sub:
+                self._addEdge(sub.main, self.rootname, label="共同主語", etype="autosub")
+                self.root_has_no_sub = False
         if obj:
             obj.type = 0
 
         # Modify parent name with entities.
-        pname = "{0}\n[{1}=>{2}]".format(parent.main, sub.main if sub else "None", obj.main if obj else "None")
+        if mode == "verb":
+            pname = "{0}\n[{1}=>{2}]".format(parent.main, sub.main if sub else "None", obj.main if obj else "None")
+        else:
+            pname = parent.main
         self._addNode(pname, parent.type, parent.main)
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
-            if child.type in [2, ]:
-                self._addToVList(pname, child)
+            self._addSpecial(pname, child)
         if sub:
             self._addNode(sub.main, sub.type, sub.main)
             self._addEdge(sub.main, pname, label=sub.func, etype="sub")
         elif parent.parent == -1:
-            self._addNode("*省略される主語", 0, "*省略される主語")
-            self._addEdge("*省略される主語", pname, label="は", etype="sub")
+            self.root_has_no_sub = True
+            self.rootname = pname
+        elif self.rootsub:
+            self._addEdge(self.rootsub.main, pname, label="共同主語", etype="autosub")
         if obj:
             self._addNode(obj.main, obj.type, obj.main)
             self._addEdge(pname, obj.main, label=auxlabel, etype="obj")
+        self._processAux(aux, pname)
+        if parent.main in self.vlist and len(self.vlist[parent.main]) > 0:
+            for item in self.vlist[parent.main]:
+                self._addEdge(pname, *item)
+
+    def _processAux(self, aux, pname):
+        """Process aux words and vlist if any."""
         if len(aux) > 0:
             for item in aux:
                 self._addNode(item.main, item.type, item.main)
                 self._addEdge(item.main, pname, label=item.func, etype="aux")
-        if parent.main in self.vlist and len(self.vlist[parent.main]) > 0:
-            for item in self.vlist[parent.main]:
-                self._addEdge(pname, *item)
             
     def _addEdge(self, parent, child, label="", etype="none"):
         """Add edge to edge list"""
