@@ -96,7 +96,8 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 if not obj:
                     obj = child
                 else:
-                    aux += "\n{0}".format(child.surface)
+                    aux.append(child)
+                    auxlabel += "\n{0}".format(child.surface)
             elif child.func in ["で", "によって", "による", "により", "で・の"]:
                 aux.append(child)
                 auxlabel += "\n{0}".format(child.surface)
