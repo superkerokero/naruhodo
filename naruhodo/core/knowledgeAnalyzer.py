@@ -46,7 +46,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
                 pool.append(cid)
             self._addChildren(pid, cabo.chunks)
         if self.root_has_no_sub:
-            self._addNode("*省略される主語", 0, "*省略される主語")
+            self._addNode("*省略される主語", -1, "*省略される主語")
             self._addEdge("*省略される主語", self.rootname, label="（省略）は", etype="sub")
         self._update()
             

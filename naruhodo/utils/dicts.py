@@ -83,14 +83,14 @@ Dict that contains verb-like functional words.
 """
 
 AuxDict = set([
-    "の", "に", "で", "によって", "による", "により", "で・の", "で・あるから", "だから", "から", "まで", "も"
+    "", "には", "にも", "だと", "の", "に", "で", "によって", "による", "により", "で・の", "で・あるから", "だから", "から", "まで", "も", "として"
 ])
 """
 Dict that contains functional words of auxilaries.
 """
 
 SubDict = set([
-    "は", "には", "にも", "だと"
+    "は", 
 ])
 """
 Dict that contains functional words of subjects.
