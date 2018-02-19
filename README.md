@@ -11,7 +11,7 @@
 ### Dependency structure graph (DSG)
 
 [Dependency parsing](https://web.stanford.edu/~jurafsky/slp3/14.pdf) is the analysis of [dependency grammar](https://en.wikipedia.org/wiki/Dependency_grammar) on a block of text using computer programs. 
-The directed linking nature of dependency grammar makes the result of dependency parsing directed graphs. I call this graph dependency structure graph(DSG). This dependency information, combined with the information of word types,transformations, and other contextual information like word embeddings are the bread and butter of the text comprehension(or assimilation of information) by computers.
+The directed linking nature of dependency grammar makes the result of dependency parsing directed graphs. I call this graph dependency structure graph(DSG). This dependency information, combined with the information of word types, transformations, and other contextual information like word embeddings are the bread and butter of the text comprehension by computers.
 
 It should be noted that DSG is not immediately useful to humans or computers(except for getting some rough ideas about the keywords and complexity of your input text), but it is important information and can be used to generate knowledge structure graph(KSG) that will be introduced later. 
 
