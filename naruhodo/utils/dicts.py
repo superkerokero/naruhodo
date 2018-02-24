@@ -121,7 +121,7 @@ Dict that contains functional words that can be objects for normal verbs and sub
 """
 
 MultiRoleDict = set([
-    "が", 
+    "が", "などが"
 ])
 """
 Dict that contains functional words that has multiple roles.
