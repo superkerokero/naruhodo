@@ -82,7 +82,7 @@ pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
 
 `naruhodo`のチュートリアルはリポジトリの`tutorial`フォルダに`ipynb` ファィルとして用意されています。ブラウザから直接閲覧する事も可能です。このチュートリアルには Naruhodo の主な機能が紹介されています。
 
-[チュートリアルのノートブック](https://github.com/superkerokero/naruhodo/blob/master/tutorial/Tutorial.ipynb)
+[日本語チュートリアルのノートブック](https://github.com/superkerokero/naruhodo/blob/master/tutorial/Tutorial-Ja.ipynb)
 
 ## Python-API
 

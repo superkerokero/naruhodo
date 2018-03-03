@@ -81,7 +81,7 @@ Support for other parsers such as `KNP` is planned in the future.
 
 The tutorial of `naruhodo` is provided as a `ipynb` file in the tutorial folder. You can view it directly in your browser. This tutorial covers all the main functionalities of naruhodo.
 
-[Tutorial notebook](https://github.com/superkerokero/naruhodo/blob/master/tutorial/Tutorial.ipynb)
+[Tutorial notebook for Japanese parsing](https://github.com/superkerokero/naruhodo/blob/master/tutorial/Tutorial-Ja.ipynb)
 
 ## Python-API
 
