@@ -22,9 +22,9 @@ class parser(object):
         """
         Precompiled regular expression for separating sentences.
         """
-        self._re1 = re.compile(r'\（[^)]*\）')
-        self._re2 = re.compile(r'\[[^)]*\]')
-        self._re3 = re.compile(r'\([^)]*\)')
+        self._re1 = re.compile(r'\（.*?\）')
+        self._re2 = re.compile(r'\[.*?\]')
+        self._re3 = re.compile(r'\(.*?\)')
         """
         Precompiled regular expressions for getting rid of parenthesis.
         """
@@ -87,7 +87,7 @@ class parser(object):
 
     def _preprocessText(self, text):
         """Get rid of weird parts from the text that interferes analysis."""
-        text = self._re1.sub("", text)
+        # text = self._re1.sub("", text)
         text = self._re2.sub("", text)
         text = self._re3.sub("", text)
         return text
@@ -116,8 +116,7 @@ class parser(object):
     def addUrls(self, urls):
         """Add the information from given urls to KSG."""
         context = self._grabTextFromUrls(urls)
-        for sent in context:
-            self.add(sent)
+        self.addAll(context)
 
     def add(self, inp):
         """Add a sentence to graph."""
@@ -143,6 +142,7 @@ class parser(object):
 
     def _addAllMP(self, inps):
         """Parallel implementation of addAll function."""
+        inps = [self._preprocessText(inp) for inp in inps]
         if self.lang == "ja":
             if self.gtype == "d":
                 results = self.pool.map(self._addMP_ja_d, inps)
@@ -152,6 +152,7 @@ class parser(object):
                 raise ValueError("Unknown graph type: {0}".format(self.gtype))
         else:
             raise ValueError("Unsupported language: {0}".format(self.lang))
+        print(self._reduce(results))
         self.G = self._mergeGraph(self.G, self._reduce(results))
 
     def _reduce(self, results):
@@ -165,13 +166,13 @@ class parser(object):
             for i in range(int(len(results) / 2)):
                 args.append([results[i * 2], results[i * 2 + 1]])
             ret = self.pool.starmap(self._mergeGraph, args)
-            self._reduce(ret)
+            return self._reduce(ret)
         else:
-            for i in range(int(len(results - 1) / 2)):
+            for i in range(int((len(results) - 1) / 2)):
                 args.append([results[i * 2], results[i * 2 + 1]])
             ret = self.pool.starmap(self._mergeGraph, args)
             ret.append(results[-1])
-            self._reduce(ret)
+            return self._reduce(ret)
 
     @staticmethod
     def _addMP_ja_d(inp):

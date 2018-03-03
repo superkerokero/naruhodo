@@ -22,10 +22,8 @@ class DependencyCoreJa(object):
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp))
         for chunk in cabo.chunks:
-            # Add nodes.
             self._addNode(chunk.main, ntype=chunk.type, rep=chunk.main)
-            self._addNode(cabo.chunks[chunk.parent].main, ntype=cabo.chunks[chunk.parent].type, rep=cabo.chunks[chunk.parent].main)
-            # Add edges.
+        for chunk in cabo.chunks:
             self._addEdge(chunk.main, cabo.chunks[chunk.parent].main, label=chunk.func)
 
     def _addEdge(self, parent, child, label="", etype="none"):

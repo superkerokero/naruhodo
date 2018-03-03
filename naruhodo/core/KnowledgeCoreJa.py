@@ -73,10 +73,10 @@ class KnowledgeCoreJa(object):
     def _addSpecial(self, pname, child):
         """Add special child node with extra information."""
         # Take care of special child that contains extra information
-        if child.main[-2:] in ["ため", "爲", "為", "為め", "爲め"]:
+        if child.main[-2:] in ["ため", "為め", "爲め"] or child.main[-1] in ["爲", "為"]:
             self._addNode(child.main, child.type, child.main)
             self._addEdge(child.main, pname, label="因果関係候補", etype="aux")
-        elif child.type in [1, 2]:
+        elif child.type in [1, 2, 5]:
             self._addToVList(pname, child)
         
     def _addNoun(self, pid, chunks):
@@ -89,7 +89,7 @@ class KnowledgeCoreJa(object):
             child = chunks[parent.children[i]]
             if child.type in [3, 4, 6]:
                 continue
-            elif child.type in [1, 2]:
+            elif child.type in [1, 2, 5]:
                 self._addToVList(parent.main, child)
             else:
                 self._addNode(child.main, child.type, child.main)
@@ -194,6 +194,7 @@ class KnowledgeCoreJa(object):
             sub.type = 0
             if not self.rootsub:
                 self.rootsub = sub
+                self._addNode(sub.main, sub.type, sub.main)
             if self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
                 self._addEdge(self.rootsub.main, self.rootname, label="主語候補", etype="autosub")
                 self.root_has_no_sub = False
@@ -249,7 +250,6 @@ class KnowledgeCoreJa(object):
             
     def _addNode(self, name, ntype, rep):
         """Add node to node list"""
-        # print("Add node", name, ntype, rep)
         if self.G.has_node(name):
             if ntype in [0, 1, 2, 3, 4, 5]:
                 if name not in MeaninglessDict:
