@@ -2,14 +2,16 @@ import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CabochaClient
 from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, MultiRoleDict, SubPassiveObjDict
-from naruhodo.core.base import AnalyzerBase
-from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 
-class KnowledgeAnalyzer(AnalyzerBase):
+class KnowledgeCoreJa(object):
     """Analyze the input text and store the information into a knowledge structure graph(KSG)."""
     def __init__(self):
-        """Setup a subprocess for backend."""
-        super().__init__()
+        """Initialize an analyzer for KSG."""
+        self.G = nx.DiGraph()
+        """
+        Graph object of this analyzer.
+        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.
+        """
         self.proc = Subprocess('cabocha -f1')
         """
         Communicator to backend for KnowledgeAnalyzer.
@@ -30,7 +32,6 @@ class KnowledgeAnalyzer(AnalyzerBase):
     def add(self, inp):
         """Take in a string input and add it to the knowledge structure graph(KSG)."""
         # Reset rootsub everytime you add a new piece of text.
-        inp = self._preprocessText(inp)
         self.rootsub = None
         self.root_has_no_sub = False
         self.rootname = ""
@@ -49,15 +50,14 @@ class KnowledgeAnalyzer(AnalyzerBase):
         if self.root_has_no_sub:
             self._addNode("*省略される主語", -1, "*省略される主語")
             self._addEdge("*省略される主語", self.rootname, label="（省略）は", etype="sub")
-        self._update()
             
     def _addChildren(self, pid, chunks):
         """Add children following rules."""
         parent = chunks[pid]
-        if parent.type in [0, 5, 6]:
+        if parent.type in [0, 6]:
             # When parent node is noun/connect.
             self._addNoun(pid, chunks)
-        elif parent.type in [1, 2]:
+        elif parent.type in [1, 2, 5]:
             # When parent node is adj/verb.
             self._addVerbAdj(pid, chunks, mode="verb")
         else:
@@ -129,6 +129,14 @@ class KnowledgeAnalyzer(AnalyzerBase):
                     else:
                         aux.append(child)
                         auxlabel += "\n{0}".format(child.surface)
+                elif child.func == "":
+                    if not sub:
+                        sub = child
+                    elif not obj:
+                        obj = child
+                    else:
+                        aux.append(child)
+                        auxlabel += "\n{0}".format(child.surface)
                 # elif child.func in AuxDict:
                 #     aux.append(child)
                 #     auxlabel += "\n{0}".format(child.surface)
@@ -154,6 +162,14 @@ class KnowledgeAnalyzer(AnalyzerBase):
                     obj = child
             elif child.func in ObjPassiveSubDict:
                 if not obj:
+                    obj = child
+                else:
+                    aux.append(child)
+                    auxlabel += "\n{0}".format(child.surface)
+            elif child.func == "":
+                if not sub:
+                    sub = child
+                elif not obj:
                     obj = child
                 else:
                     aux.append(child)
@@ -207,7 +223,7 @@ class KnowledgeAnalyzer(AnalyzerBase):
         self._processAux(aux, pname)
         if parent.main in self.vlist and len(self.vlist[parent.main]) > 0:
             for item in self.vlist[parent.main]:
-                self._addEdge(pname, *item)
+                self._addEdge(pname, *item, etype="obj")
         # Add func edge for root.
         if parent.parent == -1:
             self._addEdge(pname, pname, label=parent.func, etype="none")
@@ -221,46 +237,26 @@ class KnowledgeAnalyzer(AnalyzerBase):
             
     def _addEdge(self, parent, child, label="", etype="none"):
         """Add edge to edge list"""
-        try:
+        if self.G.has_edge(parent, child):
             if parent not in MeaninglessDict and child not in MeaninglessDict:
-                self.edges[(parent, child)]['weight'] +=1
+                self.G.edges[parent, child]['weight'] +=1
             else:
-                self.edges[(parent, child)]['weight'] == 1
-        except KeyError:
-            self.edges[(parent, child)] = {
-                'weight': 1,
-                'label': label + ' ', # Add an empty character to avoid issues in javascript libraries.
-                'type': etype
-            }
+                self.G.edges[parent, child]['weight'] == 1
+        else:
+            if label == "":
+                label = " " # Assign a space to empty label to avoid problem in certain javascript libraries.
+            self.G.add_edge(parent, child, weight=1, label=label, type=etype)
             
     def _addNode(self, name, ntype, rep):
         """Add node to node list"""
         # print("Add node", name, ntype, rep)
-        try:
+        if self.G.has_node(name):
             if ntype in [0, 1, 2, 3, 4, 5]:
-                if name not in MeaninglessDict: 
-                    self.nodes[name]['count'] += 1
+                if name not in MeaninglessDict:
+                    self.G.nodes[name]['count'] += 1
                 else:
-                    self.nodes[name]['count'] == 1
-        except KeyError:
-            self.nodes[name] = {
-                'count': 1,
-                'type': ntype,
-                'rep': rep,
-                'len': len(rep)
-            }
+                    self.G.nodes[name]['count'] == 1
+        else:
+            self.G.add_node(name, count=1, type=ntype, rep=rep)
             
-    def _update(self):
-        """Update KSG using node/edge list."""
-        # Add nodes to DAG.
-        for key, val in self.nodes.items():
-            self.G.add_node(key, **getNodeProperties(val))
-        # Add edges to DAG.
-        for key, val in self.edges.items():
-            self.G.add_edge(*key, **getEdgeProperties(val))
-            
-    def addUrls(self, urls):
-        """Add the information from given urls to KSG."""
-        context = self._grabTextFromUrls(urls)
-        for sent in context:
-            self.add(sent)
+    

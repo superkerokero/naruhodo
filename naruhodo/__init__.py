@@ -5,4 +5,4 @@ Naruhodo is a python library for generating dependency-graph(DG) and knowledge-g
 
 """
 
-from naruhodo.core import DependencyAnalyzer, KnowledgeAnalyzer
+from naruhodo.core.parser import parser
