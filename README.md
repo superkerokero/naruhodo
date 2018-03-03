@@ -6,7 +6,7 @@
 
 [日本語はこちら](README-ja.md)
 
-`naruhodo` is a python library for generating dependency structure graph(DSG) and knowledge structure graph(KSG) in networkx format from Japanese text or urls that contain Japanese texts. You can visualize these graphs directly in jupyter notebook or export graphs to JSON file for visualization using external programs.
+`naruhodo` is a python library for generating dependency structure graph(DSG) and knowledge structure graph(KSG) from English/Japanese text or urls that contain English/Japanese texts. You can visualize these graphs directly in jupyter notebook or export graphs to JSON file for visualization using external programs.
 
 ### Dependency structure graph (DSG)
 
@@ -60,10 +60,17 @@ You can install the library directly using pip:
 pip install naruhodo
 ```
 
+This will install the latest release version of `naruhodo`. 
+The current development version of `naruhodo` can be installed from github repository directly using the following command:
+
+```bash
+pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
+``` 
+
 `naruhodo` relies on external programs to do Japanese word and dependency parsing, so you need to have corresponding programs installed as well.
 
 `naruhodo` is designed to support multiple backend parsers, but currently only the support for `mecab` + `cabocha` is implemented.
-`
+
 For guide on installing `mecab` and `cabocha`, please refer to this page:
 
 [Amazon Linux に MeCab と CaboCha をインストール](https://qiita.com/january108/items/85c80769ea870c190eaa)
@@ -83,6 +90,14 @@ The complete python API document for `naruhodo` can be found here:
 [`naruhodo` Python API Reference](https://superkerokero.github.io/naruhodo).
 
 This document is generated automatically from source code using [pdoc](https://github.com/BurntSushi/pdoc), so it is up-to-date at any time.
+
+## Change-Log
+
+* 0.2.0
+  * Major API change for multi-language support and parallel processing. 
+  * Parallel processing support for parsing using multiprocess module. 
+* 0.1.0
+  * Initial version
 
 ## Development status and some personal comments
 
@@ -121,7 +136,7 @@ Here are some of my thoughts on the development of `naruhodo` :
 
 * ### Adding coreference resolution capability (0.5 ~)
 
-    Coreference resolution is the task of finding all expressions that refer to the same entity in a text. Without proper coreference resolution, generated KSG does not capture all meaningful information, and its usability will be quite limited. Currently `naruhodo` has no coreference resolution implemented, which is one of the most important reasons I say it is "below my expectation".
+    [Coreference resolution](https://en.wikipedia.org/wiki/Coreference) is the task of finding all expressions that refer to the same entity in a text. Without proper coreference resolution, generated KSG does not capture all meaningful information, and its usability will be quite limited. Currently `naruhodo` has no coreference resolution implemented, which is one of the most important reasons I say it is "below my expectation".
     I am experimenting with some published works on this topic. A method based on word embeddings might be added to `naruhodo` first starting from version 0.5 ~.
 
 * ### Applications based on DSG and KSG(new projects)

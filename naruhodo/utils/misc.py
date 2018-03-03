@@ -72,7 +72,7 @@ def getNodeProperties(info):
     ret['label'] = info['rep']
     ret['style'] = 'filled'
     ret['fixedsize'] = True 
-    ret['fontsize'] = (5.0 + 20.0 / info['len']) * info['count']
+    ret['fontsize'] = (5.0 + 20.0 / len(info['rep'])) * info['count']
     ret['width'] = info['count']*0.75
     ret['count'] = info['count']
     return ret

@@ -6,7 +6,7 @@
 
 [English version](README.md)
 
-`naruhodo`は日本語テキスト・日本語テキストを含むWebページからnetworkxフォーマットの依存構造グラフ（DSG）と知識構造グラフ（KSG）を生成するためのPythonライブラリーです。Notebook内で直接可視化が可能で、JSONファィルに出力して外部プログラムに使わせる事も可能です。
+`naruhodo`は英語・日本語テキスト、もしくは英語・日本語テキストを含むWebページから依存構造グラフ（DSG）と知識構造グラフ（KSG）を生成するためのPythonライブラリーです。Notebook内で直接可視化が可能で、JSONファィルに出力して外部プログラムに使わせる事も可能です。
 
 ### 依存構造グラフ（DSG）
 
@@ -61,6 +61,13 @@ KSGで使えるメソッドはDSGとほぼ同じです。
 pip install naruhodo
 ```
 
+この方法は`naruhodo`のリリースバージョンをインストールします。 
+開発中のバージョンは以下のコマンドで github から直接インストールできます:
+
+```bash
+pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
+``` 
+
 `naruhodo`は外部プログラムで形態素解析と依存構造解析を行います。故にNaruhodoをつかうためには、対応している外部プログラムをインストールする事も必要です。
 
 `naruhodo`は複数のバックエンドプログラムに対応できるように設計されていますが、今は　`mecab` + `cabocha` のみをサポートしています。
@@ -84,6 +91,14 @@ Python API ドキュメントはここ:
 [`naruhodo` Python API Reference](https://superkerokero.github.io/naruhodo).
 
 このドキュメントは [pdoc](https://github.com/BurntSushi/pdoc)を使って自動的にソースコードから生成されるので、常に最新のデータに更新されています。
+
+## Change-Log
+
+* 0.2.0
+  * Major API change for multi-language support and parallel processing. 
+  * Parallel processing support for parsing using multiprocess module. 
+* 0.1.0
+  * Initial version
 
 ## 開発状況とコメント
 
@@ -124,7 +139,7 @@ Python API ドキュメントはここ:
 
 * ### 共参照解析機能 (0.5 ~)
 
-    [共参照](https://en.wikipedia.org/wiki/Coreference)解析は、テキスト内の同じエンティティを参照するすべての表現を見つけるタスクです。 適切な共参照解決がなければ、生成されたKSGはすべての意味のある情報を取得するわけではなく、そのユーザビリティはかなり制限されます。共参照解決が実装されていない事が「長文に対しての解析効果はまだ良くない」と言っている最も重要な理由の1つである。
+    [共参照解析](https://en.wikipedia.org/wiki/Coreference)は、テキスト内の同じエンティティを参照するすべての表現を見つけるタスクです。 適切な共参照解決がなければ、生成されたKSGはすべての意味のある情報を取得するわけではなく、そのユーザビリティはかなり制限されます。共参照解決が実装されていない事が「長文に対しての解析効果はまだ良くない」と言っている最も重要な理由の1つである。
     
     私はこのトピックに関するいくつかの論文を調べています。単語の埋め込みに基づくメソッドは、バージョン0.5〜から`naruhodo`に追加される予定です。
 
