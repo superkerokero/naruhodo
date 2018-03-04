@@ -1,7 +1,17 @@
 """
-Naruhodo
+Naruhodo 0.2.1
 
-Naruhodo is a python library for generating dependency-graph(DG) and knowledge-graph(KG) in networkx format from Japanese text or urls that contains Japanese texts. You can visualize these graphs directly in jupyter notebook or export graphs to JSON file for visualization using external programs.
+A python library for automatic semantic graph generation from human-readable text.
+
+## Change-Log
+
+* 0.2.1
+  * Primitive coreference resolution for Japanese.
+* 0.2.0
+  * Major API change for multi-language support and parallel processing. 
+  * Parallel processing support for parsing using multiprocessing module. 
+* 0.1.0
+  * Initial version
 
 """
 
