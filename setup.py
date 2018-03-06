@@ -4,17 +4,17 @@ from setuptools import setup, find_packages
 setup(
     name = 'naruhodo',
     packages = find_packages(exclude=['contrib', 'docs', 'test']),
-    version = '0.2.0',
-    description = 'A python library for generating dependency structure graph(DSG) and knowledge structure graph(KSG) from English/Japanese text.',
+    version = '0.2.1',
+    description = 'A python library for automatic semantic graph generation from human-readable text.',
     long_description = """
-    Naruhodo is a python library for generating dependency structure graph(DSG) and knowledge structure graph(KSG) from English/Japanese text or urls that contains English/Japanese texts. You can visualize these graphs directly in jupyter notebook or export graphs to JSON file for visualization using external programs.
+    A python library for automatic semantic graph generation from human-readable text.
     For detailed documentation and tutorials, visit https://github.com/superkerokero/naruhodo
     """,
     author = 'superkerokero',
     author_email = 'superkerokero@outlook.com',
     url = 'https://github.com/superkerokero/naruhodo',
     download_url = 'https://github.com/superkerokero/naruhodo/archive/master.zip',
-    keywords = ['nlp', 'knowledge graph', 'japanese'],
+    keywords = ['nlp', 'knowledge graph', 'knowledge representation', 'japanese'],
     classifiers = [],
     license = "MIT",
     install_requires = [

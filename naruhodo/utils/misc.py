@@ -2,6 +2,8 @@
 Module for miscellaneous utility functions.
 """
 import json
+from math import sqrt
+import numpy as np
 import networkx as nx
 from naruhodo.utils.dicts import NodeShape2JsonDict, EdgeType2StyleDict, EdgeType2ColorDict
 
@@ -85,4 +87,32 @@ def getEdgeProperties(info):
     ret['weight'] = info['weight']
     ret['style'] = EdgeType2StyleDict[info['type']]
     ret['color'] = EdgeType2ColorDict[info['type']]
-    return ret  
+    return ret
+
+def inclusive(A, B):
+    """Find if one of string A and B includes the other."""
+    if len(A) > len(B):
+        if A.find(B) != -1:
+            ret = 1
+        else:
+            ret = 0
+    elif len(A) < len(B):
+        if B.find(A) != -1:
+            ret = -1
+        else:
+            ret = 0
+    else:
+        ret = 0
+    return ret
+
+def cosSimilarity(A, B):
+    """Compute the cosine similarity between vectors A and B."""
+    return np.dot(A, B) / sqrt(np.dot(A, A) * np.dot(B, B))
+
+def harmonicSim(AG, B):
+    """Return the harmonic distance between a group of vectors AG and vector B."""
+    size = len(AG)
+    ret = 0.
+    for i in range(size):
+        ret += 1. / cosSimilarity(AG[i], B)
+    return float(size) / ret

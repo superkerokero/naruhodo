@@ -1234,14 +1234,18 @@ table {
 <span class="sd">         2: verb</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Named entity type of this chunk.</span>
+<span class="sd">        The name of NE type can be retrieved using </span>
+<span class="sd">        &#39;NEList&#39; in naruhodo.utils.dicts like</span>
+<span class="sd">        NEtype = NEList[NE].</span>
 <span class="sd">        --------------------------------</span>
-<span class="sd">        -1: no named entity(or unknown)</span>
-<span class="sd">         0: person</span>
-<span class="sd">         1: location</span>
-<span class="sd">         2: organization</span>
+<span class="sd">        0: no named entity(or unknown)</span>
+<span class="sd">        1: person</span>
+<span class="sd">        2: location</span>
+<span class="sd">        3: organization</span>
+<span class="sd">        4: number</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">pro</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -1256,6 +1260,7 @@ table {
 <span class="sd">         4: personal(3rd)</span>
 <span class="sd">         5: indefinite</span>
 <span class="sd">         6: inclusive</span>
+<span class="sd">         7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
     
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
@@ -1329,11 +1334,11 @@ table {
             <span class="c1"># NE recognition.</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;固有名詞&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;人名&#39;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;地域&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;組織&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;地域&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;組織&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">3</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">pass</span>
             <span class="c1"># Pronoun identification(for correference analysis.)</span>
@@ -1356,6 +1361,7 @@ table {
                     <span class="k">pass</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;数&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">4</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;こと&#39;</span><span class="p">:</span>
@@ -1416,8 +1422,10 @@ table {
                 <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;接尾&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;れる&quot;</span> <span class="ow">or</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;られる&quot;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">passive</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(受動)&quot;</span>
                     <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;させる&quot;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">compulsory</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(強制)&quot;</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                 <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;自立&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
@@ -1425,6 +1433,7 @@ table {
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;いる&quot;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(現在)&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="s2">&quot;・&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">:</span>
@@ -1451,6 +1460,7 @@ table {
                 <span class="k">pass</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;た&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">))]):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(過去)&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span>  <span class="p">[</span><span class="s2">&quot;終助詞&quot;</span><span class="p">,</span> <span class="s2">&quot;副助詞／並立助詞／終助詞&quot;</span><span class="p">]:</span>
@@ -1471,10 +1481,12 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">5</span>
         <span class="c1"># self.func += &quot;&quot;.join([x[&#39;surface&#39;] for x in self.signs])</span>
         
-    <span class="k">def</span> <span class="nf">processChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">processChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">npro</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Process the chunk to get main and func component of it.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getMain</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getFunc</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;[{0}@{1}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">npro</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cleanUp</span><span class="p">()</span>
     
 <span class="k">class</span> <span class="nc">CabochaClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -1482,22 +1494,27 @@ table {
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize a native database.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rsplit</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[,]+|\t&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\([^)]*\)&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\(.*?\)&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">=</span> <span class="mi">0</span>
                 
-    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Takes in the block output from CaboCha and add it to native database.&quot;&quot;&quot;</span>
         <span class="n">ck</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">inp</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ck</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">()</span>
+                    <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npro</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ck</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ck</span><span class="p">)</span>
                 <span class="n">ck</span> <span class="o">=</span> <span class="n">CaboChunk</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_processHead</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ck</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rsplit</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
-        <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">()</span>
+        <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npro</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ck</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ck</span><span class="p">)</span>
         <span class="c1"># Get children list and store in self.childrenList</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getChildrenList</span><span class="p">()</span>
@@ -1528,7 +1545,7 @@ table {
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nck</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">)</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;({0})</span><span class="se">\n</span><span class="s2">{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span>
                     <span class="p">)</span>
@@ -1722,14 +1739,18 @@ table {
 <span class="sd">         2: verb</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Named entity type of this chunk.</span>
+<span class="sd">        The name of NE type can be retrieved using </span>
+<span class="sd">        &#39;NEList&#39; in naruhodo.utils.dicts like</span>
+<span class="sd">        NEtype = NEList[NE].</span>
 <span class="sd">        --------------------------------</span>
-<span class="sd">        -1: no named entity(or unknown)</span>
-<span class="sd">         0: person</span>
-<span class="sd">         1: location</span>
-<span class="sd">         2: organization</span>
+<span class="sd">        0: no named entity(or unknown)</span>
+<span class="sd">        1: person</span>
+<span class="sd">        2: location</span>
+<span class="sd">        3: organization</span>
+<span class="sd">        4: number</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">pro</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -1744,6 +1765,7 @@ table {
 <span class="sd">         4: personal(3rd)</span>
 <span class="sd">         5: indefinite</span>
 <span class="sd">         6: inclusive</span>
+<span class="sd">         7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
     
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
@@ -1817,11 +1839,11 @@ table {
             <span class="c1"># NE recognition.</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;固有名詞&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;人名&#39;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;地域&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;組織&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;地域&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;組織&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">3</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">pass</span>
             <span class="c1"># Pronoun identification(for correference analysis.)</span>
@@ -1844,6 +1866,7 @@ table {
                     <span class="k">pass</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;数&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">4</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;こと&#39;</span><span class="p">:</span>
@@ -1904,8 +1927,10 @@ table {
                 <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;接尾&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;れる&quot;</span> <span class="ow">or</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;られる&quot;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">passive</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(受動)&quot;</span>
                     <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;させる&quot;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">compulsory</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(強制)&quot;</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                 <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;自立&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
@@ -1913,6 +1938,7 @@ table {
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;いる&quot;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(現在)&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="s2">&quot;・&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">:</span>
@@ -1939,6 +1965,7 @@ table {
                 <span class="k">pass</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;た&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxvs</span><span class="p">))]):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;(過去)&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postps</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span>  <span class="p">[</span><span class="s2">&quot;終助詞&quot;</span><span class="p">,</span> <span class="s2">&quot;副助詞／並立助詞／終助詞&quot;</span><span class="p">]:</span>
@@ -1959,10 +1986,12 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">5</span>
         <span class="c1"># self.func += &quot;&quot;.join([x[&#39;surface&#39;] for x in self.signs])</span>
         
-    <span class="k">def</span> <span class="nf">processChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">processChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">npro</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Process the chunk to get main and func component of it.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getMain</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getFunc</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;[{0}@{1}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">npro</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cleanUp</span><span class="p">()</span>
 </pre></div>
 
@@ -2105,14 +2134,18 @@ table {
 <span class="sd">     2: verb</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Named entity type of this chunk.</span>
+<span class="sd">    The name of NE type can be retrieved using </span>
+<span class="sd">    &#39;NEList&#39; in naruhodo.utils.dicts like</span>
+<span class="sd">    NEtype = NEList[NE].</span>
 <span class="sd">    --------------------------------</span>
-<span class="sd">    -1: no named entity(or unknown)</span>
-<span class="sd">     0: person</span>
-<span class="sd">     1: location</span>
-<span class="sd">     2: organization</span>
+<span class="sd">    0: no named entity(or unknown)</span>
+<span class="sd">    1: person</span>
+<span class="sd">    2: location</span>
+<span class="sd">    3: organization</span>
+<span class="sd">    4: number</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">pro</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -2127,6 +2160,7 @@ table {
 <span class="sd">     4: personal(3rd)</span>
 <span class="sd">     5: indefinite</span>
 <span class="sd">     6: inclusive</span>
+<span class="sd">     7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </pre></div>
 
@@ -2191,7 +2225,7 @@ table {
             
   <div class="item">
     <div class="name def" id="naruhodo.backends.cabocha.CaboChunk.processChunk">
-    <p>def <span class="ident">processChunk</span>(</p><p>self)</p>
+    <p>def <span class="ident">processChunk</span>(</p><p>self, pos, npro)</p>
     </div>
     
 
@@ -2201,10 +2235,12 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.backends.cabocha.CaboChunk.processChunk', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.backends.cabocha.CaboChunk.processChunk" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">processChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">processChunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">npro</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Process the chunk to get main and func component of it.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_getMain</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_getFunc</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;[{0}@{1}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">npro</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_cleanUp</span><span class="p">()</span>
 </pre></div>
 
@@ -2220,11 +2256,16 @@ table {
 
             
   
-    <div class="desc"><h2>Named entity type of this chunk.</h2>
-<p>-1: no named entity(or unknown)
- 0: person
- 1: location
- 2: organization</p></div>
+    <div class="desc"><p>Named entity type of this chunk.
+The name of NE type can be retrieved using 
+'NEList' in naruhodo.utils.dicts like
+NEtype = NEList[NE].</p>
+<hr />
+<p>0: no named entity(or unknown)
+1: person
+2: location
+3: organization
+4: number</p></div>
   <div class="source_cont">
 </div>
 
@@ -2430,7 +2471,8 @@ table {
  3: personal(2nd)
  4: personal(3rd)
  5: indefinite
- 6: inclusive</p></div>
+ 6: inclusive
+ 7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.</p></div>
   <div class="source_cont">
 </div>
 
@@ -2540,22 +2582,27 @@ table {
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize a native database.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rsplit</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[,]+|\t&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\([^)]*\)&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\(.*?\)&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">=</span> <span class="mi">0</span>
                 
-    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Takes in the block output from CaboCha and add it to native database.&quot;&quot;&quot;</span>
         <span class="n">ck</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">inp</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ck</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">()</span>
+                    <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npro</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ck</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ck</span><span class="p">)</span>
                 <span class="n">ck</span> <span class="o">=</span> <span class="n">CaboChunk</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_processHead</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ck</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rsplit</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
-        <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">()</span>
+        <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npro</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ck</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ck</span><span class="p">)</span>
         <span class="c1"># Get children list and store in self.childrenList</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getChildrenList</span><span class="p">()</span>
@@ -2586,7 +2633,7 @@ table {
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nck</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">)</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;({0})</span><span class="se">\n</span><span class="s2">{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span>
                     <span class="p">)</span>
@@ -2627,9 +2674,10 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize a native database.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">rsplit</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[,]+|\t&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\([^)]*\)&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\(.*?\)&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">=</span> <span class="mi">0</span>
 </pre></div>
 
   </div>
@@ -2640,7 +2688,7 @@ table {
             
   <div class="item">
     <div class="name def" id="naruhodo.backends.cabocha.CabochaClient.add">
-    <p>def <span class="ident">add</span>(</p><p>self, inp)</p>
+    <p>def <span class="ident">add</span>(</p><p>self, inp, pos=0)</p>
     </div>
     
 
@@ -2650,18 +2698,22 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.backends.cabocha.CabochaClient.add', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.backends.cabocha.CabochaClient.add" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Takes in the block output from CaboCha and add it to native database.&quot;&quot;&quot;</span>
     <span class="n">ck</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">inp</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ck</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">()</span>
+                <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npro</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ck</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ck</span><span class="p">)</span>
             <span class="n">ck</span> <span class="o">=</span> <span class="n">CaboChunk</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_processHead</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ck</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rsplit</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
-    <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">()</span>
+    <span class="n">ck</span><span class="o">.</span><span class="n">processChunk</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npro</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ck</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npro</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ck</span><span class="p">)</span>
     <span class="c1"># Get children list and store in self.childrenList</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_getChildrenList</span><span class="p">()</span>
@@ -2677,6 +2729,16 @@ table {
           <h3>Instance variables</h3>
             <div class="item">
             <p id="naruhodo.backends.cabocha.CabochaClient.chunks" class="name">var <span class="ident">chunks</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.backends.cabocha.CabochaClient.npro" class="name">var <span class="ident">npro</span></p>
             
 
             

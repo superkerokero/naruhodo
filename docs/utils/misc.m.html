@@ -1053,10 +1053,13 @@ table {
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
+    <li class="mono"><a href="#naruhodo.utils.misc.cosSimilarity">cosSimilarity</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.exportToJsonFile">exportToJsonFile</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.exportToJsonObj">exportToJsonObj</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.getEdgeProperties">getEdgeProperties</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.getNodeProperties">getNodeProperties</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.harmonicSim">harmonicSim</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.inclusive">inclusive</a></li>
   </ul>
 
     </li>
@@ -1082,6 +1085,8 @@ table {
 <span class="sd">Module for miscellaneous utility functions.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NodeShape2JsonDict</span><span class="p">,</span> <span class="n">EdgeType2StyleDict</span><span class="p">,</span> <span class="n">EdgeType2ColorDict</span>
 
@@ -1165,7 +1170,35 @@ table {
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2ColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
-    <span class="k">return</span> <span class="n">ret</span>  
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find if one of string A and B includes the other.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">cosSimilarity</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the cosine similarity between vectors A and B.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">B</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">harmonicSim</span><span class="p">(</span><span class="n">AG</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the harmonic distance between a group of vectors AG and vector B.&quot;&quot;&quot;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">AG</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">cosSimilarity</span><span class="p">(</span><span class="n">AG</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">/</span> <span class="n">ret</span>
 </pre></div>
 
   </div>
@@ -1200,6 +1233,29 @@ table {
       </div>
 
     <h2 class="section-title" id="header-functions">Functions</h2>
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.cosSimilarity">
+    <p>def <span class="ident">cosSimilarity</span>(</p><p>A, B)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Compute the cosine similarity between vectors A and B.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.cosSimilarity', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.cosSimilarity" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cosSimilarity</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the cosine similarity between vectors A and B.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">B</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
       
   <div class="item">
     <div class="name def" id="naruhodo.utils.misc.exportToJsonFile">
@@ -1294,7 +1350,7 @@ table {
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeType2ColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
-    <span class="k">return</span> <span class="n">ret</span>  
+    <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
   </div>
@@ -1350,6 +1406,68 @@ table {
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">20.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;rep&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.75</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.harmonicSim">
+    <p>def <span class="ident">harmonicSim</span>(</p><p>AG, B)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Return the harmonic distance between a group of vectors AG and vector B.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.harmonicSim', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.harmonicSim" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">harmonicSim</span><span class="p">(</span><span class="n">AG</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the harmonic distance between a group of vectors AG and vector B.&quot;&quot;&quot;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">AG</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">cosSimilarity</span><span class="p">(</span><span class="n">AG</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">/</span> <span class="n">ret</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.inclusive">
+    <p>def <span class="ident">inclusive</span>(</p><p>A, B)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Find if one of string A and B includes the other.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.inclusive', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.inclusive" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find if one of string A and B includes the other.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 

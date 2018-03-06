@@ -10,7 +10,8 @@ ProDict = {
     'personal2nd': ["君", "きみ", "キミ", "あなた", "貴方", "お前"],
     'personal3rd': ["やつ", "奴", "彼", "彼女"],
     'indefinite': ["どこ", "どれ", "どっち", "どなた", "どちら"],
-    'inclusive': ["皆", "みんな", "みな"]
+    'inclusive': ["皆", "みんな", "みな"],
+    'omitted': ["省略される主語"]
 }
 """
 Pronoun identification dictionary.
@@ -23,7 +24,7 @@ Dict of word types.
 """
 
 
-NEList = ['PERSON', 'LOCATION', 'ORGANIZATION']
+NEList = ['NONE', 'PERSON', 'LOCATION', 'ORGANIZATION', 'NUMBER']
 """
 Dict of named entity types.
 """
@@ -49,7 +50,9 @@ EdgeType2StyleDict = {
     "autosub": "solid",
     "obj": "dashed",
     "aux": "dotted",
-    "cause": "dotted"
+    "cause": "dotted",
+    "coref": "solid",
+    "synonym": "solid"
 }
 """
 Dict to convert the edge type to edge style.
@@ -61,7 +64,9 @@ EdgeType2ColorDict = {
     "autosub": "#aaaaaa",
     "obj": "#000000",
     "aux": "#ff7777",
-    "cause": "#91027e"
+    "cause": "#91027e",
+    "coref": "#3582ff",
+    "synonym": "#00ffb6"
 }
 """
 Dict to convert the edge type to edge color.

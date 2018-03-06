@@ -36,4 +36,4 @@ rm -rf naruhodo.egg-info
 # Push to github repo
 git add -A
 git commit
-git push origin master
+git push origin dev
