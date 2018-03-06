@@ -19,11 +19,11 @@ class TestCabochaClient(unittest.TestCase):
         self.assertEqual(cabo.chunks[0].type, 0)
         self.assertEqual(cabo.chunks[1].type, 0)
         self.assertEqual(cabo.chunks[2].type, 2)
-        self.assertEqual(cabo.chunks[0].NE, 0)
+        self.assertEqual(cabo.chunks[0].NE, 1)
         text = '* 0 4D 0/0 0.374646\nそして\t接続詞,*,*,*,*,*,そして,ソシテ,ソシテ\n* 1 4D 0/1 1.891652\n彼\t名詞,代名詞,一般,*,*,*,彼,カレ,カレ\nは\t助詞,係助詞,*,*,*,*,は,ハ,ワ\n* 2 3D 0/1 1.693876\n東京\t名詞,固有名詞,地域,一般,*,*,東京,トウキョウ,トーキョー\nの\t助詞,連体化,*,*,*,*,の,ノ,ノ\n* 3 4D 0/1 3.798380\n家\t名詞,一般,*,*,*,*,家,イエ,イエ\nに\t助詞,格助詞,一般,*,*,*,に,ニ,ニ\n* 4 -1D 0/1 1.307374\n帰っ\t動詞,自立,*,*,五段・ラ行,連用タ接続,帰る,カエッ,カエッ\nた\t助動詞,*,*,*,特殊・タ,基本形,た,タ,タ\n。\t記号,句点,*,*,*,*,。,。,。\n'
         cabo.add(text)
         self.assertEqual(cabo.chunks[3].main, "そして")
-        self.assertEqual(cabo.chunks[4].main, "彼")
+        self.assertEqual(cabo.chunks[4].main, "彼[0@0]")
         self.assertEqual(cabo.chunks[5].main, "東京")
         self.assertEqual(cabo.chunks[3].func, "")
         self.assertEqual(cabo.chunks[4].func, "は")
