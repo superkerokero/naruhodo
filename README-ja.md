@@ -6,7 +6,7 @@
 
 [English version](README.md)
 
-`naruhodo`は人間が読めるテキストからセマンティックグラフを自動的に生成するためのPythonライブラリーです。`naruhodo`で生成されたグラフは全て[networkx](https://networkx.github.io/)オブジェクトなので、さらなるグラフ解析・処理は簡単に行なえます。今は2種類のセマンティックグラフがサポートされています：
+`naruhodo`は人間が読めるテキストからセマンティックグラフを自動的に生成するためのPythonライブラリーです。`naruhodo`で生成されたグラフは全て[networkx](https://networkx.github.io/)オブジェクトなので、さらなるグラフ解析・処理は簡単に行なえます。今は2種類のセマンティックグラフがサポートされています：
 
 * 知識構造グラフ（KSG）：実体・述語モデルによる知識表現の有向グラフ
 * 依存構造グラフ（DSG）：文法的依存構造に基づく有向グラフ
@@ -95,7 +95,7 @@ Python API ドキュメントはここ:
 ## Change-Log
 
 * 0.2.1
-  * Primitive coreference resolution for Japanese.
+  * Primitive coreference resolution for Japanese KSG.
 * 0.2.0
   * Major API change for multi-language support and parallel processing. 
   * Parallel processing support for parsing using multiprocessing module. 

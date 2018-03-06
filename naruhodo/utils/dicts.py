@@ -10,7 +10,8 @@ ProDict = {
     'personal2nd': ["君", "きみ", "キミ", "あなた", "貴方", "お前"],
     'personal3rd': ["やつ", "奴", "彼", "彼女"],
     'indefinite': ["どこ", "どれ", "どっち", "どなた", "どちら"],
-    'inclusive': ["皆", "みんな", "みな"]
+    'inclusive': ["皆", "みんな", "みな"],
+    'omitted': ["省略される主語"]
 }
 """
 Pronoun identification dictionary.
@@ -23,7 +24,7 @@ Dict of word types.
 """
 
 
-NEList = ['PERSON', 'LOCATION', 'ORGANIZATION']
+NEList = ['NONE', 'PERSON', 'LOCATION', 'ORGANIZATION', 'NUMBER']
 """
 Dict of named entity types.
 """

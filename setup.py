@@ -14,7 +14,7 @@ setup(
     author_email = 'superkerokero@outlook.com',
     url = 'https://github.com/superkerokero/naruhodo',
     download_url = 'https://github.com/superkerokero/naruhodo/archive/master.zip',
-    keywords = ['nlp', 'knowledge graph', 'japanese'],
+    keywords = ['nlp', 'knowledge graph', 'knowledge representation', 'japanese'],
     classifiers = [],
     license = "MIT",
     install_requires = [

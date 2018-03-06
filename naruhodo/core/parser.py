@@ -4,6 +4,7 @@ from multiprocessing import Pool
 import networkx as nx
 from nxpd import draw
 from naruhodo.utils.scraper import NScraper
+from naruhodo.utils.dicts import NEList
 from naruhodo.utils.misc import exportToJsonFile
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
@@ -17,6 +18,18 @@ class parser(object):
         """
         Graph object of the parser.
         It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.
+        """
+        self.entityList = [dict() for x in range(len(NEList))]
+        """
+        List of entities appeared during this analysis.
+        """
+        self.proList = list()
+        """
+        List of pronouns appeared during this analysis.
+        """
+        self.pos = 0
+        """
+        Position of sentences added to the parser.
         """
         self.re_sent = re.compile(r'([^　！？。]*[！？。])')
         """
@@ -84,6 +97,7 @@ class parser(object):
     def reset(self):
         """Reset the content of generated graph to empty."""
         self.G.clear()
+        self.pos = 0
 
     def _preprocessText(self, text):
         """Get rid of weird parts from the text that interferes analysis."""
@@ -121,9 +135,14 @@ class parser(object):
     def add(self, inp):
         """Add a sentence to graph."""
         inp = self._preprocessText(inp)
-        self.core.add(inp)
+        self.core.add(inp, self.pos)
+        self.pos += 1
         self.G = self._mergeGraph(self.G, self.core.G)
         self.core.G.clear()
+        self.entityList = self._mergeEntityList(self.entityList, self.core.entityList)
+        self.core.entityList = [dict() for x in range(len(NEList))]
+        self.proList = self._mergeProList(self.proList, self.core.proList)
+        self.core.proList = list()
 
     def addAll(self, inps):
         """Add a list of sentences at once."""
@@ -136,24 +155,32 @@ class parser(object):
         """Standard implementation of addAll function."""
         for inp in inps:
             inp = self._preprocessText(inp)
-            self.core.add(inp)
+            self.core.add(inp, self.pos)
+            self.pos += 1
         self.G = self._mergeGraph(self.G, self.core.G)
         self.core.G.clear()
+        self.entityList = self._mergeEntityList(self.entityList, self.core.entityList)
+        self.core.entityList = [dict() for x in range(len(NEList))]
+        self.proList = self._mergeProList(self.proList, self.core.proList)
+        self.core.proList = list()
 
     def _addAllMP(self, inps):
         """Parallel implementation of addAll function."""
-        inps = [self._preprocessText(inp) for inp in inps]
+        inps = [[self.pos + x, self._preprocessText(inps[x])] for x in range(len(inps))]
         if self.lang == "ja":
             if self.gtype == "d":
-                results = self.pool.map(self._addMP_ja_d, inps)
+                results = self.pool.starmap(self._addMP_ja_d, inps)
             elif self.gtype == "k":
-                results = self.pool.map(self._addMP_ja_k, inps)
+                results = self.pool.starmap(self._addMP_ja_k, inps)
             else:
                 raise ValueError("Unknown graph type: {0}".format(self.gtype))
         else:
             raise ValueError("Unsupported language: {0}".format(self.lang))
-        print(self._reduce(results))
-        self.G = self._mergeGraph(self.G, self._reduce(results))
+        self.pos += len(inps)
+        final = self._reduce(results)
+        self.G = self._mergeGraph(self.G, final[0])
+        self.entityList = self._mergeEntityList(self.entityList, final[1])
+        self.proList = self._mergeProList(self.proList, final[2])
 
     def _reduce(self, results):
         """Reduce the results from multiprocessing to final result."""
@@ -161,32 +188,32 @@ class parser(object):
         if len(results) == 1:
             return results[0]
         if len(results) == 2:
-            return self._mergeGraph(*results)
+            return self._mergeAll(*results)
         elif len(results) % 2 == 0:
             for i in range(int(len(results) / 2)):
                 args.append([results[i * 2], results[i * 2 + 1]])
-            ret = self.pool.starmap(self._mergeGraph, args)
+            ret = self.pool.starmap(self._mergeAll, args)
             return self._reduce(ret)
         else:
             for i in range(int((len(results) - 1) / 2)):
                 args.append([results[i * 2], results[i * 2 + 1]])
-            ret = self.pool.starmap(self._mergeGraph, args)
+            ret = self.pool.starmap(self._mergeAll, args)
             ret.append(results[-1])
             return self._reduce(ret)
 
     @staticmethod
-    def _addMP_ja_d(inp):
+    def _addMP_ja_d(pos, inp):
         """Static version of add for DSG parsing in Japanese."""
         core = DependencyCoreJa()
-        core.add(inp)
-        return core.G
+        core.add(inp, pos)
+        return core.G, core.entityList, core.proList
 
     @staticmethod
-    def _addMP_ja_k(inp):
+    def _addMP_ja_k(pos, inp):
         """Static version of add for KSG parsing in Japanese."""
         core = KnowledgeCoreJa()
-        core.add(inp)
-        return core.G
+        core.add(inp, pos)
+        return core.G, core.entityList, core.proList
 
     @staticmethod
     def _mergeGraph(A, B):
@@ -202,3 +229,50 @@ class parser(object):
             else:
                 A.add_edge(*key, **val)
         return A
+
+    @staticmethod
+    def _mergeEntityList(A, B):
+        """Return merged entityList os A and B."""
+        for i in range(len(B)):
+            for key, val in B[i].items():
+                if key in A[i]:
+                    for item in val:
+                        A[i][key].append(item)
+                else:
+                    A[i][key] = val
+        return A
+
+    @staticmethod
+    def _mergeProList(A, B):
+        """Return merged proList os A and B."""
+        for item in B:
+            A.append(item)
+        return A
+
+    @staticmethod
+    def _mergeAll(A, B):
+        """Return merged result of graph, entity list and pronoun list."""
+        # merge graph
+        for key, val in B[0].nodes.items():
+            if A[0].has_node(key):
+                A[0].nodes[key]['count'] += val['count']
+            else:
+                A[0].add_node(key, **val)
+        for key, val in B[0].edges.items():
+            if A[0].has_edge(*key):
+                A[0].edges[key[0], key[1]]['weight'] += val['weight']
+            else:
+                A[0].add_edge(*key, **val)
+        # merge entity list
+        for i in range(len(B[1])):
+            for key, val in B[1][i].items():
+                if key in A[1][i]:
+                    for item in val:
+                        A[1][i][key].append(item)
+                else:
+                    A[1][i][key] = val
+        # merge pronoun list
+        for item in B[2]:
+            A[2].append(item)
+        return A
+        

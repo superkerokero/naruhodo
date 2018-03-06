@@ -95,7 +95,7 @@ This document is generated automatically from source code using [pdoc](https://g
 ## Change-Log
 
 * 0.2.1
-  * Primitive coreference resolution for Japanese.
+  * Primitive coreference resolution for Japanese KSG.
 * 0.2.0
   * Major API change for multi-language support and parallel processing. 
   * Parallel processing support for parsing using multiprocessing module. 

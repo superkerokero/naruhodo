@@ -139,14 +139,18 @@ class CaboChunk(object):
          2: verb
         """
         
-        self.NE = -1
+        self.NE = 0
         """
         Named entity type of this chunk.
+        The name of NE type can be retrieved using 
+        'NEList' in naruhodo.utils.dicts like
+        NEtype = NEList[NE].
         --------------------------------
-        -1: no named entity(or unknown)
-         0: person
-         1: location
-         2: organization
+        0: no named entity(or unknown)
+        1: person
+        2: location
+        3: organization
+        4: number
         """
         
         self.pro = -1
@@ -161,6 +165,7 @@ class CaboChunk(object):
          4: personal(3rd)
          5: indefinite
          6: inclusive
+         7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.
         """
     
     def add(self, inp):
@@ -234,11 +239,11 @@ class CaboChunk(object):
             # NE recognition.
             elif self.nouns[0]['labels'][0] == '固有名詞':
                 if self.nouns[0]['labels'][1] == '人名':
-                    self.NE = 0
-                elif self.nouns[0]['labels'][1] == '地域':
                     self.NE = 1
-                elif self.nouns[0]['labels'][1] == '組織':
+                elif self.nouns[0]['labels'][1] == '地域':
                     self.NE = 2
+                elif self.nouns[0]['labels'][1] == '組織':
+                    self.NE = 3
                 else:
                     pass
             # Pronoun identification(for correference analysis.)
@@ -261,6 +266,7 @@ class CaboChunk(object):
                     pass
             elif self.nouns[0]['labels'][0] == '数':
                 self.main = "".join([x['surface'] for x in self.nouns])
+                self.NE = 4
             else:
                 pass
         elif len(self.nouns) > 0 and self.nouns[0]['surface'] == 'こと':
@@ -376,10 +382,12 @@ class CaboChunk(object):
             self.type = 5
         # self.func += "".join([x['surface'] for x in self.signs])
         
-    def processChunk(self):
+    def processChunk(self, pos, npro):
         """Process the chunk to get main and func component of it."""
         self._getMain()
         self._getFunc()
+        if self.pro != -1:
+            self.main += "[{0}@{1}]".format(pos, npro)
         self._cleanUp()
     
 class CabochaClient(object):
@@ -390,19 +398,24 @@ class CabochaClient(object):
         self.re_parentheses = re.compile('\([^)]*\)')
         self.chunks = list()
         self.root = None
+        self.npro = 0
                 
-    def add(self, inp):
+    def add(self, inp, pos=0):
         """Takes in the block output from CaboCha and add it to native database."""
         ck = None
         for elem in inp.splitlines():
             if elem[0] == '*':
                 if ck is not None:
-                    ck.processChunk()
+                    ck.processChunk(pos, self.npro)
+                    if ck.pro != -1:
+                        self.npro += 1
                     self.chunks.append(ck)
                 ck = CaboChunk(*self._processHead(elem))
             else:
                 ck.add(self.rsplit.split(elem))
-        ck.processChunk()
+        ck.processChunk(pos, self.npro)
+        if ck.pro != -1:
+            self.npro += 1
         self.chunks.append(ck)
         # Get children list and store in self.childrenList
         self._getChildrenList()
@@ -433,7 +446,7 @@ class CabochaClient(object):
         for i in range(nck):
             if self.re_parentheses.sub("", self.chunks[i].main) in MeaninglessDict:
                 if len(self.childrenList[i]) > 0:
-                    self.chunks[i].main = "[{0}]\n{1}".format(
+                    self.chunks[i].main = "({0})\n{1}".format(
                         self.chunks[self.childrenList[i][-1]].surface,
                         self.chunks[i].main
                     )
