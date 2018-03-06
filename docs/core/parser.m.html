@@ -1040,6 +1040,13 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#naruhodo.core.parser.NEList">NEList</a></li>
+  </ul>
+
+    </li>
 
 
     <li class="set"><h3><a href="#header-classes">Classes</a></h3>
@@ -1056,6 +1063,7 @@ table {
     <li class="mono"><a href="#naruhodo.core.parser.parser.exportJSON">exportJSON</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.plotToFile">plotToFile</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.reset">reset</a></li>
+    <li class="mono"><a href="#naruhodo.core.parser.parser.resolve">resolve</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.show">show</a></li>
   </ul>
 
@@ -1085,19 +1093,32 @@ table {
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">nxpd</span> <span class="kn">import</span> <span class="n">draw</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.scraper</span> <span class="kn">import</span> <span class="n">NScraper</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NEList</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">exportToJsonFile</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">getNodeProperties</span><span class="p">,</span> <span class="n">getEdgeProperties</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">getNodeProperties</span><span class="p">,</span> <span class="n">getEdgeProperties</span><span class="p">,</span> <span class="n">inclusive</span><span class="p">,</span> <span class="n">harmonicSim</span>
 <span class="kn">from</span> <span class="nn">naruhodo.core.DependencyCoreJa</span> <span class="kn">import</span> <span class="n">DependencyCoreJa</span>
 <span class="kn">from</span> <span class="nn">naruhodo.core.KnowledgeCoreJa</span> <span class="kn">import</span> <span class="n">KnowledgeCoreJa</span>
 
 <span class="k">class</span> <span class="nc">parser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The general parser for naruhodo.&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">gtype</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">gtype</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wv</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graph object of the parser.</span>
 <span class="sd">        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of entities appeared during this analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of pronouns appeared during this analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Position of sentences added to the parser.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">re_sent</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;([^　！？。]*[！？。])&#39;</span><span class="p">)</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1141,6 +1162,15 @@ table {
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">nproc</span><span class="p">)</span>
+        <span class="c1"># load word vectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">wv</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">gensim.models.word2vec</span> <span class="kn">import</span> <span class="n">Word2Vec</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="n">Word2Vec</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">wv</span><span class="p">)</span><span class="o">.</span><span class="n">wv</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Successfully loaded word vectors from given file: {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wv</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Failed to import gensim, please install it before trying to use word vector related functionalities.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseToSents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parse given context into list of individual sentences.&quot;&quot;&quot;</span>
@@ -1165,6 +1195,10 @@ table {
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reset the content of generated graph to empty.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="c1"># self.posEntityList = [dict() for x in range(len(NEList))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_preprocessText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
@@ -1202,9 +1236,14 @@ table {
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a sentence to graph.&quot;&quot;&quot;</span>
         <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeEntityList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">addAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a list of sentences at once.&quot;&quot;&quot;</span>
@@ -1217,24 +1256,32 @@ table {
         <span class="sd">&quot;&quot;&quot;Standard implementation of addAll function.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inps</span><span class="p">:</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeEntityList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_addAllMP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parallel implementation of addAll function.&quot;&quot;&quot;</span>
-        <span class="n">inps</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inps</span><span class="p">]</span>
+        <span class="n">inps</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inps</span><span class="p">[</span><span class="n">x</span><span class="p">])]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inps</span><span class="p">))]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">==</span> <span class="s2">&quot;ja&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
-                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_d</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_d</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
-                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_k</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_k</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown graph type: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtype</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported language: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">))</span>
-        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
+        <span class="n">final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">final</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeEntityList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="n">final</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="n">final</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reduce the results from multiprocessing to final result.&quot;&quot;&quot;</span>
@@ -1242,32 +1289,119 @@ table {
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeAll</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)):</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeAll</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)):</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeAll</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_addMP_ja_d</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Static version of add for DSG parsing in Japanese.&quot;&quot;&quot;</span>
-        <span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
-        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span>
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve coreferences in the given text.&quot;&quot;&quot;</span>
+        <span class="c1"># Get flatten entity list</span>
+        <span class="n">flatEntityList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">flatEntityList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="c1"># Find syntatic synonyms</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">inc</span> <span class="o">=</span> <span class="n">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">inc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+        <span class="c1"># Get position-based entity list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">key</span><span class="p">])</span>
+        <span class="c1"># Resolve geolocations/persons</span>
+        <span class="k">for</span> <span class="n">pro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>
+                <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Word vector model is not set correctly. Skipping part of coreference resolution.&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wvResolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">antecedent</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">antecedent</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">antecedent</span><span class="p">,</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共参照候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;coref&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_rresolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">NE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively resolve to previous position.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">NE</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">pos</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">NE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_wvResolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proname</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve using word vector similarities.&quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">snames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">svecs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">proname</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key2</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                    <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">svecs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">flatEntityList</span><span class="p">:</span>
+                <span class="n">rawitem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">rawitem</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">snames</span> <span class="ow">and</span> <span class="n">rawitem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="n">harmonicSim</span><span class="p">(</span><span class="n">svecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">rawitem</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">sim</span> <span class="o">&lt;</span> <span class="n">score</span><span class="p">:</span>
+                        <span class="n">sim</span> <span class="o">=</span> <span class="n">score</span>
+                        <span class="n">ret</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="k">if</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.4</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;&quot;</span>        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_addMP_ja_k</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_addMP_ja_d</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Static version of add for DSG parsing in Japanese.&quot;&quot;&quot;</span>
+        <span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">proList</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_addMP_ja_k</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Static version of add for KSG parsing in Japanese.&quot;&quot;&quot;</span>
         <span class="n">core</span> <span class="o">=</span> <span class="n">KnowledgeCoreJa</span><span class="p">()</span>
-        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">proList</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_mergeGraph</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
@@ -1283,6 +1417,53 @@ table {
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">A</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_mergeEntityList</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return merged entityList os A and B.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                        <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">return</span> <span class="n">A</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_mergeProList</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return merged proList os A and B.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">B</span><span class="p">:</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">A</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_mergeAll</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return merged result of graph, entity list and pronoun list.&quot;&quot;&quot;</span>
+        <span class="c1"># merge graph</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
+        <span class="c1"># merge entity list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                        <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="c1"># merge pronoun list</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">A</span>
+        
 </pre></div>
 
   </div>
@@ -1290,6 +1471,15 @@ table {
   </header>
 
   <section id="section-items">
+    <h2 class="section-title" id="header-variables">Module variables</h2>
+      <div class="item">
+      <p id="naruhodo.core.parser.NEList" class="name">var <span class="ident">NEList</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
 
 
     <h2 class="section-title" id="header-classes">Classes</h2>
@@ -1304,12 +1494,24 @@ table {
   <div id="source-naruhodo.core.parser.parser" class="source">
     <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">parser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The general parser for naruhodo.&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">gtype</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">gtype</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wv</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graph object of the parser.</span>
 <span class="sd">        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of entities appeared during this analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of pronouns appeared during this analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Position of sentences added to the parser.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">re_sent</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;([^　！？。]*[！？。])&#39;</span><span class="p">)</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1353,6 +1555,15 @@ table {
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">nproc</span><span class="p">)</span>
+        <span class="c1"># load word vectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">wv</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">gensim.models.word2vec</span> <span class="kn">import</span> <span class="n">Word2Vec</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="n">Word2Vec</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">wv</span><span class="p">)</span><span class="o">.</span><span class="n">wv</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Successfully loaded word vectors from given file: {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wv</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Failed to import gensim, please install it before trying to use word vector related functionalities.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseToSents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parse given context into list of individual sentences.&quot;&quot;&quot;</span>
@@ -1377,6 +1588,10 @@ table {
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reset the content of generated graph to empty.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="c1"># self.posEntityList = [dict() for x in range(len(NEList))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_preprocessText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
@@ -1414,9 +1629,14 @@ table {
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a sentence to graph.&quot;&quot;&quot;</span>
         <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeEntityList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">addAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a list of sentences at once.&quot;&quot;&quot;</span>
@@ -1429,24 +1649,32 @@ table {
         <span class="sd">&quot;&quot;&quot;Standard implementation of addAll function.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inps</span><span class="p">:</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeEntityList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_addAllMP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parallel implementation of addAll function.&quot;&quot;&quot;</span>
-        <span class="n">inps</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inps</span><span class="p">]</span>
+        <span class="n">inps</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inps</span><span class="p">[</span><span class="n">x</span><span class="p">])]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inps</span><span class="p">))]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">==</span> <span class="s2">&quot;ja&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
-                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_d</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_d</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
-                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_k</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addMP_ja_k</span><span class="p">,</span> <span class="n">inps</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown graph type: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtype</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported language: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">))</span>
-        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
+        <span class="n">final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">final</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeEntityList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="n">final</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="n">final</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reduce the results from multiprocessing to final result.&quot;&quot;&quot;</span>
@@ -1454,32 +1682,119 @@ table {
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeAll</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)):</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeAll</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)):</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mergeAll</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_addMP_ja_d</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Static version of add for DSG parsing in Japanese.&quot;&quot;&quot;</span>
-        <span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
-        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span>
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve coreferences in the given text.&quot;&quot;&quot;</span>
+        <span class="c1"># Get flatten entity list</span>
+        <span class="n">flatEntityList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">flatEntityList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="c1"># Find syntatic synonyms</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">inc</span> <span class="o">=</span> <span class="n">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">inc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+        <span class="c1"># Get position-based entity list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">key</span><span class="p">])</span>
+        <span class="c1"># Resolve geolocations/persons</span>
+        <span class="k">for</span> <span class="n">pro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>
+                <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Word vector model is not set correctly. Skipping part of coreference resolution.&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wvResolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">antecedent</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">antecedent</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">antecedent</span><span class="p">,</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共参照候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;coref&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_rresolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">NE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively resolve to previous position.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">NE</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">pos</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">NE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_wvResolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proname</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve using word vector similarities.&quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">snames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">svecs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">proname</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key2</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                    <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">svecs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">flatEntityList</span><span class="p">:</span>
+                <span class="n">rawitem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">rawitem</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">snames</span> <span class="ow">and</span> <span class="n">rawitem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="n">harmonicSim</span><span class="p">(</span><span class="n">svecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">rawitem</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">sim</span> <span class="o">&lt;</span> <span class="n">score</span><span class="p">:</span>
+                        <span class="n">sim</span> <span class="o">=</span> <span class="n">score</span>
+                        <span class="n">ret</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="k">if</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.4</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;&quot;</span>        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_addMP_ja_k</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_addMP_ja_d</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Static version of add for DSG parsing in Japanese.&quot;&quot;&quot;</span>
+        <span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">proList</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_addMP_ja_k</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Static version of add for KSG parsing in Japanese.&quot;&quot;&quot;</span>
         <span class="n">core</span> <span class="o">=</span> <span class="n">KnowledgeCoreJa</span><span class="p">()</span>
-        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">proList</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_mergeGraph</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
@@ -1494,6 +1809,52 @@ table {
                 <span class="n">A</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">A</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_mergeEntityList</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return merged entityList os A and B.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                        <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">return</span> <span class="n">A</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_mergeProList</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return merged proList os A and B.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">B</span><span class="p">:</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">A</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_mergeAll</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return merged result of graph, entity list and pronoun list.&quot;&quot;&quot;</span>
+        <span class="c1"># merge graph</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
+        <span class="c1"># merge entity list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                        <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="c1"># merge pronoun list</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">A</span>
 </pre></div>
 
@@ -1511,7 +1872,7 @@ table {
             
   <div class="item">
     <div class="name def" id="naruhodo.core.parser.parser.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self, lang=&#39;ja&#39;, gtype=&#39;k&#39;, mp=False, nproc=0)</p>
+    <p>def <span class="ident">__init__</span>(</p><p>self, lang=&#39;ja&#39;, gtype=&#39;k&#39;, mp=False, nproc=0, wv=&#39;&#39;)</p>
     </div>
     
 
@@ -1521,12 +1882,24 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.parser.parser.__init__', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.parser.parser.__init__" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">gtype</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">gtype</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wv</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructor.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Graph object of the parser.</span>
 <span class="sd">    It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List of entities appeared during this analysis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List of pronouns appeared during this analysis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Position of sentences added to the parser.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">re_sent</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;([^　！？。]*[！？。])&#39;</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1570,6 +1943,15 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">nproc</span><span class="p">)</span>
+    <span class="c1"># load word vectors</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">wv</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">gensim.models.word2vec</span> <span class="kn">import</span> <span class="n">Word2Vec</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="n">Word2Vec</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">wv</span><span class="p">)</span><span class="o">.</span><span class="n">wv</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Successfully loaded word vectors from given file: {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wv</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Failed to import gensim, please install it before trying to use word vector related functionalities.&quot;</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1593,9 +1975,14 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add a sentence to graph.&quot;&quot;&quot;</span>
     <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeEntityList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -1715,6 +2102,73 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reset the content of generated graph to empty.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+    <span class="c1"># self.posEntityList = [dict() for x in range(len(NEList))]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.core.parser.parser.resolve">
+    <p>def <span class="ident">resolve</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Resolve coreferences in the given text.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.parser.parser.resolve', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.parser.parser.resolve" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resolve coreferences in the given text.&quot;&quot;&quot;</span>
+    <span class="c1"># Get flatten entity list</span>
+    <span class="n">flatEntityList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">flatEntityList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="c1"># Find syntatic synonyms</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">inc</span> <span class="o">=</span> <span class="n">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">inc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+    <span class="c1"># Get position-based entity list</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">key</span><span class="p">])</span>
+    <span class="c1"># Resolve geolocations/persons</span>
+    <span class="k">for</span> <span class="n">pro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>
+            <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Word vector model is not set correctly. Skipping part of coreference resolution.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wvResolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">antecedent</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">antecedent</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">antecedent</span><span class="p">,</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共参照候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;coref&quot;</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1759,6 +2213,17 @@ It is actually a networkx directed graph object(DiGraph), so you can apply all o
 
             </div>
             <div class="item">
+            <p id="naruhodo.core.parser.parser.entityList" class="name">var <span class="ident">entityList</span></p>
+            
+
+            
+  
+    <div class="desc"><p>List of entities appeared during this analysis.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
             <p id="naruhodo.core.parser.parser.gtype" class="name">var <span class="ident">gtype</span></p>
             
 
@@ -1796,12 +2261,44 @@ It is actually a networkx directed graph object(DiGraph), so you can apply all o
 
             </div>
             <div class="item">
+            <p id="naruhodo.core.parser.parser.pos" class="name">var <span class="ident">pos</span></p>
+            
+
+            
+  
+    <div class="desc"><p>Position of sentences added to the parser.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.core.parser.parser.proList" class="name">var <span class="ident">proList</span></p>
+            
+
+            
+  
+    <div class="desc"><p>List of pronouns appeared during this analysis.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
             <p id="naruhodo.core.parser.parser.re_sent" class="name">var <span class="ident">re_sent</span></p>
             
 
             
   
     <div class="desc"><p>Precompiled regular expression for separating sentences.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.core.parser.parser.wv" class="name">var <span class="ident">wv</span></p>
+            
+
+            
+  
   <div class="source_cont">
 </div>
 

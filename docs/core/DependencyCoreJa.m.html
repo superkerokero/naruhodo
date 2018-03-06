@@ -1044,6 +1044,7 @@ table {
       
   <ul>
     <li class="mono"><a href="#naruhodo.core.DependencyCoreJa.MeaninglessDict">MeaninglessDict</a></li>
+    <li class="mono"><a href="#naruhodo.core.DependencyCoreJa.NEList">NEList</a></li>
   </ul>
 
     </li>
@@ -1081,6 +1082,7 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.DependencyCoreJa', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.DependencyCoreJa" class="source">
     <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NEList</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.communication</span> <span class="kn">import</span> <span class="n">Subprocess</span>
 <span class="kn">from</span> <span class="nn">naruhodo.backends.cabocha</span> <span class="kn">import</span> <span class="n">CabochaClient</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span>
@@ -1094,17 +1096,30 @@ table {
 <span class="sd">        Graph object of this analyzer.</span>
 <span class="sd">        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of entities appeared during this analysis round.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of pronouns appeared during this analysis round.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Current position of the analyzer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">Subprocess</span><span class="p">(</span><span class="s1">&#39;cabocha -f1&#39;</span><span class="p">)</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Communicator to backend for DependencyAnalyzer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the DSG.&quot;&quot;&quot;</span>
         <span class="n">cabo</span> <span class="o">=</span> <span class="n">CabochaClient</span><span class="p">()</span>
-        <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">pro</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">NE</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">chunk</span><span class="o">.</span><span class="n">parent</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">func</span><span class="p">)</span>
 
@@ -1120,9 +1135,26 @@ table {
                 <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="c1"># Assign a space to empty label to avoid problem in certain javascript libraries.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">etype</span><span class="p">)</span>
             
-    <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="p">,</span> <span class="n">pro</span><span class="p">,</span> <span class="n">NE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
-        <span class="c1"># print(&quot;Add node&quot;, name, ntype, rep)</span>
+        <span class="c1"># Add to entityList and proList.</span>
+        <span class="k">if</span> <span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">bpos</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
+            <span class="n">rep</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="n">bpos</span><span class="p">]</span>
+            <span class="n">proid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="n">bpos</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="n">proid</span><span class="p">,</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span>
+                <span class="n">rep</span> <span class="o">=</span> <span class="n">rep</span><span class="p">,</span>
+                <span class="nb">type</span> <span class="o">=</span> <span class="n">pro</span><span class="p">,</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+            <span class="p">))</span>
+        <span class="k">elif</span> <span class="n">ntype</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">name</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">])</span>
+        <span class="c1"># Add to graph.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">ntype</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
@@ -1130,7 +1162,7 @@ table {
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="n">rep</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="n">rep</span><span class="p">,</span> <span class="n">pro</span><span class="o">=</span><span class="n">pro</span><span class="p">,</span> <span class="n">NE</span><span class="o">=</span><span class="n">NE</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1141,6 +1173,14 @@ table {
     <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
       <p id="naruhodo.core.DependencyCoreJa.MeaninglessDict" class="name">var <span class="ident">MeaninglessDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.core.DependencyCoreJa.NEList" class="name">var <span class="ident">NEList</span></p>
       
   
   <div class="source_cont">
@@ -1168,17 +1208,30 @@ table {
 <span class="sd">        Graph object of this analyzer.</span>
 <span class="sd">        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of entities appeared during this analysis round.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of pronouns appeared during this analysis round.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Current position of the analyzer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">Subprocess</span><span class="p">(</span><span class="s1">&#39;cabocha -f1&#39;</span><span class="p">)</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Communicator to backend for DependencyAnalyzer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the DSG.&quot;&quot;&quot;</span>
         <span class="n">cabo</span> <span class="o">=</span> <span class="n">CabochaClient</span><span class="p">()</span>
-        <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">pro</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">NE</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">chunk</span><span class="o">.</span><span class="n">parent</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">func</span><span class="p">)</span>
 
@@ -1194,9 +1247,26 @@ table {
                 <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="c1"># Assign a space to empty label to avoid problem in certain javascript libraries.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">etype</span><span class="p">)</span>
             
-    <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="p">,</span> <span class="n">pro</span><span class="p">,</span> <span class="n">NE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
-        <span class="c1"># print(&quot;Add node&quot;, name, ntype, rep)</span>
+        <span class="c1"># Add to entityList and proList.</span>
+        <span class="k">if</span> <span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">bpos</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
+            <span class="n">rep</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="n">bpos</span><span class="p">]</span>
+            <span class="n">proid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="n">bpos</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="n">proid</span><span class="p">,</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span>
+                <span class="n">rep</span> <span class="o">=</span> <span class="n">rep</span><span class="p">,</span>
+                <span class="nb">type</span> <span class="o">=</span> <span class="n">pro</span><span class="p">,</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+            <span class="p">))</span>
+        <span class="k">elif</span> <span class="n">ntype</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">name</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">NE</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">])</span>
+        <span class="c1"># Add to graph.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">ntype</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
@@ -1204,7 +1274,7 @@ table {
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="n">rep</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">ntype</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="n">rep</span><span class="p">,</span> <span class="n">pro</span><span class="o">=</span><span class="n">pro</span><span class="p">,</span> <span class="n">NE</span><span class="o">=</span><span class="n">NE</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1238,6 +1308,18 @@ table {
 <span class="sd">    Graph object of this analyzer.</span>
 <span class="sd">    It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List of entities appeared during this analysis round.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List of pronouns appeared during this analysis round.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Current position of the analyzer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">Subprocess</span><span class="p">(</span><span class="s1">&#39;cabocha -f1&#39;</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Communicator to backend for DependencyAnalyzer.</span>
@@ -1252,7 +1334,7 @@ table {
             
   <div class="item">
     <div class="name def" id="naruhodo.core.DependencyCoreJa.DependencyCoreJa.add">
-    <p>def <span class="ident">add</span>(</p><p>self, inp)</p>
+    <p>def <span class="ident">add</span>(</p><p>self, inp, pos)</p>
     </div>
     
 
@@ -1262,12 +1344,13 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.DependencyCoreJa.DependencyCoreJa.add', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.DependencyCoreJa.DependencyCoreJa.add" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Take in a string input and add it to the DSG.&quot;&quot;&quot;</span>
     <span class="n">cabo</span> <span class="o">=</span> <span class="n">CabochaClient</span><span class="p">()</span>
-    <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+    <span class="n">cabo</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">inp</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">ntype</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">pro</span><span class="p">,</span> <span class="n">chunk</span><span class="o">.</span><span class="n">NE</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">chunk</span><span class="o">.</span><span class="n">parent</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">chunk</span><span class="o">.</span><span class="n">func</span><span class="p">)</span>
 </pre></div>
@@ -1286,6 +1369,39 @@ table {
   
     <div class="desc"><p>Graph object of this analyzer.
 It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.core.DependencyCoreJa.DependencyCoreJa.entityList" class="name">var <span class="ident">entityList</span></p>
+            
+
+            
+  
+    <div class="desc"><p>List of entities appeared during this analysis round.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.core.DependencyCoreJa.DependencyCoreJa.pos" class="name">var <span class="ident">pos</span></p>
+            
+
+            
+  
+    <div class="desc"><p>Current position of the analyzer.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.core.DependencyCoreJa.DependencyCoreJa.proList" class="name">var <span class="ident">proList</span></p>
+            
+
+            
+  
+    <div class="desc"><p>List of pronouns appeared during this analysis round.</p></div>
   <div class="source_cont">
 </div>
 

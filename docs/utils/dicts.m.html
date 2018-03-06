@@ -1091,7 +1091,8 @@ table {
     <span class="s1">&#39;personal2nd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;君&quot;</span><span class="p">,</span> <span class="s2">&quot;きみ&quot;</span><span class="p">,</span> <span class="s2">&quot;キミ&quot;</span><span class="p">,</span> <span class="s2">&quot;あなた&quot;</span><span class="p">,</span> <span class="s2">&quot;貴方&quot;</span><span class="p">,</span> <span class="s2">&quot;お前&quot;</span><span class="p">],</span>
     <span class="s1">&#39;personal3rd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;やつ&quot;</span><span class="p">,</span> <span class="s2">&quot;奴&quot;</span><span class="p">,</span> <span class="s2">&quot;彼&quot;</span><span class="p">,</span> <span class="s2">&quot;彼女&quot;</span><span class="p">],</span>
     <span class="s1">&#39;indefinite&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;どこ&quot;</span><span class="p">,</span> <span class="s2">&quot;どれ&quot;</span><span class="p">,</span> <span class="s2">&quot;どっち&quot;</span><span class="p">,</span> <span class="s2">&quot;どなた&quot;</span><span class="p">,</span> <span class="s2">&quot;どちら&quot;</span><span class="p">],</span>
-    <span class="s1">&#39;inclusive&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;皆&quot;</span><span class="p">,</span> <span class="s2">&quot;みんな&quot;</span><span class="p">,</span> <span class="s2">&quot;みな&quot;</span><span class="p">]</span>
+    <span class="s1">&#39;inclusive&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;皆&quot;</span><span class="p">,</span> <span class="s2">&quot;みんな&quot;</span><span class="p">,</span> <span class="s2">&quot;みな&quot;</span><span class="p">],</span>
+    <span class="s1">&#39;omitted&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;省略される主語&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Pronoun identification dictionary.</span>
@@ -1104,7 +1105,7 @@ table {
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<span class="n">NEList</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PERSON&#39;</span><span class="p">,</span> <span class="s1">&#39;LOCATION&#39;</span><span class="p">,</span> <span class="s1">&#39;ORGANIZATION&#39;</span><span class="p">]</span>
+<span class="n">NEList</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NONE&#39;</span><span class="p">,</span> <span class="s1">&#39;PERSON&#39;</span><span class="p">,</span> <span class="s1">&#39;LOCATION&#39;</span><span class="p">,</span> <span class="s1">&#39;ORGANIZATION&#39;</span><span class="p">,</span> <span class="s1">&#39;NUMBER&#39;</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict of named entity types.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -1130,7 +1131,9 @@ table {
     <span class="s2">&quot;autosub&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
     <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
     <span class="s2">&quot;aux&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cause&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span>
+    <span class="s2">&quot;cause&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;coref&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;synonym&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span>
 <span class="p">}</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict to convert the edge type to edge style.</span>
@@ -1142,7 +1145,9 @@ table {
     <span class="s2">&quot;autosub&quot;</span><span class="p">:</span> <span class="s2">&quot;#aaaaaa&quot;</span><span class="p">,</span>
     <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>
     <span class="s2">&quot;aux&quot;</span><span class="p">:</span> <span class="s2">&quot;#ff7777&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cause&quot;</span><span class="p">:</span> <span class="s2">&quot;#91027e&quot;</span>
+    <span class="s2">&quot;cause&quot;</span><span class="p">:</span> <span class="s2">&quot;#91027e&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;coref&quot;</span><span class="p">:</span> <span class="s2">&quot;#3582ff&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;synonym&quot;</span><span class="p">:</span> <span class="s2">&quot;#00ffb6&quot;</span>
 <span class="p">}</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict to convert the edge type to edge color.</span>
