@@ -50,7 +50,9 @@ EdgeType2StyleDict = {
     "autosub": "solid",
     "obj": "dashed",
     "aux": "dotted",
-    "cause": "dotted"
+    "cause": "dotted",
+    "coref": "solid",
+    "synonym": "solid"
 }
 """
 Dict to convert the edge type to edge style.
@@ -62,7 +64,9 @@ EdgeType2ColorDict = {
     "autosub": "#aaaaaa",
     "obj": "#000000",
     "aux": "#ff7777",
-    "cause": "#91027e"
+    "cause": "#91027e",
+    "coref": "#3582ff",
+    "synonym": "#00ffb6"
 }
 """
 Dict to convert the edge type to edge color.

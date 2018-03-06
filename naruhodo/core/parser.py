@@ -6,13 +6,13 @@ from nxpd import draw
 from naruhodo.utils.scraper import NScraper
 from naruhodo.utils.dicts import NEList
 from naruhodo.utils.misc import exportToJsonFile
-from naruhodo.utils.misc import getNodeProperties, getEdgeProperties
+from naruhodo.utils.misc import getNodeProperties, getEdgeProperties, inclusive, harmonicSim
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
 from naruhodo.core.KnowledgeCoreJa import KnowledgeCoreJa
 
 class parser(object):
     """The general parser for naruhodo."""
-    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0):
+    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0, wv=""):
         """Constructor."""
         self.G = nx.DiGraph()
         """
@@ -73,6 +73,15 @@ class parser(object):
                 self.pool = Pool()
             else:
                 self.pool = Pool(processes=nproc)
+        # load word vectors
+        self.wv = None
+        if wv != "":
+            try:
+                from gensim.models.word2vec import Word2Vec
+                self.wv = Word2Vec.load(wv).wv
+                print("Successfully loaded word vectors from given file: {0}.".format(wv))
+            except ImportError:
+                print("Failed to import gensim, please install it before trying to use word vector related functionalities.")
 
     def _parseToSents(self, context):
         """Parse given context into list of individual sentences."""
@@ -98,6 +107,9 @@ class parser(object):
         """Reset the content of generated graph to empty."""
         self.G.clear()
         self.pos = 0
+        self.entityList = [dict() for x in range(len(NEList))]
+        # self.posEntityList = [dict() for x in range(len(NEList))]
+        self.proList = list()
 
     def _preprocessText(self, text):
         """Get rid of weird parts from the text that interferes analysis."""
@@ -200,6 +212,93 @@ class parser(object):
             ret = self.pool.starmap(self._mergeAll, args)
             ret.append(results[-1])
             return self._reduce(ret)
+
+    def resolve(self):
+        """Resolve coreferences in the given text."""
+        # Get flatten entity list
+        flatEntityList = list()
+        for item in self.entityList:
+            for key in item.keys():
+                flatEntityList.append(key)
+        # Find syntatic synonyms
+        for i in range(len(flatEntityList)):
+            for j in range(i + 1, len(flatEntityList)):
+                A = self._re3.sub("", flatEntityList[i]).replace("\n", "")
+                B = self._re3.sub("", flatEntityList[j]).replace("\n", "")
+                inc = inclusive(A, B)
+                if inc == 1:
+                    self.G.nodes[flatEntityList[i]]['count'] += 1
+                    self.G.add_edge(flatEntityList[i], flatEntityList[j], weight=1, label="同義語候補", type="synonym")
+                elif inc == -1:
+                    self.G.nodes[flatEntityList[j]]['count'] += 1
+                    self.G.add_edge(flatEntityList[j], flatEntityList[i], weight=1, label="同義語候補", type="synonym")
+        # Get position-based entity list
+        self.posEntityList = [dict() for x in range(len(NEList))]
+        for i in range(len(NEList)):
+            for key, val in self.entityList[i].items():
+                for pos in val:
+                    if pos in self.posEntityList[i]:
+                        self.posEntityList[i][pos].append(key)
+                    else:
+                        self.posEntityList[i][pos] = list([key])
+        # Resolve geolocations/persons
+        for pro in self.proList:
+            if pro['type'] == 0:
+                antecedent = self._rresolve(pro['pos'] - 1, 2)
+            elif pro['type'] in [2, 4]:
+                antecedent = self._rresolve(pro['pos'] - 1, 1)
+            elif pro['type'] == 7:
+                if not self.wv:
+                    print("Word vector model is not set correctly. Skipping part of coreference resolution.")
+                    continue
+                else:
+                    antecedent = self._wvResolve(pro['name'], flatEntityList)
+            if antecedent != "":
+                self.G.nodes[antecedent]['count'] += 1
+                self.G.add_edge(antecedent, pro['name'], weight=1, label="共参照候補", type="coref")
+
+    def _rresolve(self, pos, NE):
+        """Recursively resolve to previous position."""
+        if pos == -1:
+            return ""
+        else:
+            if pos in self.posEntityList[NE]:
+                return self.posEntityList[NE][pos][-1]
+            else:
+                return self._rresolve(pos - 1, NE)
+
+    def _wvResolve(self, proname, flatEntityList):
+        """Resolve using word vector similarities."""
+        ret = ""
+        snames = list()
+        svecs = list()
+        sim = 0.
+        for key in self.G.successors(proname):
+            name = self._re3.sub("", key).replace("\n", "")
+            if name in self.wv:
+                snames.append(name)
+                svecs.append(self.wv[name])
+            for key2 in self.G.successors(key):
+                name = self._re3.sub("", key2).replace("\n", "")
+                if name in self.wv:
+                    snames.append(name)
+                    svecs.append(self.wv[name])
+        if len(svecs) > 0:
+            for item in flatEntityList:
+                rawitem = self._re3.sub("", item).replace("\n", "")
+                if rawitem not in snames and rawitem in self.wv:
+                    score = harmonicSim(svecs, self.wv[rawitem])
+                    if sim < score:
+                        sim = score
+                        ret = item
+            if sim > 0.4:
+                return ret
+            else:
+                return ""        
+        else:
+            return ""
+
+
 
     @staticmethod
     def _addMP_ja_d(pos, inp):

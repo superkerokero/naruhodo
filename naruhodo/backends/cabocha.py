@@ -327,8 +327,10 @@ class CaboChunk(object):
                 if item['labels'][0] == '接尾':
                     if item['lemma'] == "れる" or item['lemma'] == "られる":
                         self.passive = 1
+                        self.main += "(受動)"
                     elif item['lemma'] == "させる":
                         self.compulsory = 1
+                        self.main += "(強制)"
                     self.func += item['surface']
                 elif len(self.nouns) > 0 and item['labels'][0] == '自立':
                     self.func += item['surface']
@@ -336,6 +338,7 @@ class CaboChunk(object):
                     self.func += item['surface']
                     if item['lemma'] == "いる":
                         self.tense = 1
+                        self.main += "(現在)"
         if len(self.auxvs) > 0:
             self.func += "・".join([x['surface'] for x in self.auxvs])
             for elem in self.postps:
@@ -362,6 +365,7 @@ class CaboChunk(object):
                 pass
             if any([self.auxvs[x]['lemma'] == "た" for x in range(len(self.auxvs))]):
                 self.tense = -1
+                self.main += "(過去)"
         if len(self.postps) > 0:
             for elem in self.postps:
                 if elem['labels'][0] not in  ["終助詞", "副助詞／並立助詞／終助詞"]:
@@ -395,7 +399,7 @@ class CabochaClient(object):
     def __init__(self):
         """Initialize a native database."""
         self.rsplit = re.compile(r'[,]+|\t')
-        self.re_parentheses = re.compile('\([^)]*\)')
+        self.re_parentheses = re.compile(r'\(.*?\)')
         self.chunks = list()
         self.root = None
         self.npro = 0

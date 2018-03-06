@@ -61,15 +61,16 @@ class DependencyCoreJa(object):
             proid = int(name[bpos+1:-1].split("@")[1])
             self.proList.append(dict(
                 id = proid,
-                name = rep,
+                name = name,
+                rep = rep,
                 type = pro,
                 pos = self.pos
             ))
         elif ntype == 0:
-            if rep in self.entityList[NE] and self.pos not in self.entityList[NE][rep]:
-                self.entityList[NE][rep].append(self.pos)
+            if rep in self.entityList[NE] and self.pos not in self.entityList[NE][name]:
+                self.entityList[NE][name].append(self.pos)
             else:
-                self.entityList[NE][rep] = list([self.pos])
+                self.entityList[NE][name] = list([self.pos])
         # Add to graph.
         if self.G.has_node(name):
             if ntype in [0, 1, 2, 3, 4, 5]:

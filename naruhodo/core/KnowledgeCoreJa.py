@@ -62,7 +62,7 @@ class KnowledgeCoreJa(object):
             self._addChildren(pid, cabo.chunks)
         if self.root_has_no_sub:
             omitted = "省略される主語[{0}@{1}]".format(self.pos, 0)
-            self._addNode(omitted, 0, omitted, 4, 0)
+            self._addNode(omitted, 0, omitted, 7, 0)
             self._addEdge(omitted, self.rootname, label="(省略)", etype="sub")
 
     def _addChildren(self, pid, chunks):
@@ -118,7 +118,7 @@ class KnowledgeCoreJa(object):
         auxlabel = ""
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
-            if child.type in [3, 4, 6]: # and child.type2 == -1:
+            if child.type in [3, 4, 5, 6]: # and child.type2 == -1:
                 continue
             # Deal with passive form verb.
             if parent.passive == 1:
@@ -154,7 +154,7 @@ class KnowledgeCoreJa(object):
                 # elif child.func in AuxDict:
                 #     aux.append(child)
                 #     auxlabel += "\n{0}".format(child.surface)
-                elif child.type not in [1, 2]:
+                elif child.type not in [1, 2, 5]:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
                 else:
@@ -191,7 +191,7 @@ class KnowledgeCoreJa(object):
             # elif child.func in AuxDict:
             #     aux.append(child)
             #     auxlabel += "\n{0}".format(child.surface)
-            elif child.type not in [1, 2]:
+            elif child.type not in [1, 2, 5]:
                 aux.append(child)
                 auxlabel += "\n{0}".format(child.surface)
             else:
@@ -205,15 +205,15 @@ class KnowledgeCoreJa(object):
             return
         # Entities deemed as nouns.
         if sub:
-            sub.type = 0
+            # sub.type = 0
             if not self.rootsub:
                 self.rootsub = sub
                 self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE)
             if self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
                 self._addEdge(self.rootsub.main, self.rootname, label="主語候補", etype="autosub")
                 self.root_has_no_sub = False
-        if obj:
-            obj.type = 0
+        # if obj:
+        #     obj.type = 0
 
         # Modify parent name with entities.
         if mode == "verb":
