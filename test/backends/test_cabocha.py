@@ -12,7 +12,7 @@ class TestCabochaClient(unittest.TestCase):
         cabo.add(text)
         self.assertEqual(cabo.chunks[0].main, "麻生\n太郎")
         self.assertEqual(cabo.chunks[1].main, "コーヒー")
-        self.assertEqual(cabo.chunks[2].main, "飲む(否定)")
+        self.assertEqual(cabo.chunks[2].main, "飲む\n(否定)")
         self.assertEqual(cabo.chunks[0].func, "は")
         self.assertEqual(cabo.chunks[1].func, "を")
         self.assertEqual(cabo.chunks[2].func, "ませ・ん")
