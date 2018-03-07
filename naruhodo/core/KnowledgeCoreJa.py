@@ -62,7 +62,7 @@ class KnowledgeCoreJa(object):
             self._addChildren(pid, cabo.chunks)
         if self.root_has_no_sub:
             omitted = "省略される主語[{0}@{1}]".format(self.pos, 0)
-            self._addNode(omitted, 0, omitted, 7, 0)
+            self._addNode(omitted, 0, omitted, 7, 0, "省略される主語")
             self._addEdge(omitted, self.rootname, label="(省略)", etype="sub")
 
     def _addChildren(self, pid, chunks):
@@ -88,7 +88,7 @@ class KnowledgeCoreJa(object):
         """Add special child node with extra information."""
         # Take care of special child that contains extra information
         if child.main[-2:] in ["ため", "為め", "爲め"] or child.main[-1] in ["爲", "為"]:
-            self._addNode(child.main, child.type, child.main, child.pro, child.NE)
+            self._addNode(child.main, child.type, child.main, child.pro, child.NE, child.surface)
             self._addEdge(child.main, pname, label="因果関係候補", etype="aux")
         elif child.type in [1, 2, 5]:
             self._addToVList(pname, child)
@@ -98,7 +98,7 @@ class KnowledgeCoreJa(object):
         parent = chunks[pid]
         if len(parent.children) == 0:
             return
-        self._addNode(parent.main, parent.type, parent.main, parent.pro, parent.NE)
+        self._addNode(parent.main, parent.type, parent.main, parent.pro, parent.NE, parent.surface)
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
             if child.type in [3, 4, 6]:
@@ -106,7 +106,7 @@ class KnowledgeCoreJa(object):
             elif child.type in [1, 2, 5]:
                 self._addToVList(parent.main, child)
             else:
-                self._addNode(child.main, child.type, child.main, child.pro, child.NE)
+                self._addNode(child.main, child.type, child.main, child.pro, child.NE, child.surface)
                 self._addEdge(child.main, parent.main, label=child.func, etype="none")
     
     def _addVerbAdj(self, pid, chunks, mode="verb"):
@@ -208,7 +208,7 @@ class KnowledgeCoreJa(object):
             # sub.type = 0
             if not self.rootsub:
                 self.rootsub = sub
-                self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE)
+                self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE, sub.surface)
             if self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
                 self._addEdge(self.rootsub.main, self.rootname, label="主語候補", etype="autosub")
                 self.root_has_no_sub = False
@@ -220,12 +220,12 @@ class KnowledgeCoreJa(object):
             pname = "{0}\n[{1}=>{2}]".format(parent.main, sub.main if sub else "None", obj.main if obj else "None")
         else:
             pname = parent.main
-        self._addNode(pname, parent.type, parent.main, parent.pro, parent.NE)
+        self._addNode(pname, parent.type, parent.main, parent.pro, parent.NE, parent.surface)
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
             self._addSpecial(pname, child)
         if sub:
-            self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE)
+            self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE, sub.surface)
             self._addEdge(sub.main, pname, label=sub.func, etype="sub")
         elif parent.parent == -1:
             self.root_has_no_sub = True
@@ -233,7 +233,7 @@ class KnowledgeCoreJa(object):
         elif self.rootsub and parent.type == 2 and parent.type2 != 0:
             self._addEdge(self.rootsub.main, pname, label="主語候補", etype="autosub")
         if obj:
-            self._addNode(obj.main, obj.type, obj.main, obj.pro, obj.NE)
+            self._addNode(obj.main, obj.type, obj.main, obj.pro, obj.NE, obj.surface)
             self._addEdge(pname, obj.main, label=auxlabel, etype="obj")
         self._processAux(aux, pname)
         if parent.main in self.vlist and len(self.vlist[parent.main]) > 0:
@@ -247,7 +247,7 @@ class KnowledgeCoreJa(object):
         """Process aux words and vlist if any."""
         if len(aux) > 0:
             for item in aux:
-                self._addNode(item.main, item.type, item.main, item.pro, item.NE)
+                self._addNode(item.main, item.type, item.main, item.pro, item.NE, item.surface)
                 self._addEdge(item.main, pname, label=item.func, etype="aux")
             
     def _addEdge(self, parent, child, label="", etype="none"):
@@ -262,7 +262,7 @@ class KnowledgeCoreJa(object):
                 label = " " # Assign a space to empty label to avoid problem in certain javascript libraries.
             self.G.add_edge(parent, child, weight=1, label=label, type=etype)
             
-    def _addNode(self, name, ntype, rep, pro, NE):
+    def _addNode(self, name, ntype, rep, pro, NE, surface):
         """Add node to node list"""
         # Add to entityList and proList.
         if pro != -1:
@@ -289,5 +289,5 @@ class KnowledgeCoreJa(object):
                 else:
                     self.G.nodes[name]['count'] == 1
         else:
-            self.G.add_node(name, count=1, type=ntype, rep=rep, pro=pro, NE=NE)
+            self.G.add_node(name, count=1, type=ntype, rep=rep, pro=pro, NE=NE, pos=self.pos, surface=surface)
         

@@ -78,6 +78,82 @@ For guide on installing `mecab` and `cabocha`, please refer to this page:
 
 Support for other parsers such as `KNP` is planned in the future.
 
+## Nodes-and-edges-specification
+
+`naruhodo` stores graph information in a [networkx](https://networkx.github.io/) [`DiGraph`](https://networkx.github.io/documentation/latest/reference/classes/digraph.html) object. The properties of nodes and edges provided by naruhodo are listed in the following table.
+
+* **Node properties**
+
+  | Property | Description                                                                                                                     |
+  |:--------:|---------------------------------------------------------------------------------------------------------------------------------|
+  | name     | A string that stores the name of the node stored in the graph. This is what you use to refer to the node from graph object.     |
+  | count    | An integer representing the number of this node being referred to. Can be used as an indicator of node's significance.          |
+  | type     | An integer representing the type of the node. For meanings of integers, refer to the table of node types below.                 |
+  | rep      | A string that stores the normalized representation of the node. This is what you see from the visualizations.                   |
+  | pro      | An integer representing the pronoun type of this node. For meanings of integers, refer to the table of pronoun types below.     |
+  | NE       | An integer representing the named-entity(NE) type of this node. For meanings of integers, refer to the table of NE types below. |
+  | pos      | A list of integers representing the id of sentences where this node appears.                                                    |
+  | surface  | A string that stores the surface of this node(original form as it appears in the text).                                         |
+
+* **Node types**
+
+  | Type ID | Description   |
+  |---------|---------------|
+  | -1      | Unknown type  |
+  | 0       | Noun          |
+  | 1       | Adjective     |
+  | 2       | Verb          |
+  | 3       | Conjective    |
+  | 4       | Interjection  |
+  | 5       | Adverb        |
+  | 6       | Connect       |
+
+* **Pronoun types**
+
+  | Pronoun ID | Description                       |
+  |------------|-----------------------------------|
+  | -1         | Not a pronoun(or unknown pronoun) |
+  | 0          | Demonstrative-location            |
+  | 1          | Demonstrative-object              |
+  | 2          | Personal-1st                      |
+  | 3          | Personal-2nd                      |
+  | 4          | Personal-3rd                      |
+  | 5          | Indefinite                        |
+  | 6          | Inclusive                         |
+  | 7          | Omitted subject                   |
+
+
+* **Named-entity types**
+
+  | NE ID | Description                  |
+  |-------|------------------------------|
+  | 0     | Not named-entity(or unknown) |
+  | 1     | Person                       |
+  | 2     | Location                     |
+  | 3     | Organization                 |
+  | 4     | Number/Date                  |
+
+* **Edge properties**
+
+  | Property | Description                                                                                                        |
+  |----------|--------------------------------------------------------------------------------------------------------------------|
+  | weight   | An integer representing the number of appearance of this edge. Can be used as an indicator of edge's significance. |
+  | label    | A string that stores the label of this edge.                                                                       |
+  | type     | A string that stores the type of this edge. For details, refer to the table of edge types below.                   |
+
+* **Edge types**
+
+  | Type    | Description                                |
+  |---------|--------------------------------------------|
+  | none    | Unknown type(also used in DSG edges)       |
+  | sub     | Edge from a subject to predicate           |
+  | autosub | Edge from a potential subject to predicate |
+  | obj     | Edge from a predicate to object            |
+  | aux     | Edge from auxiliary to predicate           |
+  | cause   | Edge from potential cause to result        |
+  | coref   | Edge from potential antecedent to pronoun  |
+  | synonym | Edge from potential synonym to an entity   |
+
 ## Tutorial
 
 The tutorial of `naruhodo` is provided as `ipynb` files in the tutorial folder. You can view it directly in your browser.
@@ -94,8 +170,10 @@ This document is generated automatically from source code using [pdoc](https://g
 
 ## Change-Log
 
+* 0.2.2
+  * Tweaks for use with naruhodo-viewer.
 * 0.2.1
-  * Primitive coreference resolution for Japanese KSG.
+  * Primitive coreference resolution for Japanese.
 * 0.2.0
   * Major API change for multi-language support and parallel processing. 
   * Parallel processing support for parsing using multiprocessing module. 
@@ -117,6 +195,10 @@ Here are some of my thoughts on the development of `naruhodo` :
 
     As a rule-based system, it certainly has its limitations such as completely resolving coreferences. But I believe in the realm of NLP, especially in rudimentary information parsing tasks, rule-based system can be used to make practical applications. Recent advances in statitics-based techniques such as deep learning seem promising. But almost all of these techniques require large amount of labelled data, which is hard to retrieve. The rule-based approach taken here is more or less an Ab Initio way of looking at some NLP problems(which doesn't take any training data before making useful predictions). My hope is that applications like this may at least alleviate the pain of collecting large amount of labelled data by automating some of the tedious tasks. `naruhodo` is my personal experiment on how far rule-based system can go in the world of NLP. It may fail to be practically useful, but I am sure it is going to be an interesting journey. 
 
+* ### Improving coreference resolution performance (0.2.1 ~)
+
+    [Coreference resolution](https://en.wikipedia.org/wiki/Coreference) is the task of finding all expressions that refer to the same entity in a text. Without proper coreference resolution, generated KSG does not capture all meaningful information, and its usability will be quite limited. Currently `naruhodo` has a primitive coreference resolution added from 0.2.1, but the performance is quite limited. I am experimenting with some published works on this topic. A method based on word embeddings and reinforcement learning might be added to `naruhodo` first starting from version 0.5 ~.
+
 * ### Support for more backends (0.5 ~)
     
     There aren't many Japanese parsing programs available on the internet yet. Aside of `mecab` + `cabocha`, the most usable parsing program seems to be `juman(++)` + `knp`. The output format of `knp` does contain extra useful information and can be more accurate than `cabocha` in some situations. But its output lacks a unified scheme, making it difficult to use. Another important fact is that `juman(++)` + `knp` parsing can be very time consuming compared to `mecab` + `cabocha`, which limits its use cases.
@@ -136,11 +218,6 @@ Here are some of my thoughts on the development of `naruhodo` :
     It seems that everybody is excited about machine learning these days. And I do see huge application potential in techniques like reinforcement learning and generative adversarial models. I do have some thoughts about the applications of these techniques to some specific knowledge retrieval problems. For example, the coreference problem is obviously outside the reach of any rule-based systems, and a reinforcement learning based approach seems quite attractive in this case(provided that we have a real-time feedback system from users).
     
     As my understanding of machine learning techniques improves, some statistics-based approaches may be added in the future.
-
-* ### Adding coreference resolution capability (0.2.1 ~)
-
-    [Coreference resolution](https://en.wikipedia.org/wiki/Coreference) is the task of finding all expressions that refer to the same entity in a text. Without proper coreference resolution, generated KSG does not capture all meaningful information, and its usability will be quite limited. Currently `naruhodo` has no coreference resolution implemented, which is one of the most important reasons I say it is "below my expectation".
-    I am experimenting with some published works on this topic. A method based on word embeddings might be added to `naruhodo` first starting from version 0.5 ~.
 
 * ### Applications based on DSG and KSG(new projects)
     

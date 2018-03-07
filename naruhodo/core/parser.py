@@ -113,10 +113,10 @@ class parser(object):
 
     def _preprocessText(self, text):
         """Get rid of weird parts from the text that interferes analysis."""
-        # text = self._re1.sub("", text)
+        text = self._re1.sub("", text)
         text = self._re2.sub("", text)
         text = self._re3.sub("", text)
-        return text
+        return text.replace("\n", "")
 
     def exportJSON(self, filename):
         """Export current graph to a JSON file on disk."""
@@ -223,8 +223,8 @@ class parser(object):
         # Find syntatic synonyms
         for i in range(len(flatEntityList)):
             for j in range(i + 1, len(flatEntityList)):
-                A = self._re3.sub("", flatEntityList[i]).replace("\n", "")
-                B = self._re3.sub("", flatEntityList[j]).replace("\n", "")
+                A = self._preprocessText(flatEntityList[i])
+                B = self._preprocessText(flatEntityList[j])
                 inc = inclusive(A, B)
                 if inc == 1:
                     self.G.nodes[flatEntityList[i]]['count'] += 1
@@ -274,18 +274,18 @@ class parser(object):
         svecs = list()
         sim = 0.
         for key in self.G.successors(proname):
-            name = self._re3.sub("", key).replace("\n", "")
+            name = self._preprocessText(key)
             if name in self.wv:
                 snames.append(name)
                 svecs.append(self.wv[name])
             for key2 in self.G.successors(key):
-                name = self._re3.sub("", key2).replace("\n", "")
+                name = self._preprocessText(key2)
                 if name in self.wv:
                     snames.append(name)
                     svecs.append(self.wv[name])
         if len(svecs) > 0:
             for item in flatEntityList:
-                rawitem = self._re3.sub("", item).replace("\n", "")
+                rawitem = self._preprocessText(item)
                 if rawitem not in snames and rawitem in self.wv:
                     score = harmonicSim(svecs, self.wv[rawitem])
                     if sim < score:
@@ -297,8 +297,6 @@ class parser(object):
                 return ""        
         else:
             return ""
-
-
 
     @staticmethod
     def _addMP_ja_d(pos, inp):
