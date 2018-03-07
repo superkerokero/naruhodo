@@ -243,6 +243,7 @@ class parser(object):
                         self.posEntityList[i][pos] = list([key])
         # Resolve geolocations/persons
         for pro in self.proList:
+            antecedent = ""
             if pro['type'] == 0:
                 antecedent = self._rresolve(pro['pos'] - 1, 2)
             elif pro['type'] in [2, 4]:
