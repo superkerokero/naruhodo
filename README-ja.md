@@ -170,6 +170,8 @@ Python API ドキュメントはここ:
 
 ## Change-Log
 
+* 0.2.2
+  * Tweaks for use with naruhodo-viewer.
 * 0.2.1
   * Primitive coreference resolution for Japanese.
 * 0.2.0

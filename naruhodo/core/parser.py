@@ -59,15 +59,7 @@ class parser(object):
         """
         Use multiprocessing or not for parsing.
         """
-        if self.lang == "ja":
-            if self.gtype == "d":
-                self.core = DependencyCoreJa()
-            elif self.gtype == "k":
-                self.core = KnowledgeCoreJa()
-            else:
-                raise ValueError("Unknown graph type: {0}".format(self.gtype))
-        else:
-            raise ValueError("Unsupported language: {0}".format(self.lang))
+        self._setCore()
         if mp:
             if nproc == 0:
                 self.pool = Pool()
@@ -82,6 +74,24 @@ class parser(object):
                 print("Successfully loaded word vectors from given file: {0}.".format(wv))
             except ImportError:
                 print("Failed to import gensim, please install it before trying to use word vector related functionalities.")
+
+    def change(self, lang, gtype):
+        """Change the language and type of the parser."""
+        self.lang = lang
+        self.gtype = gtype
+        self._setCore()
+
+    def _setCore(self):
+        """Set the core of the parser to chosen languange ang gtype."""
+        if self.lang == "ja":
+            if self.gtype == "d":
+                self.core = DependencyCoreJa()
+            elif self.gtype == "k":
+                self.core = KnowledgeCoreJa()
+            else:
+                raise ValueError("Unknown graph type: {0}".format(self.gtype))
+        else:
+            raise ValueError("Unsupported language: {0}".format(self.lang))
 
     def _parseToSents(self, context):
         """Parse given context into list of individual sentences."""
