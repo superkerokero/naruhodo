@@ -5,7 +5,7 @@ import networkx as nx
 from nxpd import draw
 from naruhodo.utils.scraper import NScraper
 from naruhodo.utils.dicts import NEList
-from naruhodo.utils.misc import exportToJsonFile
+from naruhodo.utils.misc import exportToJsonObj, exportToJsonFile
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties, inclusive, harmonicSim
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
 from naruhodo.core.KnowledgeCoreJa import KnowledgeCoreJa
@@ -127,6 +127,10 @@ class parser(object):
         text = self._re2.sub("", text)
         text = self._re3.sub("", text)
         return text.replace("\n", "")
+
+    def exportObj(self):
+        """Export graph to a JSON-like object for external visualization."""
+        return exportToJsonObj(self.G)
 
     def exportJSON(self, filename):
         """Export current graph to a JSON file on disk."""

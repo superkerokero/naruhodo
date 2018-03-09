@@ -79,4 +79,4 @@ class DependencyCoreJa(object):
                 else:
                     self.G.nodes[name]['count'] == 1
         else:
-            self.G.add_node(name, count=1, type=ntype, rep=rep, pro=pro, NE=NE, pos=self.pos, surface=surface)
+            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=self.pos, surface=surface)

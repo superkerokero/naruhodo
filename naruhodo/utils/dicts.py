@@ -29,19 +29,46 @@ NEList = ['NONE', 'PERSON', 'LOCATION', 'ORGANIZATION', 'NUMBER']
 Dict of named entity types.
 """
 
-
-NodeShape2JsonDict = {
-    "square": "circle",
-    "Mdiamond": "circle",
-    "doublecircle": "circle",
-    "parallelogram": "ellipse",
-    "pentagon": "diamond",
-    "box": "hexagon",
-    "circle": "square",
-    "underline": "text"
+NodeType2StyleDict = {
+    -1: 'underline',
+    0: 'square',
+    1: 'Mdiamond',
+    2: 'doublecircle',
+    3: 'parallelogram',
+    4: 'pentagon',
+    5: 'box',
+    6: 'circle'
 }
 """
-Dict to convert the node shape from notebook to vis.js json format.
+Dict to convert the node type to node style for visualization in notebook.
+"""
+
+NodeType2ColorDict = {
+    -1: '#ffffff',
+    0: '#ffffff',
+    1: '#e5ffaa',
+    2: '#000000',
+    3: '#dcc4ff',
+    4: '#90889b',
+    5: '#a3a8b7',
+    6: '#d0d4e0'
+}
+"""
+Dict to convert the node type to node color for visualization in notebook.
+"""
+
+NodeType2FontColorDict = {
+    -1: '#000000',
+    0: '#000000',
+    1: '#000000',
+    2: '#ffffff',
+    3: '#000000',
+    4: '#000000',
+    5: '#000000',
+    6: '#000000'
+}
+"""
+Dict to convert the node type to node font color for visualization in notebook.
 """
 
 EdgeType2StyleDict = {
