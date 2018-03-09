@@ -206,7 +206,7 @@ class KnowledgeCoreJa(object):
         # Entities deemed as nouns.
         if sub:
             # sub.type = 0
-            if not self.rootsub:
+            if not self.rootsub and sub.type == 0:
                 self.rootsub = sub
                 self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE, sub.surface)
             if self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:

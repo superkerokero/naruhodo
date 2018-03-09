@@ -448,7 +448,7 @@ class CabochaClient(object):
         """This function makes meaningless words tagged with its meaning."""
         nck = len(self.chunks)
         for i in range(nck):
-            if self.re_parentheses.sub("", self.chunks[i].main) in MeaninglessDict:
+            if self.re_parentheses.sub("", self.chunks[i].main).replace("\n", "") in MeaninglessDict:
                 if len(self.childrenList[i]) > 0:
                     self.chunks[i].main = "({0})\n{1}".format(
                         self.chunks[self.childrenList[i][-1]].surface,

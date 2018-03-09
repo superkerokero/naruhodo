@@ -102,7 +102,7 @@ Dict to convert the edge type to edge color.
 
 MeaninglessDict = set([
     "前", "後", "こと", "事", "もの", "物", "ため", "爲", "為", "為め", "爲め", 
-    "意", "中", "なる", "成る", "ある", "よる", "する", "ない", "から", "だから"
+    "意", "中", "なる", "成る", "ある", "よる", "する", "ない", "無い", "から", "だから"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
