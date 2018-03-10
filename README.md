@@ -19,8 +19,8 @@ Supported semantic graph types:
 * knowledge-structure-graph(KSG): A directed graph based on entity-predicate model of knowledge representation.
 * dependency-structure-graph(DSG): A directed graph based on dependency structure.
 
- `naruhodo` also provides basic visulization utilities using [nxpd](https://github.com/chebee7i/nxpd).
-
+ `naruhodo` provides basic visulization utilities using [nxpd](https://github.com/chebee7i/nxpd). A full-fledged visualization webapp [naruhodo-viewer](https://github.com/superkerokero/naruhodo-viewer) is also available. This webapp provides faster and interactive visualization of large graphs. If you are interested in `naruhodo`'s graphs, you definitely check it out.
+ 
 ### Knowledge structure graph(KSG)
 
 Knowledge structure graph(KSG) tries to capture meaningful relationships between different entities. It is generated based on the dependency structure of the text.
@@ -97,11 +97,11 @@ Support for other parsers such as `KNP` is planned in the future.
   | name     | A string that stores the name of the node stored in the graph. This is what you use to refer to the node from graph object.     |
   | count    | An integer representing the number of this node being referred to. Can be used as an indicator of node's significance.          |
   | type     | An integer representing the type of the node. For meanings of integers, refer to the table of node types below.                 |
-  | rep      | A string that stores the normalized representation of the node. This is what you see from the visualizations.                   |
+  | label     | A string that stores the normalized representation of the node. This is what you see from the visualizations.                   |
   | pro      | An integer representing the pronoun type of this node. For meanings of integers, refer to the table of pronoun types below.     |
   | NE       | An integer representing the named-entity(NE) type of this node. For meanings of integers, refer to the table of NE types below. |
   | pos      | A list of integers representing the id of sentences where this node appears.                                                    |
-  | surface  | A string that stores the surface of this node(original form as it appears in the text).                                         |
+  | surface  | A list of strings that stores the surfaces of this node(original form as it appears in the text).                                         |
 
 * **Node types**
 

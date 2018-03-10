@@ -1045,7 +1045,9 @@ table {
   <ul>
     <li class="mono"><a href="#naruhodo.utils.misc.EdgeType2ColorDict">EdgeType2ColorDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.EdgeType2StyleDict">EdgeType2StyleDict</a></li>
-    <li class="mono"><a href="#naruhodo.utils.misc.NodeShape2JsonDict">NodeShape2JsonDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.NodeType2ColorDict">NodeType2ColorDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.NodeType2FontColorDict">NodeType2FontColorDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.NodeType2StyleDict">NodeType2StyleDict</a></li>
   </ul>
 
     </li>
@@ -1088,37 +1090,11 @@ table {
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NodeShape2JsonDict</span><span class="p">,</span> <span class="n">EdgeType2StyleDict</span><span class="p">,</span> <span class="n">EdgeType2ColorDict</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NodeType2StyleDict</span><span class="p">,</span> <span class="n">NodeType2ColorDict</span><span class="p">,</span> <span class="n">NodeType2FontColorDict</span><span class="p">,</span> <span class="n">EdgeType2StyleDict</span><span class="p">,</span> <span class="n">EdgeType2ColorDict</span>
 
 <span class="k">def</span> <span class="nf">exportToJsonObj</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export given networkx graph to JSON object(dict object in python).&quot;&quot;&quot;</span>
-    <span class="n">raw</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span>
-        <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="n">NodeShape2JsonDict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]],</span>
-        <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;background&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">],</span>
-            <span class="s1">&#39;highlight&#39;</span><span class="p">:</span> <span class="s1">&#39;#ff9647&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;hover&#39;</span><span class="p">:</span> <span class="s1">&#39;#b4f3ff&#39;</span>
-        <span class="p">},</span>
-        <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span>
-        <span class="p">}</span>
-    <span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]]</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span>
-        <span class="s1">&#39;from&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;to&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;arrows&#39;</span><span class="p">:</span> <span class="s1">&#39;to&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;penwidth&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span>
-    <span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">]]</span>
-    <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">exportToJsonFile</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export given networkx graph to JSON file.&quot;&quot;&quot;</span>
@@ -1128,36 +1104,13 @@ table {
 <span class="k">def</span> <span class="nf">getNodeProperties</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert node properties for node drawing using nxpd.&quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#000000&#39;</span>
-    <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;square&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#ffffff&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Mdiamond&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#e5ffaa&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;doublecircle&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#000000&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#ffffff&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;parallelogram&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#dcc4ff&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;pentagon&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#90889b&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;box&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#a3a8b7&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;circle&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#d0d4e0&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;underline&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#ffffff&#39;</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;rep&#39;</span><span class="p">]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2ColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2FontColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;filled&#39;</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fixedsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span> 
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">20.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;rep&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">20.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.75</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">ret</span>
@@ -1224,7 +1177,23 @@ table {
 
       </div>
       <div class="item">
-      <p id="naruhodo.utils.misc.NodeShape2JsonDict" class="name">var <span class="ident">NodeShape2JsonDict</span></p>
+      <p id="naruhodo.utils.misc.NodeType2ColorDict" class="name">var <span class="ident">NodeType2ColorDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.misc.NodeType2FontColorDict" class="name">var <span class="ident">NodeType2FontColorDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.misc.NodeType2StyleDict" class="name">var <span class="ident">NodeType2StyleDict</span></p>
       
   
   <div class="source_cont">
@@ -1295,33 +1264,7 @@ table {
   <div id="source-naruhodo.utils.misc.exportToJsonObj" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">exportToJsonObj</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export given networkx graph to JSON object(dict object in python).&quot;&quot;&quot;</span>
-    <span class="n">raw</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span>
-        <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="n">NodeShape2JsonDict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]],</span>
-        <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;background&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">],</span>
-            <span class="s1">&#39;highlight&#39;</span><span class="p">:</span> <span class="s1">&#39;#ff9647&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;hover&#39;</span><span class="p">:</span> <span class="s1">&#39;#b4f3ff&#39;</span>
-        <span class="p">},</span>
-        <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span>
-        <span class="p">}</span>
-    <span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]]</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span>
-        <span class="s1">&#39;from&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;to&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;arrows&#39;</span><span class="p">:</span> <span class="s1">&#39;to&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;penwidth&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span>
-    <span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">]]</span>
-    <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1374,36 +1317,13 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getNodeProperties</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert node properties for node drawing using nxpd.&quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#000000&#39;</span>
-    <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;square&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#ffffff&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Mdiamond&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#e5ffaa&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;doublecircle&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#000000&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#ffffff&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;parallelogram&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#dcc4ff&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;pentagon&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#90889b&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;box&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#a3a8b7&#39;</span>
-    <span class="k">elif</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;circle&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#d0d4e0&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;underline&#39;</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#ffffff&#39;</span>
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;rep&#39;</span><span class="p">]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2ColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2FontColorDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;filled&#39;</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fixedsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span> 
-    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">20.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;rep&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">20.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.75</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">ret</span>

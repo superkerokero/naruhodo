@@ -71,7 +71,7 @@ class KnowledgeCoreJa(object):
         if parent.type in [0, 6]:
             # When parent node is noun/connect.
             self._addNoun(pid, chunks)
-        elif parent.type in [1, 2, 5]:
+        elif parent.type in [1, 2, 5, -1]:
             # When parent node is adj/verb.
             self._addVerbAdj(pid, chunks, mode="verb")
         else:
@@ -90,7 +90,7 @@ class KnowledgeCoreJa(object):
         if child.main[-2:] in ["ため", "為め", "爲め"] or child.main[-1] in ["爲", "為"]:
             self._addNode(child.main, child.type, child.main, child.pro, child.NE, child.surface)
             self._addEdge(child.main, pname, label="因果関係候補", etype="aux")
-        elif child.type in [1, 2, 5]:
+        elif child.type in [1, 2, 5, -1]:
             self._addToVList(pname, child)
         
     def _addNoun(self, pid, chunks):
@@ -103,7 +103,7 @@ class KnowledgeCoreJa(object):
             child = chunks[parent.children[i]]
             if child.type in [3, 4, 6]:
                 continue
-            elif child.type in [1, 2, 5]:
+            elif child.type in [1, 2, 5, -1]:
                 self._addToVList(parent.main, child)
             else:
                 self._addNode(child.main, child.type, child.main, child.pro, child.NE, child.surface)
@@ -129,7 +129,7 @@ class KnowledgeCoreJa(object):
                 elif child.func in MultiRoleDict:
                     if not sub:
                         sub = child
-                    else:
+                    elif sub.main != child.main:
                         obj = child
                 elif child.func in ObjPassiveSubDict:
                     if not sub:
@@ -154,7 +154,7 @@ class KnowledgeCoreJa(object):
                 # elif child.func in AuxDict:
                 #     aux.append(child)
                 #     auxlabel += "\n{0}".format(child.surface)
-                elif child.type not in [1, 2, 5]:
+                elif child.type not in [1, 2, 5, -1]:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
                 else:
@@ -172,7 +172,7 @@ class KnowledgeCoreJa(object):
             elif child.func in MultiRoleDict:
                 if not sub:
                     sub = child
-                else:
+                elif sub.main != child.main:
                     obj = child
             elif child.func in ObjPassiveSubDict:
                 if not obj:
@@ -191,7 +191,7 @@ class KnowledgeCoreJa(object):
             # elif child.func in AuxDict:
             #     aux.append(child)
             #     auxlabel += "\n{0}".format(child.surface)
-            elif child.type not in [1, 2, 5]:
+            elif child.type not in [1, 2, 5, -1]:
                 aux.append(child)
                 auxlabel += "\n{0}".format(child.surface)
             else:
@@ -209,7 +209,7 @@ class KnowledgeCoreJa(object):
             if not self.rootsub and sub.type == 0:
                 self.rootsub = sub
                 self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE, sub.surface)
-            if self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
+            if self.rootsub and self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
                 self._addEdge(self.rootsub.main, self.rootname, label="主語候補", etype="autosub")
                 self.root_has_no_sub = False
         # if obj:
@@ -280,14 +280,15 @@ class KnowledgeCoreJa(object):
             if rep in self.entityList[NE] and self.pos not in self.entityList[NE][name]:
                 self.entityList[NE][name].append(self.pos)
             else:
-                self.entityList[NE][name] = list([self.pos])
+                self.entityList[NE][name] = [self.pos]
         # Add to graph.
         if self.G.has_node(name):
-            if ntype in [0, 1, 2, 3, 4, 5]:
-                if name not in MeaninglessDict:
-                    self.G.nodes[name]['count'] += 1
-                else:
-                    self.G.nodes[name]['count'] == 1
+            if self.pos not in self.G.nodes[name]['pos']:
+                self.G.nodes[name]['pos'].append(self.pos)
+                self.G.nodes[name]['surface'].append(surface)
+            if name not in MeaninglessDict:
+                self.G.nodes[name]['count'] += 1
+            else:
+                self.G.nodes[name]['count'] == 1
         else:
-            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=self.pos, surface=surface)
-        
+            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=[self.pos], surface=[surface])

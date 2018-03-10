@@ -170,8 +170,9 @@ class CaboChunk(object):
     
     def add(self, inp):
         """Add components to chunk lists."""
-        if inp[1] != "記号" or inp[0] == "？":
-            self.surface += inp[0]
+        # if inp[1] != "記号" or inp[0] == "？":
+        #     self.surface += inp[0]
+        self.surface += inp[0]
         elem = {
             'surface': inp[0],
             'lemma' : inp[7],
@@ -219,7 +220,7 @@ class CaboChunk(object):
     def _getMain(self):
         """Get the main component of the chunk."""
         if len(self.nouns) > 0 and self.nouns[0]['labels'][0] not in ['非自立', '接尾']:
-            self.main = "\n".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
+            self.main = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
             if len(self.adjs) > 0:
                 self.main += "：" + self.adjs[0]['lemma']

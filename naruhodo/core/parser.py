@@ -126,11 +126,21 @@ class parser(object):
         text = self._re1.sub("", text)
         text = self._re2.sub("", text)
         text = self._re3.sub("", text)
+        text = text.replace("・", "、").replace(" ", "").strip()
         return text.replace("\n", "")
 
-    def exportObj(self):
+    def exportObj(self, texts=None):
         """Export graph to a JSON-like object for external visualization."""
-        return exportToJsonObj(self.G)
+        gobj = exportToJsonObj(self.G)
+        if texts:
+            ret = dict(
+                nodes = gobj['nodes'],
+                links = gobj['links'],
+                texts = texts
+            )
+        else:
+            ret = gobj
+        return ret
 
     def exportJSON(self, filename):
         """Export current graph to a JSON file on disk."""
@@ -157,10 +167,13 @@ class parser(object):
         """Add the information from given urls to KSG."""
         context = self._grabTextFromUrls(urls)
         self.addAll(context)
+        return [self._preprocessText(item) for item in context]
 
     def add(self, inp):
         """Add a sentence to graph."""
         inp = self._preprocessText(inp)
+        if inp == "":
+            return [inp]
         self.core.add(inp, self.pos)
         self.pos += 1
         self.G = self._mergeGraph(self.G, self.core.G)
@@ -169,6 +182,8 @@ class parser(object):
         self.core.entityList = [dict() for x in range(len(NEList))]
         self.proList = self._mergeProList(self.proList, self.core.proList)
         self.core.proList = list()
+        self.resolve()
+        return [inp]
 
     def addAll(self, inps):
         """Add a list of sentences at once."""
@@ -176,11 +191,14 @@ class parser(object):
             self._addAllMP(inps)
         else:
             self._addAllSP(inps)
+        self.resolve()
 
     def _addAllSP(self, inps):
         """Standard implementation of addAll function."""
         for inp in inps:
             inp = self._preprocessText(inp)
+            if inp == "":
+                continue
             self.core.add(inp, self.pos)
             self.pos += 1
         self.G = self._mergeGraph(self.G, self.core.G)
@@ -333,6 +351,10 @@ class parser(object):
         for key, val in B.nodes.items():
             if A.has_node(key):
                 A.nodes[key]['count'] += val['count']
+                for i in range(len(val['pos'])):
+                    if val['pos'][i] not in A.nodes[key]['pos']:
+                        A.nodes[key]['pos'].append(val['pos'][i])
+                        A.nodes[key]['surface'].append(val['surface'][i])
             else:
                 A.add_node(key, **val)
         for key, val in B.edges.items():

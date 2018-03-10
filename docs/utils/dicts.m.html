@@ -1049,7 +1049,9 @@ table {
     <li class="mono"><a href="#naruhodo.utils.dicts.MeaninglessDict">MeaninglessDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.MultiRoleDict">MultiRoleDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.NEList">NEList</a></li>
-    <li class="mono"><a href="#naruhodo.utils.dicts.NodeShape2JsonDict">NodeShape2JsonDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.NodeType2ColorDict">NodeType2ColorDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.NodeType2FontColorDict">NodeType2FontColorDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.NodeType2StyleDict">NodeType2StyleDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ObjDict">ObjDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ObjPassiveSubDict">ObjPassiveSubDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ProDict">ProDict</a></li>
@@ -1110,19 +1112,46 @@ table {
 <span class="sd">Dict of named entity types.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-
-<span class="n">NodeShape2JsonDict</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;square&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Mdiamond&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;doublecircle&quot;</span><span class="p">:</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;parallelogram&quot;</span><span class="p">:</span> <span class="s2">&quot;ellipse&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;pentagon&quot;</span><span class="p">:</span> <span class="s2">&quot;diamond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;box&quot;</span><span class="p">:</span> <span class="s2">&quot;hexagon&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;circle&quot;</span><span class="p">:</span> <span class="s2">&quot;square&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;underline&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span>
+<span class="n">NodeType2StyleDict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;underline&#39;</span><span class="p">,</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;square&#39;</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;Mdiamond&#39;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;doublecircle&#39;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;parallelogram&#39;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;pentagon&#39;</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;box&#39;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;circle&#39;</span>
 <span class="p">}</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Dict to convert the node shape from notebook to vis.js json format.</span>
+<span class="sd">Dict to convert the node type to node style for visualization in notebook.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">NodeType2ColorDict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;#ffffff&#39;</span><span class="p">,</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;#ffffff&#39;</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;#e5ffaa&#39;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;#dcc4ff&#39;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;#90889b&#39;</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;#a3a8b7&#39;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;#d0d4e0&#39;</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict to convert the node type to node color for visualization in notebook.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">NodeType2FontColorDict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;#ffffff&#39;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;#000000&#39;</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict to convert the node type to node font color for visualization in notebook.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">EdgeType2StyleDict</span> <span class="o">=</span> <span class="p">{</span>
@@ -1155,8 +1184,9 @@ table {
 
 
 <span class="n">MeaninglessDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;事&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;物&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;爲&quot;</span><span class="p">,</span> <span class="s2">&quot;為&quot;</span><span class="p">,</span> <span class="s2">&quot;為め&quot;</span><span class="p">,</span> <span class="s2">&quot;爲め&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;成る&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span>
+    <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;事&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;物&quot;</span><span class="p">,</span> <span class="s2">&quot;者&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;爲&quot;</span><span class="p">,</span> <span class="s2">&quot;為&quot;</span><span class="p">,</span> <span class="s2">&quot;為め&quot;</span><span class="p">,</span> <span class="s2">&quot;爲め&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;上&quot;</span><span class="p">,</span> <span class="s2">&quot;うえ&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なか&quot;</span><span class="p">,</span> <span class="s2">&quot;下&quot;</span><span class="p">,</span> <span class="s2">&quot;した&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;成る&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;無い&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span><span class="p">,</span> <span class="s2">&quot;場合&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;問題&quot;</span><span class="p">,</span> <span class="s2">&quot;もんだい&quot;</span><span class="p">,</span> <span class="s2">&quot;内容&quot;</span><span class="p">,</span> <span class="s2">&quot;ないよう&quot;</span><span class="p">,</span> <span class="s2">&quot;範囲&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</span>
@@ -1275,10 +1305,28 @@ table {
 
       </div>
       <div class="item">
-      <p id="naruhodo.utils.dicts.NodeShape2JsonDict" class="name">var <span class="ident">NodeShape2JsonDict</span></p>
+      <p id="naruhodo.utils.dicts.NodeType2ColorDict" class="name">var <span class="ident">NodeType2ColorDict</span></p>
       
   
-    <div class="desc"><p>Dict to convert the node shape from notebook to vis.js json format.</p></div>
+    <div class="desc"><p>Dict to convert the node type to node color for visualization in notebook.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.NodeType2FontColorDict" class="name">var <span class="ident">NodeType2FontColorDict</span></p>
+      
+  
+    <div class="desc"><p>Dict to convert the node type to node font color for visualization in notebook.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.NodeType2StyleDict" class="name">var <span class="ident">NodeType2StyleDict</span></p>
+      
+  
+    <div class="desc"><p>Dict to convert the node type to node style for visualization in notebook.</p></div>
   <div class="source_cont">
 </div>
 

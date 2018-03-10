@@ -70,13 +70,15 @@ class DependencyCoreJa(object):
             if rep in self.entityList[NE] and self.pos not in self.entityList[NE][name]:
                 self.entityList[NE][name].append(self.pos)
             else:
-                self.entityList[NE][name] = list([self.pos])
+                self.entityList[NE][name] = [self.pos]
         # Add to graph.
         if self.G.has_node(name):
-            if ntype in [0, 1, 2, 3, 4, 5]:
-                if name not in MeaninglessDict:
-                    self.G.nodes[name]['count'] += 1
-                else:
-                    self.G.nodes[name]['count'] == 1
+            if self.pos not in self.G.nodes[name]['pos']:
+                self.G.nodes[name]['pos'].append(self.pos)
+                self.G.nodes[name]['surface'].append(surface)
+            if name not in MeaninglessDict:
+                self.G.nodes[name]['count'] += 1
+            else:
+                self.G.nodes[name]['count'] == 1
         else:
-            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=self.pos, surface=surface)
+            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=[self.pos], surface=[surface])
