@@ -5,7 +5,7 @@ import networkx as nx
 from nxpd import draw
 from naruhodo.utils.scraper import NScraper
 from naruhodo.utils.dicts import NEList
-from naruhodo.utils.misc import exportToJsonFile
+from naruhodo.utils.misc import exportToJsonObj, exportToJsonFile
 from naruhodo.utils.misc import getNodeProperties, getEdgeProperties, inclusive, harmonicSim
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
 from naruhodo.core.KnowledgeCoreJa import KnowledgeCoreJa
@@ -59,15 +59,7 @@ class parser(object):
         """
         Use multiprocessing or not for parsing.
         """
-        if self.lang == "ja":
-            if self.gtype == "d":
-                self.core = DependencyCoreJa()
-            elif self.gtype == "k":
-                self.core = KnowledgeCoreJa()
-            else:
-                raise ValueError("Unknown graph type: {0}".format(self.gtype))
-        else:
-            raise ValueError("Unsupported language: {0}".format(self.lang))
+        self._setCore()
         if mp:
             if nproc == 0:
                 self.pool = Pool()
@@ -82,6 +74,24 @@ class parser(object):
                 print("Successfully loaded word vectors from given file: {0}.".format(wv))
             except ImportError:
                 print("Failed to import gensim, please install it before trying to use word vector related functionalities.")
+
+    def change(self, lang, gtype):
+        """Change the language and type of the parser."""
+        self.lang = lang
+        self.gtype = gtype
+        self._setCore()
+
+    def _setCore(self):
+        """Set the core of the parser to chosen languange ang gtype."""
+        if self.lang == "ja":
+            if self.gtype == "d":
+                self.core = DependencyCoreJa()
+            elif self.gtype == "k":
+                self.core = KnowledgeCoreJa()
+            else:
+                raise ValueError("Unknown graph type: {0}".format(self.gtype))
+        else:
+            raise ValueError("Unsupported language: {0}".format(self.lang))
 
     def _parseToSents(self, context):
         """Parse given context into list of individual sentences."""
@@ -113,10 +123,24 @@ class parser(object):
 
     def _preprocessText(self, text):
         """Get rid of weird parts from the text that interferes analysis."""
-        # text = self._re1.sub("", text)
+        text = self._re1.sub("", text)
         text = self._re2.sub("", text)
         text = self._re3.sub("", text)
-        return text
+        text = text.replace("・", "、").replace(" ", "").strip()
+        return text.replace("\n", "")
+
+    def exportObj(self, texts=None):
+        """Export graph to a JSON-like object for external visualization."""
+        gobj = exportToJsonObj(self.G)
+        if texts:
+            ret = dict(
+                nodes = gobj['nodes'],
+                links = gobj['links'],
+                texts = texts
+            )
+        else:
+            ret = gobj
+        return ret
 
     def exportJSON(self, filename):
         """Export current graph to a JSON file on disk."""
@@ -143,10 +167,13 @@ class parser(object):
         """Add the information from given urls to KSG."""
         context = self._grabTextFromUrls(urls)
         self.addAll(context)
+        return [self._preprocessText(item) for item in context]
 
     def add(self, inp):
         """Add a sentence to graph."""
         inp = self._preprocessText(inp)
+        if inp == "":
+            return [inp]
         self.core.add(inp, self.pos)
         self.pos += 1
         self.G = self._mergeGraph(self.G, self.core.G)
@@ -155,6 +182,8 @@ class parser(object):
         self.core.entityList = [dict() for x in range(len(NEList))]
         self.proList = self._mergeProList(self.proList, self.core.proList)
         self.core.proList = list()
+        self.resolve()
+        return [inp]
 
     def addAll(self, inps):
         """Add a list of sentences at once."""
@@ -162,11 +191,14 @@ class parser(object):
             self._addAllMP(inps)
         else:
             self._addAllSP(inps)
+        self.resolve()
 
     def _addAllSP(self, inps):
         """Standard implementation of addAll function."""
         for inp in inps:
             inp = self._preprocessText(inp)
+            if inp == "":
+                continue
             self.core.add(inp, self.pos)
             self.pos += 1
         self.G = self._mergeGraph(self.G, self.core.G)
@@ -223,8 +255,8 @@ class parser(object):
         # Find syntatic synonyms
         for i in range(len(flatEntityList)):
             for j in range(i + 1, len(flatEntityList)):
-                A = self._re3.sub("", flatEntityList[i]).replace("\n", "")
-                B = self._re3.sub("", flatEntityList[j]).replace("\n", "")
+                A = self._preprocessText(flatEntityList[i])
+                B = self._preprocessText(flatEntityList[j])
                 inc = inclusive(A, B)
                 if inc == 1:
                     self.G.nodes[flatEntityList[i]]['count'] += 1
@@ -243,6 +275,7 @@ class parser(object):
                         self.posEntityList[i][pos] = list([key])
         # Resolve geolocations/persons
         for pro in self.proList:
+            antecedent = ""
             if pro['type'] == 0:
                 antecedent = self._rresolve(pro['pos'] - 1, 2)
             elif pro['type'] in [2, 4]:
@@ -274,18 +307,18 @@ class parser(object):
         svecs = list()
         sim = 0.
         for key in self.G.successors(proname):
-            name = self._re3.sub("", key).replace("\n", "")
+            name = self._preprocessText(key)
             if name in self.wv:
                 snames.append(name)
                 svecs.append(self.wv[name])
             for key2 in self.G.successors(key):
-                name = self._re3.sub("", key2).replace("\n", "")
+                name = self._preprocessText(key2)
                 if name in self.wv:
                     snames.append(name)
                     svecs.append(self.wv[name])
         if len(svecs) > 0:
             for item in flatEntityList:
-                rawitem = self._re3.sub("", item).replace("\n", "")
+                rawitem = self._preprocessText(item)
                 if rawitem not in snames and rawitem in self.wv:
                     score = harmonicSim(svecs, self.wv[rawitem])
                     if sim < score:
@@ -297,8 +330,6 @@ class parser(object):
                 return ""        
         else:
             return ""
-
-
 
     @staticmethod
     def _addMP_ja_d(pos, inp):
@@ -320,6 +351,10 @@ class parser(object):
         for key, val in B.nodes.items():
             if A.has_node(key):
                 A.nodes[key]['count'] += val['count']
+                for i in range(len(val['pos'])):
+                    if val['pos'][i] not in A.nodes[key]['pos']:
+                        A.nodes[key]['pos'].append(val['pos'][i])
+                        A.nodes[key]['surface'].append(val['surface'][i])
             else:
                 A.add_node(key, **val)
         for key, val in B.edges.items():

@@ -6,12 +6,20 @@
 
 [English version](README.md)
 
-`naruhodo`は人間が読めるテキストからセマンティックグラフを自動的に生成するためのPythonライブラリーです。`naruhodo`で生成されたグラフは全て[networkx](https://networkx.github.io/)オブジェクトなので、さらなるグラフ解析・処理は簡単に行なえます。今は2種類のセマンティックグラフがサポートされています：
+`naruhodo`は人間が読めるテキストからセマンティックグラフを自動的に生成するためのPythonライブラリーです。`naruhodo`で生成されたグラフは全て[networkx](https://networkx.github.io/)オブジェクトなので、さらなるグラフ解析・処理は簡単に行なえます。
+
+サポートされている言語：
+
+* 日本語
+* 英語（WIP）
+* 中国語（WIP）
+
+サポートされているマンティックグラフの種類：
 
 * 知識構造グラフ（KSG）：実体・述語モデルによる知識表現の有向グラフ
 * 依存構造グラフ（DSG）：文法的依存構造に基づく有向グラフ
 
-`naruhodo`には[nxpd](https://github.com/chebee7i/nxpd)で簡単な可視化機能を提供しています。
+`naruhodo`には[nxpd](https://github.com/chebee7i/nxpd)で簡単な可視化機能を提供しています。[naruhodo-viewer](https://github.com/superkerokero/naruhodo-viewer) というウェブアプリも提供されています。`naruhodo-viewer`ではノード数の大きいグラフでもスムーズに、インターラクティブに表示できますので、是非試してみてください。
 
 ### 知識構造グラフ（KSG）
 
@@ -78,6 +86,82 @@ pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
 
 他のバックエンドプログラム（`KNP` など）へのサポートはこれから追加する予定です。
 
+## ノードとエッジの属性
+
+`naruhodo`で生成されたセマンティックグラフは[networkx](https://networkx.github.io/) [`DiGraph`](https://networkx.github.io/documentation/latest/reference/classes/digraph.html) オブジェクトに保存されています。ノードとエッジに付与された属性は以下のテーブルに載せています。
+
+* **ノードの属性**
+
+  | Property | Description                                                                                                                     |
+  |:--------:|---------------------------------------------------------------------------------------------------------------------------------|
+  | name     | A string that stores the name of the node stored in the graph. This is what you use to refer to the node from graph object.     |
+  | count    | An integer representing the number of this node being referred to. Can be used as an indicator of node's significance.          |
+  | type     | An integer representing the type of the node. For meanings of integers, refer to the table of node types below.                 |
+  | label     | A string that stores the normalized representation of the node. This is the node name you see from the visualizations.                   |
+  | pro      | An integer representing the pronoun type of this node. For meanings of integers, refer to the table of pronoun types below.     |
+  | NE       | An integer representing the named-entity(NE) type of this node. For meanings of integers, refer to the table of NE types below. |
+  | pos      | A list of integers representing the id of sentences where this node appears.                                                    |
+  | surface  | A list of strings that stores the surfaces of this node(original form as it appears in the text).                                         |
+
+* **ノードのタイプ**
+
+  | Type ID | Description   |
+  |---------|---------------|
+  | -1      | Unknown type  |
+  | 0       | Noun          |
+  | 1       | Adjective     |
+  | 2       | Verb          |
+  | 3       | Conjective    |
+  | 4       | Interjection  |
+  | 5       | Adverb        |
+  | 6       | Connect       |
+
+* **代名詞タイプ**
+
+  | Pronoun ID | Description                       |
+  |------------|-----------------------------------|
+  | -1         | Not a pronoun(or unknown pronoun) |
+  | 0          | Demonstrative-location            |
+  | 1          | Demonstrative-object              |
+  | 2          | Personal-1st                      |
+  | 3          | Personal-2nd                      |
+  | 4          | Personal-3rd                      |
+  | 5          | Indefinite                        |
+  | 6          | Inclusive                         |
+  | 7          | Omitted subject                   |
+
+
+* **Named-entity　タイプ**
+
+  | NE ID | Description                  |
+  |-------|------------------------------|
+  | 0     | Not named-entity(or unknown) |
+  | 1     | Person                       |
+  | 2     | Location                     |
+  | 3     | Organization                 |
+  | 4     | Number/Date                  |
+
+* **エッジの属性**
+
+  | Property | Description                                                                                                        |
+  |----------|--------------------------------------------------------------------------------------------------------------------|
+  | weight   | An integer representing the number of appearance of this edge. Can be used as an indicator of edge's significance. |
+  | label    | A string that stores the label of this edge.                                                                       |
+  | type     | A string that stores the type of this edge. For details, refer to the table of edge types below.                   |
+
+* **エッジのタイプ**
+
+  | Type    | Description                                |
+  |---------|--------------------------------------------|
+  | none    | Unknown type(also used in DSG edges)       |
+  | sub     | Edge from a subject to predicate           |
+  | autosub | Edge from a potential subject to predicate |
+  | obj     | Edge from a predicate to object            |
+  | aux     | Edge from auxiliary to predicate           |
+  | cause   | Edge from potential cause to result        |
+  | coref   | Edge from potential antecedent to pronoun  |
+  | synonym | Edge from potential synonym to an entity   |
+
 ## チュートリアル
 
 `naruhodo`のチュートリアルはリポジトリの`tutorial`フォルダに`ipynb` ファィルとして用意されています。ブラウザから直接閲覧する事も可能です。
@@ -94,8 +178,10 @@ Python API ドキュメントはここ:
 
 ## Change-Log
 
+* 0.2.2
+  * Tweaks for use with naruhodo-viewer.
 * 0.2.1
-  * Primitive coreference resolution for Japanese KSG.
+  * Primitive coreference resolution for Japanese.
 * 0.2.0
   * Major API change for multi-language support and parallel processing. 
   * Parallel processing support for parsing using multiprocessing module. 
@@ -141,9 +227,9 @@ Python API ドキュメントはここ:
 
 * ### 共参照解析機能 (0.2.1 ~)
 
-    [共参照解析](https://en.wikipedia.org/wiki/Coreference)は、テキスト内の同じエンティティを参照するすべての表現を見つけるタスクです。 適切な共参照解決がなければ、生成されたKSGはすべての意味のある情報を取得するわけではなく、そのユーザビリティはかなり制限されます。共参照解決が実装されていない事が「長文に対しての解析効果はまだ良くない」と言っている最も重要な理由の1つである。
+    [共参照解析](https://en.wikipedia.org/wiki/Coreference)は、テキスト内の同じエンティティを参照するすべての表現を見つけるタスクです。 適切な共参照解決がなければ、生成されたKSGはすべての意味のある情報を取得するわけではなく、そのユーザビリティはかなり制限されます。バージョン0.2.1から`naruhodo`にプリミティブな共参照解析機能が実装された。ただ性能はよくないので、まだ実用性に欠けます。
     
-    私はこのトピックに関するいくつかの論文を調べています。単語の埋め込みに基づくメソッドは、バージョン0.2.1〜から`naruhodo`に追加される予定です。
+    私は共参照解析に関するいくつかの論文を調べています。単語の埋め込みと強化学習に基づくメソッドは、バージョン0.5〜から`naruhodo`に追加される予定です。
 
 * ### 生成されたグラフの具体的応用(new projects)
     

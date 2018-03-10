@@ -1060,7 +1060,9 @@ table {
     <li class="mono"><a href="#naruhodo.core.parser.parser.add">add</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.addAll">addAll</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.addUrls">addUrls</a></li>
+    <li class="mono"><a href="#naruhodo.core.parser.parser.change">change</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.exportJSON">exportJSON</a></li>
+    <li class="mono"><a href="#naruhodo.core.parser.parser.exportObj">exportObj</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.plotToFile">plotToFile</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.reset">reset</a></li>
     <li class="mono"><a href="#naruhodo.core.parser.parser.resolve">resolve</a></li>
@@ -1094,7 +1096,7 @@ table {
 <span class="kn">from</span> <span class="nn">nxpd</span> <span class="kn">import</span> <span class="n">draw</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.scraper</span> <span class="kn">import</span> <span class="n">NScraper</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NEList</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">exportToJsonFile</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">exportToJsonObj</span><span class="p">,</span> <span class="n">exportToJsonFile</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">getNodeProperties</span><span class="p">,</span> <span class="n">getEdgeProperties</span><span class="p">,</span> <span class="n">inclusive</span><span class="p">,</span> <span class="n">harmonicSim</span>
 <span class="kn">from</span> <span class="nn">naruhodo.core.DependencyCoreJa</span> <span class="kn">import</span> <span class="n">DependencyCoreJa</span>
 <span class="kn">from</span> <span class="nn">naruhodo.core.KnowledgeCoreJa</span> <span class="kn">import</span> <span class="n">KnowledgeCoreJa</span>
@@ -1148,15 +1150,7 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use multiprocessing or not for parsing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">==</span> <span class="s2">&quot;ja&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">KnowledgeCoreJa</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown graph type: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtype</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported language: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">nproc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">()</span>
@@ -1171,6 +1165,24 @@ table {
                 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Successfully loaded word vectors from given file: {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wv</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
                 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Failed to import gensim, please install it before trying to use word vector related functionalities.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="p">,</span> <span class="n">gtype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Change the language and type of the parser.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">lang</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">=</span> <span class="n">gtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_setCore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the core of the parser to chosen languange ang gtype.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">==</span> <span class="s2">&quot;ja&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">KnowledgeCoreJa</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown graph type: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtype</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported language: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_parseToSents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parse given context into list of individual sentences.&quot;&quot;&quot;</span>
@@ -1202,10 +1214,24 @@ table {
 
     <span class="k">def</span> <span class="nf">_preprocessText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
-        <span class="c1"># text = self._re1.sub(&quot;&quot;, text)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re1</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re2</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">text</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;・&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Export graph to a JSON-like object for external visualization.&quot;&quot;&quot;</span>
+        <span class="n">gobj</span> <span class="o">=</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
+                <span class="n">links</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">],</span>
+                <span class="n">texts</span> <span class="o">=</span> <span class="n">texts</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">gobj</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">def</span> <span class="nf">exportJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Export current graph to a JSON file on disk.&quot;&quot;&quot;</span>
@@ -1232,10 +1258,13 @@ table {
         <span class="sd">&quot;&quot;&quot;Add the information from given urls to KSG.&quot;&quot;&quot;</span>
         <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grabTextFromUrls</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addAll</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">context</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a sentence to graph.&quot;&quot;&quot;</span>
         <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inp</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">inp</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
@@ -1244,6 +1273,8 @@ table {
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">inp</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">addAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a list of sentences at once.&quot;&quot;&quot;</span>
@@ -1251,11 +1282,14 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">_addAllMP</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addAllSP</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_addAllSP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Standard implementation of addAll function.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inps</span><span class="p">:</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inp</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
@@ -1312,8 +1346,8 @@ table {
         <span class="c1"># Find syntatic synonyms</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
-                <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-                <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                 <span class="n">inc</span> <span class="o">=</span> <span class="n">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1332,6 +1366,7 @@ table {
                         <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">key</span><span class="p">])</span>
         <span class="c1"># Resolve geolocations/persons</span>
         <span class="k">for</span> <span class="n">pro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">:</span>
+            <span class="n">antecedent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="k">if</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>
@@ -1363,18 +1398,18 @@ table {
         <span class="n">svecs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">sim</span> <span class="o">=</span> <span class="mf">0.</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">proname</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
                 <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key2</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">key2</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
                     <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                     <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">svecs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">flatEntityList</span><span class="p">:</span>
-                <span class="n">rawitem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">rawitem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">rawitem</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">snames</span> <span class="ow">and</span> <span class="n">rawitem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
                     <span class="n">score</span> <span class="o">=</span> <span class="n">harmonicSim</span><span class="p">(</span><span class="n">svecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">rawitem</span><span class="p">])</span>
                     <span class="k">if</span> <span class="n">sim</span> <span class="o">&lt;</span> <span class="n">score</span><span class="p">:</span>
@@ -1386,8 +1421,6 @@ table {
                 <span class="k">return</span> <span class="s2">&quot;&quot;</span>        
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
-
-
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_addMP_ja_d</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
@@ -1409,6 +1442,10 @@ table {
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]:</span>
+                        <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                        <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1541,15 +1578,7 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use multiprocessing or not for parsing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">==</span> <span class="s2">&quot;ja&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">KnowledgeCoreJa</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown graph type: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtype</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported language: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">nproc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">()</span>
@@ -1564,6 +1593,24 @@ table {
                 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Successfully loaded word vectors from given file: {0}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wv</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
                 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Failed to import gensim, please install it before trying to use word vector related functionalities.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="p">,</span> <span class="n">gtype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Change the language and type of the parser.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">lang</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">=</span> <span class="n">gtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_setCore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the core of the parser to chosen languange ang gtype.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">==</span> <span class="s2">&quot;ja&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">KnowledgeCoreJa</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown graph type: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtype</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported language: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_parseToSents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parse given context into list of individual sentences.&quot;&quot;&quot;</span>
@@ -1595,10 +1642,24 @@ table {
 
     <span class="k">def</span> <span class="nf">_preprocessText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
-        <span class="c1"># text = self._re1.sub(&quot;&quot;, text)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re1</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re2</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">text</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;・&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Export graph to a JSON-like object for external visualization.&quot;&quot;&quot;</span>
+        <span class="n">gobj</span> <span class="o">=</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
+                <span class="n">links</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">],</span>
+                <span class="n">texts</span> <span class="o">=</span> <span class="n">texts</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">gobj</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">def</span> <span class="nf">exportJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Export current graph to a JSON file on disk.&quot;&quot;&quot;</span>
@@ -1625,10 +1686,13 @@ table {
         <span class="sd">&quot;&quot;&quot;Add the information from given urls to KSG.&quot;&quot;&quot;</span>
         <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grabTextFromUrls</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addAll</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">context</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a sentence to graph.&quot;&quot;&quot;</span>
         <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inp</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">inp</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
@@ -1637,6 +1701,8 @@ table {
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">inp</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">addAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a list of sentences at once.&quot;&quot;&quot;</span>
@@ -1644,11 +1710,14 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">_addAllMP</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addAllSP</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_addAllSP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Standard implementation of addAll function.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inps</span><span class="p">:</span>
             <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inp</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
@@ -1705,8 +1774,8 @@ table {
         <span class="c1"># Find syntatic synonyms</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
-                <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-                <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                 <span class="n">inc</span> <span class="o">=</span> <span class="n">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1725,6 +1794,7 @@ table {
                         <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">key</span><span class="p">])</span>
         <span class="c1"># Resolve geolocations/persons</span>
         <span class="k">for</span> <span class="n">pro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">:</span>
+            <span class="n">antecedent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="k">if</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>
@@ -1756,18 +1826,18 @@ table {
         <span class="n">svecs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">sim</span> <span class="o">=</span> <span class="mf">0.</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">proname</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
                 <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">key2</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">key2</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
                     <span class="n">snames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                     <span class="n">svecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">svecs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">flatEntityList</span><span class="p">:</span>
-                <span class="n">rawitem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">rawitem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">rawitem</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">snames</span> <span class="ow">and</span> <span class="n">rawitem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">:</span>
                     <span class="n">score</span> <span class="o">=</span> <span class="n">harmonicSim</span><span class="p">(</span><span class="n">svecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="n">rawitem</span><span class="p">])</span>
                     <span class="k">if</span> <span class="n">sim</span> <span class="o">&lt;</span> <span class="n">score</span><span class="p">:</span>
@@ -1779,8 +1849,6 @@ table {
                 <span class="k">return</span> <span class="s2">&quot;&quot;</span>        
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
-
-
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_addMP_ja_d</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
@@ -1802,6 +1870,10 @@ table {
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]:</span>
+                        <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                        <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">A</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1929,15 +2001,7 @@ table {
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Use multiprocessing or not for parsing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">==</span> <span class="s2">&quot;ja&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">DependencyCoreJa</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">KnowledgeCoreJa</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown graph type: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtype</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported language: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">mp</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">nproc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">()</span>
@@ -1975,6 +2039,8 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add a sentence to graph.&quot;&quot;&quot;</span>
     <span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">inp</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">inp</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
@@ -1983,6 +2049,8 @@ table {
     <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mergeProList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">inp</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -2009,6 +2077,7 @@ table {
         <span class="bp">self</span><span class="o">.</span><span class="n">_addAllMP</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addAllSP</span><span class="p">(</span><span class="n">inps</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -2033,6 +2102,32 @@ table {
     <span class="sd">&quot;&quot;&quot;Add the information from given urls to KSG.&quot;&quot;&quot;</span>
     <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grabTextFromUrls</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">addAll</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">context</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.core.parser.parser.change">
+    <p>def <span class="ident">change</span>(</p><p>self, lang, gtype)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Change the language and type of the parser.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.parser.parser.change', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.parser.parser.change" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="p">,</span> <span class="n">gtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Change the language and type of the parser.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">lang</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">gtype</span> <span class="o">=</span> <span class="n">gtype</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -2056,6 +2151,38 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">exportJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export current graph to a JSON file on disk.&quot;&quot;&quot;</span>
     <span class="n">exportToJsonFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.core.parser.parser.exportObj">
+    <p>def <span class="ident">exportObj</span>(</p><p>self, texts=None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Export graph to a JSON-like object for external visualization.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.parser.parser.exportObj', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.core.parser.parser.exportObj" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Export graph to a JSON-like object for external visualization.&quot;&quot;&quot;</span>
+    <span class="n">gobj</span> <span class="o">=</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
+            <span class="n">links</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">],</span>
+            <span class="n">texts</span> <span class="o">=</span> <span class="n">texts</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">gobj</span>
+    <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
   </div>
@@ -2136,8 +2263,8 @@ table {
     <span class="c1"># Find syntatic synonyms</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">)):</span>
-            <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocessText</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
             <span class="n">inc</span> <span class="o">=</span> <span class="n">inclusive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -2156,6 +2283,7 @@ table {
                     <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">key</span><span class="p">])</span>
     <span class="c1"># Resolve geolocations/persons</span>
     <span class="k">for</span> <span class="n">pro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="p">:</span>
+        <span class="n">antecedent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">if</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">antecedent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rresolve</span><span class="p">(</span><span class="n">pro</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>

@@ -4,10 +4,9 @@ from setuptools import setup, find_packages
 setup(
     name = 'naruhodo',
     packages = find_packages(exclude=['contrib', 'docs', 'test']),
-    version = '0.2.1',
+    version = '0.2.2',
     description = 'A python library for automatic semantic graph generation from human-readable text.',
     long_description = """
-    A python library for automatic semantic graph generation from human-readable text.
     For detailed documentation and tutorials, visit https://github.com/superkerokero/naruhodo
     """,
     author = 'superkerokero',

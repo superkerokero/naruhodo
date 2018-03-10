@@ -170,8 +170,9 @@ class CaboChunk(object):
     
     def add(self, inp):
         """Add components to chunk lists."""
-        if inp[1] != "記号" or inp[0] == "？":
-            self.surface += inp[0]
+        # if inp[1] != "記号" or inp[0] == "？":
+        #     self.surface += inp[0]
+        self.surface += inp[0]
         elem = {
             'surface': inp[0],
             'lemma' : inp[7],
@@ -219,7 +220,7 @@ class CaboChunk(object):
     def _getMain(self):
         """Get the main component of the chunk."""
         if len(self.nouns) > 0 and self.nouns[0]['labels'][0] not in ['非自立', '接尾']:
-            self.main = "\n".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
+            self.main = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
             if len(self.adjs) > 0:
                 self.main += "：" + self.adjs[0]['lemma']
@@ -327,10 +328,10 @@ class CaboChunk(object):
                 if item['labels'][0] == '接尾':
                     if item['lemma'] == "れる" or item['lemma'] == "られる":
                         self.passive = 1
-                        self.main += "(受動)"
+                        self.main += "\n(受動)"
                     elif item['lemma'] == "させる":
                         self.compulsory = 1
-                        self.main += "(強制)"
+                        self.main += "\n(強制)"
                     self.func += item['surface']
                 elif len(self.nouns) > 0 and item['labels'][0] == '自立':
                     self.func += item['surface']
@@ -338,7 +339,7 @@ class CaboChunk(object):
                     self.func += item['surface']
                     if item['lemma'] == "いる":
                         self.tense = 1
-                        self.main += "(現在)"
+                        self.main += "\n(現在)"
         if len(self.auxvs) > 0:
             self.func += "・".join([x['surface'] for x in self.auxvs])
             for elem in self.postps:
@@ -353,19 +354,19 @@ class CaboChunk(object):
                 if len(self.signs) > 0 and any([self.signs[x]['surface'] == '？' for x in range(len(self.signs))]):
                     pass
                 else:
-                    self.main += "(否定)"
+                    self.main += "\n(否定)"
                     self.negative = 1
             elif neg > 1:
                 if neg % 2 == 0:
-                    self.main += "(二重否定)"
+                    self.main += "\n(二重否定)"
                     self.negative = -1
                 else:
-                    self.main += "(多重否定)"
+                    self.main += "\n(多重否定)"
             else:
                 pass
             if any([self.auxvs[x]['lemma'] == "た" for x in range(len(self.auxvs))]):
                 self.tense = -1
-                self.main += "(過去)"
+                self.main += "\n(過去)"
         if len(self.postps) > 0:
             for elem in self.postps:
                 if elem['labels'][0] not in  ["終助詞", "副助詞／並立助詞／終助詞"]:
@@ -448,7 +449,7 @@ class CabochaClient(object):
         """This function makes meaningless words tagged with its meaning."""
         nck = len(self.chunks)
         for i in range(nck):
-            if self.re_parentheses.sub("", self.chunks[i].main) in MeaninglessDict:
+            if self.re_parentheses.sub("", self.chunks[i].main).replace("\n", "") in MeaninglessDict:
                 if len(self.childrenList[i]) > 0:
                     self.chunks[i].main = "({0})\n{1}".format(
                         self.chunks[self.childrenList[i][-1]].surface,
@@ -461,4 +462,4 @@ class CabochaClient(object):
         for i in range(nck):
             if self.chunks[i].main in ["ない", ]:
                 pid = self.chunks[i].parent
-                self.chunks[pid].main += "（否定）"
+                self.chunks[pid].main += "\n(否定)"

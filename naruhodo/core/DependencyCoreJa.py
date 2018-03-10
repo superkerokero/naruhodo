@@ -36,7 +36,7 @@ class DependencyCoreJa(object):
         self.pos = pos
         cabo.add(self.proc.query(inp), self.pos)
         for chunk in cabo.chunks:
-            self._addNode(chunk.main, chunk.type, chunk.main, chunk.pro, chunk.NE)
+            self._addNode(chunk.main, chunk.type, chunk.main, chunk.pro, chunk.NE, chunk.surface)
         for chunk in cabo.chunks:
             self._addEdge(chunk.main, cabo.chunks[chunk.parent].main, label=chunk.func)
 
@@ -52,7 +52,7 @@ class DependencyCoreJa(object):
                 label = " " # Assign a space to empty label to avoid problem in certain javascript libraries.
             self.G.add_edge(parent, child, weight=1, label=label, type=etype)
             
-    def _addNode(self, name, ntype, rep, pro, NE):
+    def _addNode(self, name, ntype, rep, pro, NE, surface):
         """Add node to node list"""
         # Add to entityList and proList.
         if pro != -1:
@@ -70,13 +70,15 @@ class DependencyCoreJa(object):
             if rep in self.entityList[NE] and self.pos not in self.entityList[NE][name]:
                 self.entityList[NE][name].append(self.pos)
             else:
-                self.entityList[NE][name] = list([self.pos])
+                self.entityList[NE][name] = [self.pos]
         # Add to graph.
         if self.G.has_node(name):
-            if ntype in [0, 1, 2, 3, 4, 5]:
-                if name not in MeaninglessDict:
-                    self.G.nodes[name]['count'] += 1
-                else:
-                    self.G.nodes[name]['count'] == 1
+            if self.pos not in self.G.nodes[name]['pos']:
+                self.G.nodes[name]['pos'].append(self.pos)
+                self.G.nodes[name]['surface'].append(surface)
+            if name not in MeaninglessDict:
+                self.G.nodes[name]['count'] += 1
+            else:
+                self.G.nodes[name]['count'] == 1
         else:
-            self.G.add_node(name, count=1, type=ntype, rep=rep, pro=pro, NE=NE)
+            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=[self.pos], surface=[surface])
