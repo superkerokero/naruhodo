@@ -140,7 +140,7 @@ Dict that contains functional words of objects.
 """
 
 ObjPassiveSubDict = set([
-    "へ", "と", "ないと", "とは"
+    "へ", "に", "と", "ないと", "とは"
 ])
 """
 Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. 

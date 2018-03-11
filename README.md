@@ -178,6 +178,8 @@ This document is generated automatically from source code using [pdoc](https://g
 
 ## Change-Log
 
+* 0.2.4
+  * Refactored KSG core for better code clearance and some bug fixes.
 * 0.2.3
   * Fixed a bug in KSG core causing repetitive nodes added to graph.
 * 0.2.2

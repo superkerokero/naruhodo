@@ -259,10 +259,10 @@ class parser(object):
                 B = self._preprocessText(flatEntityList[j])
                 inc = inclusive(A, B)
                 if inc == 1:
-                    self.G.nodes[flatEntityList[i]]['count'] += 1
+                    # self.G.nodes[flatEntityList[i]]['count'] += 1
                     self.G.add_edge(flatEntityList[i], flatEntityList[j], weight=1, label="同義語候補", type="synonym")
                 elif inc == -1:
-                    self.G.nodes[flatEntityList[j]]['count'] += 1
+                    # self.G.nodes[flatEntityList[j]]['count'] += 1
                     self.G.add_edge(flatEntityList[j], flatEntityList[i], weight=1, label="同義語候補", type="synonym")
         # Get position-based entity list
         self.posEntityList = [dict() for x in range(len(NEList))]
@@ -274,7 +274,8 @@ class parser(object):
                     else:
                         self.posEntityList[i][pos] = list([key])
         # Resolve geolocations/persons
-        for pro in self.proList:
+        while self.proList:
+            pro = self.proList.pop(0)
             antecedent = ""
             if pro['type'] == 0:
                 antecedent = self._rresolve(pro['pos'] - 1, 2)
@@ -283,11 +284,28 @@ class parser(object):
             elif pro['type'] == 7:
                 if not self.wv:
                     print("Word vector model is not set correctly. Skipping part of coreference resolution.")
-                    continue
                 else:
                     antecedent = self._wvResolve(pro['name'], flatEntityList)
+            # Process antecedent
             if antecedent != "":
                 self.G.nodes[antecedent]['count'] += 1
+                self.G.add_edge(antecedent, pro['name'], weight=1, label="共参照候補", type="coref")
+            else:
+                # Add unknown coref
+                antecedent = "未知の主体"
+                if not self.G.has_node(antecedent):
+                    self.G.add_node(antecedent, 
+                            count = 1, 
+                            func = "(未知)", 
+                            type = 0, 
+                            label = antecedent, 
+                            pro = -1, 
+                            NE = 0, 
+                            pos = [self.pos], 
+                            surface = [antecedent],
+                            sub = "")
+                else:
+                    self.G.nodes[antecedent]['count'] += 1
                 self.G.add_edge(antecedent, pro['name'], weight=1, label="共参照候補", type="coref")
 
     def _rresolve(self, pos, NE):
