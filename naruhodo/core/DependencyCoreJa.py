@@ -36,7 +36,7 @@ class DependencyCoreJa(object):
         self.pos = pos
         cabo.add(self.proc.query(inp), self.pos)
         for chunk in cabo.chunks:
-            self._addNode(chunk.main, chunk.type, chunk.main, chunk.pro, chunk.NE, chunk.surface)
+            self._addNode(chunk)
         for chunk in cabo.chunks:
             self._addEdge(chunk.main, cabo.chunks[chunk.parent].main, label=chunk.func)
 
@@ -52,33 +52,44 @@ class DependencyCoreJa(object):
                 label = " " # Assign a space to empty label to avoid problem in certain javascript libraries.
             self.G.add_edge(parent, child, weight=1, label=label, type=etype)
             
-    def _addNode(self, name, ntype, rep, pro, NE, surface):
+    def _addNode(self, node, sub=''):
         """Add node to node list"""
-        # Add to entityList and proList.
-        if pro != -1:
-            bpos = name.find("[")
-            rep = name[:bpos]
-            proid = int(name[bpos+1:-1].split("@")[1])
+        # Get rep.
+        bpos = node.main.find("[")
+        if bpos == -1:
+            rep = node.main
+        else:
+            rep = node.main[:bpos]
+        # Add to proList.
+        if node.pro != -1:
+            proid = int(node.main[bpos+1:-1].split("@")[1])
             self.proList.append(dict(
                 id = proid,
-                name = name,
+                name = node.main,
                 rep = rep,
-                type = pro,
+                type = node.pro,
                 pos = self.pos
             ))
-        elif ntype == 0:
-            if rep in self.entityList[NE] and self.pos not in self.entityList[NE][name]:
-                self.entityList[NE][name].append(self.pos)
+        # Add to entityList.
+        elif node.type == 0:
+            if node.main in self.entityList[node.NE] and self.pos not in self.entityList[node.NE][node.main]:
+                self.entityList[node.NE][node.main].append(self.pos)
             else:
-                self.entityList[NE][name] = [self.pos]
+                self.entityList[node.NE][node.main] = [self.pos]
         # Add to graph.
-        if self.G.has_node(name):
-            if self.pos not in self.G.nodes[name]['pos']:
-                self.G.nodes[name]['pos'].append(self.pos)
-                self.G.nodes[name]['surface'].append(surface)
-            if name not in MeaninglessDict:
-                self.G.nodes[name]['count'] += 1
-            else:
-                self.G.nodes[name]['count'] == 1
+        if self.G.has_node(node.main):
+            if self.pos not in self.G.nodes[node.main]['pos']:
+                self.G.nodes[node.main]['pos'].append(self.pos)
+                self.G.nodes[node.main]['surface'].append(node.surface)
+                self.G.nodes[node.main]['count'] += 1
         else:
-            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=[self.pos], surface=[surface])
+            self.G.add_node(node.main, 
+                            count = 1, 
+                            func = node.func, 
+                            type = node.type, 
+                            label = rep, 
+                            pro = node.pro, 
+                            NE = node.NE, 
+                            pos = [self.pos], 
+                            surface = [node.surface],
+                            sub = sub)

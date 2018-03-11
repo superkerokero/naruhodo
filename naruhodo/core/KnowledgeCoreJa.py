@@ -1,6 +1,6 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
-from naruhodo.backends.cabocha import CabochaClient
+from naruhodo.backends.cabocha import CaboChunk, CabochaClient
 from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, SubPassiveObjDict, NEList
 
 class KnowledgeCoreJa(object):
@@ -28,197 +28,122 @@ class KnowledgeCoreJa(object):
         """
         Communicator to backend for KnowledgeAnalyzer.
         """
-        self.rootsub = None
-        """
-        The subject node of the root. Used to assign subject node to parent nodes other than the root.
-        """
-        self.root_has_no_sub = False
-        """
-        If True, it means that root has no subject and has to transfer its children's subject(if any) to root.
-        """
-        self.rootname = ""
-        """
-        Name of the root node.
-        """
 
     def add(self, inp, pos):
         """Take in a string input and add it to the knowledge structure graph(KSG)."""
-        # Reset rootsub everytime you add a new piece of text.
-        self.rootsub = None
-        self.root_has_no_sub = False
-        self.rootname = ""
         self.pos = pos
         # Call backend for dependency parsing.
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp), self.pos)
         pool = [cabo.root]
+        plist = [cabo.root]
         self.vlist = dict()
-        # start while loop from root node
+        # Use BFS to get a list of nodes.
         while pool:
-            # Take next id from pool as parent
             pid = pool.pop(0)
             for cid in cabo.childrenList[pid]:
                 pool.append(cid)
+                plist.insert(0, cid)
+        # Add nodes using plist(from leaves to roots).
+        for i in range(len(plist)):
+            pid = plist[i]
             self._addChildren(pid, cabo.chunks)
-        if self.root_has_no_sub:
-            omitted = "省略される主語[{0}@{1}]".format(self.pos, 0)
-            self._addNode(omitted, 0, omitted, 7, 0, "省略される主語")
-            self._addEdge(omitted, self.rootname, label="(省略)", etype="sub")
-
+        # If root has no subject, add omitted subject node.
+        if self.G.nodes[cabo.chunks[cabo.root].main]['sub'] == '':
+            omitted = CaboChunk(-1, cabo.root)
+            omitted.main = "省略される主語[{0}@{1}]".format(self.pos, 0)
+            omitted.func = "(省略)"
+            omitted.type = 0
+            omitted.pro = 7
+            omitted.surface = "省略される主語"
+            self._addNode(omitted)
+            self._addEdge(omitted.main, cabo.chunks[cabo.root].main, label="(省略)主体", etype="sub")
+            self.G.nodes[cabo.chunks[cabo.root].main]['sub'] = omitted.main
+        # Add autosub
+        for i in range(len(plist)):
+            pid = plist[i]
+            if cabo.chunks[pid].type in [1, 2] and self.G.nodes[cabo.chunks[pid].main]['sub']== "":
+                self._addEdge(self.G.nodes[cabo.chunks[cabo.root].main]['sub'], cabo.chunks[pid].main, label="主体候補", etype="autosub")
+                self.G.nodes[cabo.chunks[pid].main]['sub'] = self.G.nodes[cabo.chunks[cabo.root].main]['sub']
     def _addChildren(self, pid, chunks):
         """Add children following rules."""
         parent = chunks[pid]
-        if parent.type in [0, 6]:
-            # When parent node is noun/connect.
-            self._addNoun(pid, chunks)
-        elif parent.type in [1, 2, 5, -1]:
-            # When parent node is adj/verb.
-            self._addVerbAdj(pid, chunks, mode="verb")
-        else:
-            pass
-
-    def _addToVList(self, pname, child):
-        """Add the verb-related edge to vlist to be added later."""
-        try:
-            self.vlist[child.main].append([pname, child.func])
-        except KeyError:
-            self.vlist[child.main] = [[pname, child.func]]
-
-    def _addSpecial(self, pname, child):
-        """Add special child node with extra information."""
-        # Take care of special child that contains extra information
-        if child.main[-2:] in ["ため", "為め", "爲め"] or child.main[-1] in ["爲", "為"]:
-            self._addNode(child.main, child.type, child.main, child.pro, child.NE, child.surface)
-            self._addEdge(child.main, pname, label="因果関係候補", etype="aux")
-        
-    def _addNoun(self, pid, chunks):
-        """Adding node/edge when parent node is noun."""
-        parent = chunks[pid]
-        if len(parent.children) == 0:
-            return
-        self._addNode(parent.main, parent.type, parent.main, parent.pro, parent.NE, parent.surface)
-        for i in range(len(parent.children)):
-            child = chunks[parent.children[i]]
-            if child.type in [3, 4, 6]:
-                continue
-            elif child.type in [1, 2, 5, -1]:
-                self._addToVList(parent.main, child)
-            else:
-                self._addNode(child.main, child.type, child.main, child.pro, child.NE, child.surface)
-                self._addEdge(child.main, parent.main, label=child.func, etype="none")
-    
-    def _addVerbAdj(self, pid, chunks, mode="verb"):
-        """Adding node/edge when parent node is verb."""
-        parent = chunks[pid]
-        if len(parent.children) == 0:
-            return
         sub = None
         obj = None
         aux = list()
         auxlabel = ""
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
-            if child.type in [3, 4, 5, 6]: # and child.type2 == -1:
-                continue
-            # Deal with passive form verb.
-            if parent.passive == 1:
-                if child.func in SubDict:
-                    sub = child
-                elif child.func in ObjDict:
-                    obj = child
-                elif child.func in ObjPassiveSubDict:
+            # Process by categories.
+            if child.func in SubDict:
+                sub = child
+            elif child.func in ObjDict:
+                obj = child
+            elif child.func in SubPassiveObjDict:
+                if parent.passive == 1:
+                    if not obj:
+                        obj = child
+                    elif not sub:
+                        sub = child
+                    else:
+                        aux.append(child.id)
+                        auxlabel += "[{0}]\n".format(child.surface)
+                else:
                     if not sub:
                         sub = child
                     elif not obj:
                         obj = child
                     else:
-                        aux.append(child)
-                        auxlabel += "\n{0}".format(child.surface)
-                elif child.func in SubPassiveObjDict:
-                    if not obj:
-                        obj = child
+                        aux.append(child.id)
+                        auxlabel += "[{0}]\n".format(child.surface)
+            elif child.func in ObjPassiveSubDict:
+                if parent.passive == 1:
                     if not sub:
                         sub = child
+                    elif not obj:
+                        obj = child
                     else:
-                        aux.append(child)
-                        auxlabel += "\n{0}".format(child.surface)
-                elif child.type not in [1, 2, 5, -1]:
-                    aux.append(child)
-                    auxlabel += "\n{0}".format(child.surface)
+                        aux.append(child.id)
+                        auxlabel += "[{0}]\n".format(child.surface)
                 else:
-                    pass
-            elif child.func in SubDict:
-                sub = child
-            elif child.func in ObjDict:
-                obj = child
-            elif child.func in SubPassiveObjDict:
-                if not sub:
-                    sub = child
-                elif not obj:
-                    obj = child
-                else:
-                    aux.append(child)
-                    auxlabel += "\n{0}".format(child.surface)
-            elif child.func in ObjPassiveSubDict:
-                if not obj:
-                    obj = child
-                if not sub:
-                    sub = child
-                else:
-                    aux.append(child)
-                    auxlabel += "\n{0}".format(child.surface)
-            elif child.type not in [1, 2, 5, -1]:
-                aux.append(child)
-                auxlabel += "\n{0}".format(child.surface)
+                    if not obj:
+                        obj = child
+                    elif not sub:
+                        sub = child
+                    else:
+                        aux.append(child.id)
+                        auxlabel += "[{0}]\n".format(child.surface)
             else:
-                pass
+                aux.append(child.id)
+                auxlabel += "[{0}]\n".format(child.surface)
 
-        # Entities deemed as nouns.
+        # Add parent and subject.
         if sub:
-            # sub.type = 0
-            if not self.rootsub and sub.type == 0:
-                self.rootsub = sub
-                self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE, sub.surface)
-            if self.rootsub and self.root_has_no_sub and parent.type == 2 and parent.type2 != 0:
-                self._addEdge(self.rootsub.main, self.rootname, label="主語候補", etype="autosub")
-                self.root_has_no_sub = False
-        # if obj:
-        #     obj.type = 0
-
-        # Modify parent name with entities.
-        if mode == "verb":
-            pname = "{0}\n[{1}=>{2}]".format(parent.main, sub.main if sub else "None", obj.main if obj else "None")
+            parent.main = "{0}\n[{1}]".format(parent.main, sub.main)
+            self._addNode(parent, sub=sub.main)
+            if not self.G.has_node(sub.main):
+                self._addNode(sub)
+            self._addEdge(sub.main, parent.main, label="主体", etype="sub")
         else:
-            pname = parent.main
-        self._addNode(pname, parent.type, parent.main, parent.pro, parent.NE, parent.surface)
-        for i in range(len(parent.children)):
-            child = chunks[parent.children[i]]
-            self._addSpecial(pname, child)
-        if sub:
-            self._addNode(sub.main, sub.type, sub.main, sub.pro, sub.NE, sub.surface)
-            self._addEdge(sub.main, pname, label=sub.func, etype="sub")
-        elif parent.parent == -1:
-            self.root_has_no_sub = True
-            self.rootname = pname
-        elif self.rootsub and parent.type == 2 and parent.type2 != 0:
-            self._addEdge(self.rootsub.main, pname, label="主語候補", etype="autosub")
+            # parent.main = "{0}\n[{1}]".format(parent.main, "")
+            self._addNode(parent)
+        # Add object.
         if obj:
-            self._addNode(obj.main, obj.type, obj.main, obj.pro, obj.NE, obj.surface)
-            self._addEdge(pname, obj.main, label=auxlabel, etype="obj")
-        self._processAux(aux, pname)
-        if parent.main in self.vlist and len(self.vlist[parent.main]) > 0:
-            for item in self.vlist[parent.main]:
-                self._addEdge(pname, *item, etype="obj")
-        # Add func edge for root.
-        if parent.parent == -1:
-            self._addEdge(pname, pname, label=parent.func, etype="none")
+            if not self.G.has_node(obj.main):
+                self._addNode(obj)
+            self._addEdge(parent.main, obj.main, label="客体\n" + auxlabel, etype="obj")
+        self._processAux(aux, parent.main, chunks)        
 
-    def _processAux(self, aux, pname):
+    def _processAux(self, aux, pname, chunks):
         """Process aux words and vlist if any."""
         if len(aux) > 0:
-            for item in aux:
-                self._addNode(item.main, item.type, item.main, item.pro, item.NE, item.surface)
-                self._addEdge(item.main, pname, label=item.func, etype="aux")
+            for nid in aux:
+                if not self.G.has_node(chunks[nid].main):
+                    self._addNode(chunks[nid])
+                if chunks[nid].main[-2:] in ["ため", "為め", "爲め"] or chunks[nid].main[-1] in ["爲", "為"]:
+                    self._addEdge(chunks[nid].main, pname, label="因果関係候補", etype="cause")
+                else:
+                    self._addEdge(chunks[nid].main, pname, label=chunks[nid].func, etype="aux")
             
     def _addEdge(self, parent, child, label="", etype="none"):
         """Add edge to edge list"""
@@ -232,33 +157,44 @@ class KnowledgeCoreJa(object):
                 label = " " # Assign a space to empty label to avoid problem in certain javascript libraries.
             self.G.add_edge(parent, child, weight=1, label=label, type=etype)
             
-    def _addNode(self, name, ntype, rep, pro, NE, surface):
+    def _addNode(self, node, sub=''):
         """Add node to node list"""
-        # Add to entityList and proList.
-        if pro != -1:
-            bpos = name.find("[")
-            rep = name[:bpos]
-            proid = int(name[bpos+1:-1].split("@")[1])
+        # Get rep.
+        bpos = node.main.find("[")
+        if bpos == -1:
+            rep = node.main
+        else:
+            rep = node.main[:bpos]
+        # Add to proList.
+        if node.pro != -1:
+            proid = int(node.main[bpos+1:-1].split("@")[1])
             self.proList.append(dict(
                 id = proid,
-                name = name,
+                name = node.main,
                 rep = rep,
-                type = pro,
+                type = node.pro,
                 pos = self.pos
             ))
-        elif ntype == 0:
-            if rep in self.entityList[NE] and self.pos not in self.entityList[NE][name]:
-                self.entityList[NE][name].append(self.pos)
+        # Add to entityList.
+        elif node.type == 0:
+            if node.main in self.entityList[node.NE] and self.pos not in self.entityList[node.NE][node.main]:
+                self.entityList[node.NE][node.main].append(self.pos)
             else:
-                self.entityList[NE][name] = [self.pos]
+                self.entityList[node.NE][node.main] = [self.pos]
         # Add to graph.
-        if self.G.has_node(name):
-            if self.pos not in self.G.nodes[name]['pos']:
-                self.G.nodes[name]['pos'].append(self.pos)
-                self.G.nodes[name]['surface'].append(surface)
-            if name not in MeaninglessDict:
-                self.G.nodes[name]['count'] += 1
-            else:
-                self.G.nodes[name]['count'] == 1
+        if self.G.has_node(node.main):
+            if self.pos not in self.G.nodes[node.main]['pos']:
+                self.G.nodes[node.main]['pos'].append(self.pos)
+                self.G.nodes[node.main]['surface'].append(node.surface)
+                self.G.nodes[node.main]['count'] += 1
         else:
-            self.G.add_node(name, count=1, type=ntype, label=rep, pro=pro, NE=NE, pos=[self.pos], surface=[surface])
+            self.G.add_node(node.main, 
+                            count = 1, 
+                            func = node.func, 
+                            type = node.type, 
+                            label = rep, 
+                            pro = node.pro, 
+                            NE = node.NE, 
+                            pos = [self.pos], 
+                            surface = [node.surface],
+                            sub = sub)
