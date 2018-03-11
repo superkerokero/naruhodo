@@ -301,7 +301,7 @@ class parser(object):
                             label = antecedent, 
                             pro = -1, 
                             NE = 0, 
-                            pos = [self.pos], 
+                            pos = [self.pos - 1], 
                             surface = [antecedent],
                             sub = "")
                 else:
