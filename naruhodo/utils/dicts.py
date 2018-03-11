@@ -147,15 +147,12 @@ Dict that contains functional words that can be objects for normal verbs and sub
 """
 
 SubPassiveObjDict = set([
-    "も",
+    "が", "などが", "も"
 ])
 """
 Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. 
 """
 
-MultiRoleDict = set([
-    "が", "などが"
-])
 """
 Dict that contains functional words that has multiple roles.
 """

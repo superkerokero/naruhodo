@@ -178,6 +178,8 @@ Python API ドキュメントはここ:
 
 ## Change-Log
 
+* 0.2.3
+  * Fixed a bug in KSG core causing repetitive nodes added to graph.
 * 0.2.2
   * Tweaks for use with naruhodo-viewer.
 * 0.2.1

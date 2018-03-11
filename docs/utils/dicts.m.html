@@ -1047,7 +1047,6 @@ table {
     <li class="mono"><a href="#naruhodo.utils.dicts.EdgeType2ColorDict">EdgeType2ColorDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.EdgeType2StyleDict">EdgeType2StyleDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.MeaninglessDict">MeaninglessDict</a></li>
-    <li class="mono"><a href="#naruhodo.utils.dicts.MultiRoleDict">MultiRoleDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.NEList">NEList</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.NodeType2ColorDict">NodeType2ColorDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.NodeType2FontColorDict">NodeType2FontColorDict</a></li>
@@ -1230,15 +1229,12 @@ table {
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">SubPassiveObjDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;も&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;が&quot;</span><span class="p">,</span> <span class="s2">&quot;などが&quot;</span><span class="p">,</span> <span class="s2">&quot;も&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">MultiRoleDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;が&quot;</span><span class="p">,</span> <span class="s2">&quot;などが&quot;</span>
-<span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains functional words that has multiple roles.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -1282,15 +1278,6 @@ table {
       
   
     <div class="desc"><p>Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</p></div>
-  <div class="source_cont">
-</div>
-
-      </div>
-      <div class="item">
-      <p id="naruhodo.utils.dicts.MultiRoleDict" class="name">var <span class="ident">MultiRoleDict</span></p>
-      
-  
-    <div class="desc"><p>Dict that contains functional words that has multiple roles.</p></div>
   <div class="source_cont">
 </div>
 

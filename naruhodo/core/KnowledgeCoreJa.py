@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CabochaClient
-from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, MultiRoleDict, SubPassiveObjDict, NEList
+from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, SubPassiveObjDict, NEList
 
 class KnowledgeCoreJa(object):
     """Analyze the input text and store the information into a knowledge structure graph(KSG)."""
@@ -90,8 +90,6 @@ class KnowledgeCoreJa(object):
         if child.main[-2:] in ["ため", "為め", "爲め"] or child.main[-1] in ["爲", "為"]:
             self._addNode(child.main, child.type, child.main, child.pro, child.NE, child.surface)
             self._addEdge(child.main, pname, label="因果関係候補", etype="aux")
-        elif child.type in [1, 2, 5, -1]:
-            self._addToVList(pname, child)
         
     def _addNoun(self, pid, chunks):
         """Adding node/edge when parent node is noun."""
@@ -112,6 +110,8 @@ class KnowledgeCoreJa(object):
     def _addVerbAdj(self, pid, chunks, mode="verb"):
         """Adding node/edge when parent node is verb."""
         parent = chunks[pid]
+        if len(parent.children) == 0:
+            return
         sub = None
         obj = None
         aux = list()
@@ -126,34 +126,22 @@ class KnowledgeCoreJa(object):
                     sub = child
                 elif child.func in ObjDict:
                     obj = child
-                elif child.func in MultiRoleDict:
-                    if not sub:
-                        sub = child
-                    elif sub.main != child.main:
-                        obj = child
                 elif child.func in ObjPassiveSubDict:
                     if not sub:
                         sub = child
+                    elif not obj:
+                        obj = child
                     else:
                         aux.append(child)
                         auxlabel += "\n{0}".format(child.surface)
                 elif child.func in SubPassiveObjDict:
                     if not obj:
                         obj = child
+                    if not sub:
+                        sub = child
                     else:
                         aux.append(child)
                         auxlabel += "\n{0}".format(child.surface)
-                # elif child.func == "":
-                #     if not sub:
-                #         sub = child
-                #     elif not obj:
-                #         obj = child
-                #     else:
-                #         aux.append(child)
-                #         auxlabel += "\n{0}".format(child.surface)
-                # elif child.func in AuxDict:
-                #     aux.append(child)
-                #     auxlabel += "\n{0}".format(child.surface)
                 elif child.type not in [1, 2, 5, -1]:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
@@ -166,43 +154,25 @@ class KnowledgeCoreJa(object):
             elif child.func in SubPassiveObjDict:
                 if not sub:
                     sub = child
+                elif not obj:
+                    obj = child
                 else:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
-            elif child.func in MultiRoleDict:
-                if not sub:
-                    sub = child
-                elif sub.main != child.main:
-                    obj = child
             elif child.func in ObjPassiveSubDict:
                 if not obj:
                     obj = child
+                if not sub:
+                    sub = child
                 else:
                     aux.append(child)
                     auxlabel += "\n{0}".format(child.surface)
-            # elif child.func == "":
-            #     if not sub:
-            #         sub = child
-            #     elif not obj:
-            #         obj = child
-            #     else:
-            #         aux.append(child)
-            #         auxlabel += "\n{0}".format(child.surface)
-            # elif child.func in AuxDict:
-            #     aux.append(child)
-            #     auxlabel += "\n{0}".format(child.surface)
             elif child.type not in [1, 2, 5, -1]:
                 aux.append(child)
                 auxlabel += "\n{0}".format(child.surface)
             else:
                 pass
 
-        if len(parent.children) == 0 and parent.parent == -1:
-            for i in range(len(parent.children)):
-                child = chunks[parent.children[i]]
-                self._addSpecial(parent.main, child)
-            self._processAux(aux, parent.main)
-            return
         # Entities deemed as nouns.
         if sub:
             # sub.type = 0
