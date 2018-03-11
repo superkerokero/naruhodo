@@ -126,7 +126,7 @@ class parser(object):
         text = self._re1.sub("", text)
         text = self._re2.sub("", text)
         text = self._re3.sub("", text)
-        text = text.replace("・", "、").replace(" ", "").strip()
+        text = text.replace("・", "、").replace("|", "、").replace(" ", "").strip()
         return text.replace("\n", "")
 
     def exportObj(self, texts=None):
