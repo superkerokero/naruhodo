@@ -19,7 +19,7 @@ Supported semantic graph types:
 * knowledge-structure-graph(KSG): A directed graph based on entity-predicate model of knowledge representation.
 * dependency-structure-graph(DSG): A directed graph based on dependency structure.
 
- `naruhodo` provides basic visulization utilities using [nxpd](https://github.com/chebee7i/nxpd). A full-fledged visualization webapp [naruhodo-viewer](https://github.com/superkerokero/naruhodo-viewer) is also available. This webapp provides faster and interactive visualization of large graphs. If you are interested in `naruhodo`'s graphs, you definitely check it out.
+ `naruhodo` provides basic visulization utilities using [nxpd](https://github.com/chebee7i/nxpd). A full-fledged visualization webapp [naruhodo-viewer](https://github.com/superkerokero/naruhodo-viewer) is also available. This webapp provides faster and interactive visualization of large graphs. 
  
 ### Knowledge structure graph(KSG)
 
