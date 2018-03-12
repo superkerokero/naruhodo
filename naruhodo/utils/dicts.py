@@ -5,10 +5,10 @@ This module contains various dicts used in naruhodo.
 
 ProDict = {
     'demonstrative-loc': ["ここ", "そこ", "あそこ", "こっち", "そっち", "あっち", "こちら", "そちら", "あちら"],
-    'demonstrative-obj': ["これ", "それ", "あれ", "こいつ", "そいつ", "あいつ"],
-    'personal1st': ["私", "わたし", "俺", "おれ", "オレ", "僕", "ぼく", "ボク", "我ら", "我々"],
+    'demonstrative-obj': ["これ", "それ", "あれ", "そう", "こう", "こんな", "そんな", "あんな"],
+    'personal1st': ["私", "わたし", "俺", "おれ", "オレ", "僕", "ぼく", "僕ら", "ぼくら", "ボク", "我ら", "我々"],
     'personal2nd': ["君", "きみ", "キミ", "あなた", "貴方", "お前"],
-    'personal3rd': ["やつ", "奴", "彼", "彼女"],
+    'personal3rd': ["やつ", "奴", "彼", "彼女", "こいつ", "そいつ", "あいつ"],
     'indefinite': ["どこ", "どれ", "どっち", "どなた", "どちら"],
     'inclusive': ["皆", "みんな", "みな"],
     'omitted': ["省略される主語"]
@@ -102,8 +102,9 @@ Dict to convert the edge type to edge color.
 
 MeaninglessDict = set([
     "前", "後", "こと", "事", "もの", "物", "者", "ため", "爲", "為", "為め", "爲め", 
-    "意", "上", "うえ", "中", "なか", "下", "した", "なる", "成る", "ある", "よる", "する", "ない", "無い", "から", "だから", "場合",
-    "問題", "もんだい", "内容", "ないよう", "範囲"
+    "意", "上", "うえ", "中", "なか", "下", "した", "なる", "成る", "ある", "よる", "する", 
+    "ない", "無い", "から", "だから", "場合", 
+    "問題", "もんだい", "内容", "ないよう", "範囲", "やつ"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
@@ -139,8 +140,15 @@ ObjDict = set([
 Dict that contains functional words of objects.
 """
 
+ObjPostDict = set([
+    "へ", "に",
+])
+"""
+Dict that contains functional words that can be objects. 
+"""
+
 ObjPassiveSubDict = set([
-    "へ", "に", "と", "ないと", "とは"
+    "と", "ないと", "とは"
 ])
 """
 Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. 

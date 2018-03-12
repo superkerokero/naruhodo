@@ -1054,6 +1054,7 @@ table {
     <li class="mono"><a href="#naruhodo.utils.dicts.NodeType2StyleDict">NodeType2StyleDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ObjDict">ObjDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ObjPassiveSubDict">ObjPassiveSubDict</a></li>
+    <li class="mono"><a href="#naruhodo.utils.dicts.ObjPostDict">ObjPostDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.ProDict">ProDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.SubDict">SubDict</a></li>
     <li class="mono"><a href="#naruhodo.utils.dicts.SubPassiveObjDict">SubPassiveObjDict</a></li>
@@ -1088,10 +1089,10 @@ table {
 
 <span class="n">ProDict</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;demonstrative-loc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ここ&quot;</span><span class="p">,</span> <span class="s2">&quot;そこ&quot;</span><span class="p">,</span> <span class="s2">&quot;あそこ&quot;</span><span class="p">,</span> <span class="s2">&quot;こっち&quot;</span><span class="p">,</span> <span class="s2">&quot;そっち&quot;</span><span class="p">,</span> <span class="s2">&quot;あっち&quot;</span><span class="p">,</span> <span class="s2">&quot;こちら&quot;</span><span class="p">,</span> <span class="s2">&quot;そちら&quot;</span><span class="p">,</span> <span class="s2">&quot;あちら&quot;</span><span class="p">],</span>
-    <span class="s1">&#39;demonstrative-obj&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;これ&quot;</span><span class="p">,</span> <span class="s2">&quot;それ&quot;</span><span class="p">,</span> <span class="s2">&quot;あれ&quot;</span><span class="p">,</span> <span class="s2">&quot;こいつ&quot;</span><span class="p">,</span> <span class="s2">&quot;そいつ&quot;</span><span class="p">,</span> <span class="s2">&quot;あいつ&quot;</span><span class="p">],</span>
-    <span class="s1">&#39;personal1st&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;私&quot;</span><span class="p">,</span> <span class="s2">&quot;わたし&quot;</span><span class="p">,</span> <span class="s2">&quot;俺&quot;</span><span class="p">,</span> <span class="s2">&quot;おれ&quot;</span><span class="p">,</span> <span class="s2">&quot;オレ&quot;</span><span class="p">,</span> <span class="s2">&quot;僕&quot;</span><span class="p">,</span> <span class="s2">&quot;ぼく&quot;</span><span class="p">,</span> <span class="s2">&quot;ボク&quot;</span><span class="p">,</span> <span class="s2">&quot;我ら&quot;</span><span class="p">,</span> <span class="s2">&quot;我々&quot;</span><span class="p">],</span>
+    <span class="s1">&#39;demonstrative-obj&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;これ&quot;</span><span class="p">,</span> <span class="s2">&quot;それ&quot;</span><span class="p">,</span> <span class="s2">&quot;あれ&quot;</span><span class="p">,</span> <span class="s2">&quot;そう&quot;</span><span class="p">,</span> <span class="s2">&quot;こう&quot;</span><span class="p">,</span> <span class="s2">&quot;こんな&quot;</span><span class="p">,</span> <span class="s2">&quot;そんな&quot;</span><span class="p">,</span> <span class="s2">&quot;あんな&quot;</span><span class="p">],</span>
+    <span class="s1">&#39;personal1st&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;私&quot;</span><span class="p">,</span> <span class="s2">&quot;わたし&quot;</span><span class="p">,</span> <span class="s2">&quot;俺&quot;</span><span class="p">,</span> <span class="s2">&quot;おれ&quot;</span><span class="p">,</span> <span class="s2">&quot;オレ&quot;</span><span class="p">,</span> <span class="s2">&quot;僕&quot;</span><span class="p">,</span> <span class="s2">&quot;ぼく&quot;</span><span class="p">,</span> <span class="s2">&quot;僕ら&quot;</span><span class="p">,</span> <span class="s2">&quot;ぼくら&quot;</span><span class="p">,</span> <span class="s2">&quot;ボク&quot;</span><span class="p">,</span> <span class="s2">&quot;我ら&quot;</span><span class="p">,</span> <span class="s2">&quot;我々&quot;</span><span class="p">],</span>
     <span class="s1">&#39;personal2nd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;君&quot;</span><span class="p">,</span> <span class="s2">&quot;きみ&quot;</span><span class="p">,</span> <span class="s2">&quot;キミ&quot;</span><span class="p">,</span> <span class="s2">&quot;あなた&quot;</span><span class="p">,</span> <span class="s2">&quot;貴方&quot;</span><span class="p">,</span> <span class="s2">&quot;お前&quot;</span><span class="p">],</span>
-    <span class="s1">&#39;personal3rd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;やつ&quot;</span><span class="p">,</span> <span class="s2">&quot;奴&quot;</span><span class="p">,</span> <span class="s2">&quot;彼&quot;</span><span class="p">,</span> <span class="s2">&quot;彼女&quot;</span><span class="p">],</span>
+    <span class="s1">&#39;personal3rd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;やつ&quot;</span><span class="p">,</span> <span class="s2">&quot;奴&quot;</span><span class="p">,</span> <span class="s2">&quot;彼&quot;</span><span class="p">,</span> <span class="s2">&quot;彼女&quot;</span><span class="p">,</span> <span class="s2">&quot;こいつ&quot;</span><span class="p">,</span> <span class="s2">&quot;そいつ&quot;</span><span class="p">,</span> <span class="s2">&quot;あいつ&quot;</span><span class="p">],</span>
     <span class="s1">&#39;indefinite&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;どこ&quot;</span><span class="p">,</span> <span class="s2">&quot;どれ&quot;</span><span class="p">,</span> <span class="s2">&quot;どっち&quot;</span><span class="p">,</span> <span class="s2">&quot;どなた&quot;</span><span class="p">,</span> <span class="s2">&quot;どちら&quot;</span><span class="p">],</span>
     <span class="s1">&#39;inclusive&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;皆&quot;</span><span class="p">,</span> <span class="s2">&quot;みんな&quot;</span><span class="p">,</span> <span class="s2">&quot;みな&quot;</span><span class="p">],</span>
     <span class="s1">&#39;omitted&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;省略される主語&quot;</span><span class="p">]</span>
@@ -1185,8 +1186,9 @@ table {
 
 <span class="n">MeaninglessDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
     <span class="s2">&quot;前&quot;</span><span class="p">,</span> <span class="s2">&quot;後&quot;</span><span class="p">,</span> <span class="s2">&quot;こと&quot;</span><span class="p">,</span> <span class="s2">&quot;事&quot;</span><span class="p">,</span> <span class="s2">&quot;もの&quot;</span><span class="p">,</span> <span class="s2">&quot;物&quot;</span><span class="p">,</span> <span class="s2">&quot;者&quot;</span><span class="p">,</span> <span class="s2">&quot;ため&quot;</span><span class="p">,</span> <span class="s2">&quot;爲&quot;</span><span class="p">,</span> <span class="s2">&quot;為&quot;</span><span class="p">,</span> <span class="s2">&quot;為め&quot;</span><span class="p">,</span> <span class="s2">&quot;爲め&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;上&quot;</span><span class="p">,</span> <span class="s2">&quot;うえ&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なか&quot;</span><span class="p">,</span> <span class="s2">&quot;下&quot;</span><span class="p">,</span> <span class="s2">&quot;した&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;成る&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;無い&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span><span class="p">,</span> <span class="s2">&quot;場合&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;問題&quot;</span><span class="p">,</span> <span class="s2">&quot;もんだい&quot;</span><span class="p">,</span> <span class="s2">&quot;内容&quot;</span><span class="p">,</span> <span class="s2">&quot;ないよう&quot;</span><span class="p">,</span> <span class="s2">&quot;範囲&quot;</span>
+    <span class="s2">&quot;意&quot;</span><span class="p">,</span> <span class="s2">&quot;上&quot;</span><span class="p">,</span> <span class="s2">&quot;うえ&quot;</span><span class="p">,</span> <span class="s2">&quot;中&quot;</span><span class="p">,</span> <span class="s2">&quot;なか&quot;</span><span class="p">,</span> <span class="s2">&quot;下&quot;</span><span class="p">,</span> <span class="s2">&quot;した&quot;</span><span class="p">,</span> <span class="s2">&quot;なる&quot;</span><span class="p">,</span> <span class="s2">&quot;成る&quot;</span><span class="p">,</span> <span class="s2">&quot;ある&quot;</span><span class="p">,</span> <span class="s2">&quot;よる&quot;</span><span class="p">,</span> <span class="s2">&quot;する&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;ない&quot;</span><span class="p">,</span> <span class="s2">&quot;無い&quot;</span><span class="p">,</span> <span class="s2">&quot;から&quot;</span><span class="p">,</span> <span class="s2">&quot;だから&quot;</span><span class="p">,</span> <span class="s2">&quot;場合&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;問題&quot;</span><span class="p">,</span> <span class="s2">&quot;もんだい&quot;</span><span class="p">,</span> <span class="s2">&quot;内容&quot;</span><span class="p">,</span> <span class="s2">&quot;ないよう&quot;</span><span class="p">,</span> <span class="s2">&quot;範囲&quot;</span><span class="p">,</span> <span class="s2">&quot;やつ&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.</span>
@@ -1222,8 +1224,15 @@ table {
 <span class="sd">Dict that contains functional words of objects.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">ObjPostDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
+    <span class="s2">&quot;へ&quot;</span><span class="p">,</span> <span class="s2">&quot;に&quot;</span><span class="p">,</span>
+<span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dict that contains functional words that can be objects. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="n">ObjPassiveSubDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span>
-    <span class="s2">&quot;へ&quot;</span><span class="p">,</span> <span class="s2">&quot;に&quot;</span><span class="p">,</span> <span class="s2">&quot;と&quot;</span><span class="p">,</span> <span class="s2">&quot;ないと&quot;</span><span class="p">,</span> <span class="s2">&quot;とは&quot;</span>
+    <span class="s2">&quot;と&quot;</span><span class="p">,</span> <span class="s2">&quot;ないと&quot;</span><span class="p">,</span> <span class="s2">&quot;とは&quot;</span>
 <span class="p">])</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs. </span>
@@ -1347,6 +1356,15 @@ table {
       
   
     <div class="desc"><p>Dict that contains functional words that can be objects for normal verbs and subjects for passive verbs.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.utils.dicts.ObjPostDict" class="name">var <span class="ident">ObjPostDict</span></p>
+      
+  
+    <div class="desc"><p>Dict that contains functional words that can be objects.</p></div>
   <div class="source_cont">
 </div>
 

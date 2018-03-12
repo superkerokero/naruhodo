@@ -265,7 +265,7 @@ class parser(object):
                     if A in self.wv and B in self.wv:
                         sim = cosSimilarity(self.wv[A], self.wv[B])
                     else:
-                        sim = 0.
+                        sim = 1.
                 if inc == 1 and sim > 0.5:
                     # self.G.nodes[flatEntityList[i]]['count'] += 1
                     self.G.add_edge(flatEntityList[i], flatEntityList[j], weight=1, label="同義語候補", type="synonym")

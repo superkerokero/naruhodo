@@ -102,6 +102,8 @@ pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
   | NE       | An integer representing the named-entity(NE) type of this node. For meanings of integers, refer to the table of NE types below. |
   | pos      | A list of integers representing the id of sentences where this node appears.                                                    |
   | surface  | A list of strings that stores the surfaces of this node(original form as it appears in the text).                                         |
+  | yomi  | A string that stores the yomi of the surface of this node.                    |
+  | sub  | A string that stores the subject of this node(if none it will be an empty string).                    |
 
 * **ノードのタイプ**
 
@@ -178,6 +180,10 @@ Python API ドキュメントはここ:
 
 ## Change-Log
 
+* 0.2.6
+  * Improved subject & object searching logic.
+  * Removed some debugging output.
+  * Added 'yomi' and 'sub' property to nodes.
 * 0.2.5
   * Restricted the source node of 'aux' edges to certain node types(stored in EntityTypeDict).
   * Added 'yomi' property to CaboChunks.

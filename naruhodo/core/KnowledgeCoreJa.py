@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CaboChunk, CabochaClient
-from naruhodo.utils.dicts import MeaninglessDict, SubDict, ObjDict, ObjPassiveSubDict, SubPassiveObjDict, NEList, EntityTypeDict
+from naruhodo.utils.dicts import MeaninglessDict, SubDict, ObjDict, ObjPostDict, ObjPassiveSubDict, SubPassiveObjDict, NEList, EntityTypeDict
 
 class KnowledgeCoreJa(object):
     """Analyze the input text and store the information into a knowledge structure graph(KSG)."""
@@ -73,6 +73,7 @@ class KnowledgeCoreJa(object):
         obj = None
         aux = list()
         auxlabel = ""
+        # 1st round find absolute subject & object
         for i in range(len(parent.children)):
             child = chunks[parent.children[i]]
             # Process by categories.
@@ -80,6 +81,19 @@ class KnowledgeCoreJa(object):
                 sub = child
             elif child.func in ObjDict:
                 obj = child
+
+        # 2nd round find potential subject & object with aux.
+        for i in range(len(parent.children)):
+            child = chunks[parent.children[i]]
+            # Process by categories.
+            if child.func in SubDict or child.func in ObjDict:
+                continue
+            elif child.func in ObjPostDict:
+                if not obj and child.type in EntityTypeDict:
+                    obj = child
+                else:
+                    aux.append(child.id)
+                    auxlabel += "[{0}]\n".format(child.surface)
             elif child.func in SubPassiveObjDict:
                 if parent.passive == 1:
                     if not obj and child.type in EntityTypeDict:
@@ -101,7 +115,7 @@ class KnowledgeCoreJa(object):
                 if parent.passive == 1:
                     if not sub and child.type in EntityTypeDict:
                         sub = child
-                    elif not obj:
+                    elif not obj and child.type in EntityTypeDict:
                         obj = child
                     else:
                         aux.append(child.id)
@@ -109,7 +123,7 @@ class KnowledgeCoreJa(object):
                 else:
                     if not obj and child.type in EntityTypeDict:
                         obj = child
-                    elif not sub:
+                    elif not sub and child.type in EntityTypeDict:
                         sub = child
                     else:
                         aux.append(child.id)
@@ -198,4 +212,5 @@ class KnowledgeCoreJa(object):
                             NE = node.NE, 
                             pos = [self.pos], 
                             surface = [node.surface],
+                            yomi = node.yomi,
                             sub = sub)
