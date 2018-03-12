@@ -110,6 +110,11 @@ class CaboChunk(object):
         If chunk contains ? 1, else 0.
         """
 
+        self.yomi = ""
+        """
+        Contains the yomi of this chunk's surface.
+        """
+
         self.tense = 0 
         """
         If chunk has no tense or present 0, elif past -1, elif present continuous 1
@@ -173,6 +178,10 @@ class CaboChunk(object):
         # if inp[1] != "記号" or inp[0] == "？":
         #     self.surface += inp[0]
         self.surface += inp[0]
+        if len(inp) > 8:
+            self.yomi += inp[8]
+        else:
+            self.yomi += inp[0]
         elem = {
             'surface': inp[0],
             'lemma' : inp[7],

@@ -6,7 +6,7 @@ from nxpd import draw
 from naruhodo.utils.scraper import NScraper
 from naruhodo.utils.dicts import NEList
 from naruhodo.utils.misc import exportToJsonObj, exportToJsonFile
-from naruhodo.utils.misc import getNodeProperties, getEdgeProperties, inclusive, harmonicSim
+from naruhodo.utils.misc import getNodeProperties, getEdgeProperties, inclusive, harmonicSim, cosSimilarity
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
 from naruhodo.core.KnowledgeCoreJa import KnowledgeCoreJa
 
@@ -258,10 +258,18 @@ class parser(object):
                 A = self._preprocessText(flatEntityList[i])
                 B = self._preprocessText(flatEntityList[j])
                 inc = inclusive(A, B)
-                if inc == 1:
+                if not self.wv:
+                    sim = 1.
+                    print("Word vector model is not set correctly. Skipping part of coreference resolution.")
+                else:
+                    if A in self.wv and B in self.wv:
+                        sim = cosSimilarity(self.wv[A], self.wv[B])
+                    else:
+                        sim = 0.
+                if inc == 1 and sim > 0.5:
                     # self.G.nodes[flatEntityList[i]]['count'] += 1
                     self.G.add_edge(flatEntityList[i], flatEntityList[j], weight=1, label="同義語候補", type="synonym")
-                elif inc == -1:
+                elif inc == -1 and sim > 0.5:
                     # self.G.nodes[flatEntityList[j]]['count'] += 1
                     self.G.add_edge(flatEntityList[j], flatEntityList[i], weight=1, label="同義語候補", type="synonym")
         # Get position-based entity list
@@ -342,7 +350,7 @@ class parser(object):
                     if sim < score:
                         sim = score
                         ret = item
-            if sim > 0.4:
+            if sim > 0.5:
                 return ret
             else:
                 return ""        

@@ -156,3 +156,8 @@ Dict that contains functional words that can be objects for normal verbs and sub
 """
 Dict that contains functional words that has multiple roles.
 """
+
+EntityTypeDict = set([0, 2])
+"""
+Dict of node types that can be potential entities.
+"""
