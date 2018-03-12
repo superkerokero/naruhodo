@@ -1048,6 +1048,7 @@ table {
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.NEList">NEList</a></li>
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.ObjDict">ObjDict</a></li>
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.ObjPassiveSubDict">ObjPassiveSubDict</a></li>
+    <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.ObjPostDict">ObjPostDict</a></li>
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.SubDict">SubDict</a></li>
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.SubPassiveObjDict">SubPassiveObjDict</a></li>
   </ul>
@@ -1089,7 +1090,7 @@ table {
     <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.communication</span> <span class="kn">import</span> <span class="n">Subprocess</span>
 <span class="kn">from</span> <span class="nn">naruhodo.backends.cabocha</span> <span class="kn">import</span> <span class="n">CaboChunk</span><span class="p">,</span> <span class="n">CabochaClient</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">SubDict</span><span class="p">,</span> <span class="n">ObjDict</span><span class="p">,</span> <span class="n">ObjPassiveSubDict</span><span class="p">,</span> <span class="n">SubPassiveObjDict</span><span class="p">,</span> <span class="n">NEList</span><span class="p">,</span> <span class="n">EntityTypeDict</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">SubDict</span><span class="p">,</span> <span class="n">ObjDict</span><span class="p">,</span> <span class="n">ObjPostDict</span><span class="p">,</span> <span class="n">ObjPassiveSubDict</span><span class="p">,</span> <span class="n">SubPassiveObjDict</span><span class="p">,</span> <span class="n">NEList</span><span class="p">,</span> <span class="n">EntityTypeDict</span>
 
 <span class="k">class</span> <span class="nc">KnowledgeCoreJa</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge structure graph(KSG).&quot;&quot;&quot;</span>
@@ -1161,6 +1162,7 @@ table {
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">aux</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">auxlabel</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># 1st round find absolute subject &amp; object</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
             <span class="n">child</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
             <span class="c1"># Process by categories.</span>
@@ -1168,6 +1170,19 @@ table {
                 <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjDict</span><span class="p">:</span>
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+
+        <span class="c1"># 2nd round find potential subject &amp; object with aux.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="c1"># Process by categories.</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubDict</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjDict</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjPostDict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                    <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
@@ -1189,7 +1204,7 @@ table {
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -1197,7 +1212,7 @@ table {
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -1249,7 +1264,6 @@ table {
     <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
         <span class="c1"># Get rep.</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">)</span>
         <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
@@ -1287,6 +1301,7 @@ table {
                             <span class="n">NE</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">,</span> 
                             <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">],</span> 
                             <span class="n">surface</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">],</span>
+                            <span class="n">yomi</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">,</span>
                             <span class="n">sub</span> <span class="o">=</span> <span class="n">sub</span><span class="p">)</span>
 </pre></div>
 
@@ -1330,6 +1345,14 @@ table {
       </div>
       <div class="item">
       <p id="naruhodo.core.KnowledgeCoreJa.ObjPassiveSubDict" class="name">var <span class="ident">ObjPassiveSubDict</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="naruhodo.core.KnowledgeCoreJa.ObjPostDict" class="name">var <span class="ident">ObjPostDict</span></p>
       
   
   <div class="source_cont">
@@ -1434,6 +1457,7 @@ table {
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">aux</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">auxlabel</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># 1st round find absolute subject &amp; object</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
             <span class="n">child</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
             <span class="c1"># Process by categories.</span>
@@ -1441,6 +1465,19 @@ table {
                 <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjDict</span><span class="p">:</span>
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+
+        <span class="c1"># 2nd round find potential subject &amp; object with aux.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)):</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="c1"># Process by categories.</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubDict</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjDict</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjPostDict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                    <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
@@ -1462,7 +1499,7 @@ table {
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -1470,7 +1507,7 @@ table {
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -1522,7 +1559,6 @@ table {
     <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
         <span class="c1"># Get rep.</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">)</span>
         <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
@@ -1560,6 +1596,7 @@ table {
                             <span class="n">NE</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">,</span> 
                             <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">],</span> 
                             <span class="n">surface</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">],</span>
+                            <span class="n">yomi</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">,</span>
                             <span class="n">sub</span> <span class="o">=</span> <span class="n">sub</span><span class="p">)</span>
 </pre></div>
 

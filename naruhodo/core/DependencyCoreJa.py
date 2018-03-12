@@ -92,4 +92,5 @@ class DependencyCoreJa(object):
                             NE = node.NE, 
                             pos = [self.pos], 
                             surface = [node.surface],
+                            yomi = node.yomi,
                             sub = sub)
