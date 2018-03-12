@@ -161,7 +161,6 @@ class KnowledgeCoreJa(object):
     def _addNode(self, node, sub=''):
         """Add node to node list"""
         # Get rep.
-        print(node.surface, node.yomi)
         bpos = node.main.find("[")
         if bpos == -1:
             rep = node.main
