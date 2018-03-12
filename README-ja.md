@@ -178,6 +178,10 @@ Python API ドキュメントはここ:
 
 ## Change-Log
 
+* 0.2.5
+  * Restricted the source node of 'aux' edges to certain node types(stored in EntityTypeDict).
+  * Added 'yomi' property to CaboChunks.
+  * Added word embedding cosine similarity threshold for synonym identification.
 * 0.2.4
   * Refactored KSG core for better code clearance and some bug fixes.
 * 0.2.3

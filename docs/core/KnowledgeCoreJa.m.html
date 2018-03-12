@@ -1043,7 +1043,7 @@ table {
     <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
       
   <ul>
-    <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.AuxDict">AuxDict</a></li>
+    <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.EntityTypeDict">EntityTypeDict</a></li>
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.MeaninglessDict">MeaninglessDict</a></li>
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.NEList">NEList</a></li>
     <li class="mono"><a href="#naruhodo.core.KnowledgeCoreJa.ObjDict">ObjDict</a></li>
@@ -1089,7 +1089,7 @@ table {
     <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.communication</span> <span class="kn">import</span> <span class="n">Subprocess</span>
 <span class="kn">from</span> <span class="nn">naruhodo.backends.cabocha</span> <span class="kn">import</span> <span class="n">CaboChunk</span><span class="p">,</span> <span class="n">CabochaClient</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">AuxDict</span><span class="p">,</span> <span class="n">SubDict</span><span class="p">,</span> <span class="n">ObjDict</span><span class="p">,</span> <span class="n">ObjPassiveSubDict</span><span class="p">,</span> <span class="n">SubPassiveObjDict</span><span class="p">,</span> <span class="n">NEList</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">SubDict</span><span class="p">,</span> <span class="n">ObjDict</span><span class="p">,</span> <span class="n">ObjPassiveSubDict</span><span class="p">,</span> <span class="n">SubPassiveObjDict</span><span class="p">,</span> <span class="n">NEList</span><span class="p">,</span> <span class="n">EntityTypeDict</span>
 
 <span class="k">class</span> <span class="nc">KnowledgeCoreJa</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge structure graph(KSG).&quot;&quot;&quot;</span>
@@ -1144,6 +1144,7 @@ table {
             <span class="n">omitted</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">omitted</span><span class="o">.</span><span class="n">pro</span> <span class="o">=</span> <span class="mi">7</span>
             <span class="n">omitted</span><span class="o">.</span><span class="n">surface</span> <span class="o">=</span> <span class="s2">&quot;省略される主語&quot;</span>
+            <span class="n">omitted</span><span class="o">.</span><span class="n">yomi</span> <span class="o">=</span> <span class="s2">&quot;ショウリャクサレルシュゴ&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">omitted</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">omitted</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;(省略)主体&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;sub&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">omitted</span><span class="o">.</span><span class="n">main</span>
@@ -1169,24 +1170,24 @@ table {
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjPassiveSubDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
@@ -1194,7 +1195,7 @@ table {
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
@@ -1248,6 +1249,7 @@ table {
     <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
         <span class="c1"># Get rep.</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">)</span>
         <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
@@ -1295,7 +1297,7 @@ table {
   <section id="section-items">
     <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
-      <p id="naruhodo.core.KnowledgeCoreJa.AuxDict" class="name">var <span class="ident">AuxDict</span></p>
+      <p id="naruhodo.core.KnowledgeCoreJa.EntityTypeDict" class="name">var <span class="ident">EntityTypeDict</span></p>
       
   
   <div class="source_cont">
@@ -1415,6 +1417,7 @@ table {
             <span class="n">omitted</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">omitted</span><span class="o">.</span><span class="n">pro</span> <span class="o">=</span> <span class="mi">7</span>
             <span class="n">omitted</span><span class="o">.</span><span class="n">surface</span> <span class="o">=</span> <span class="s2">&quot;省略される主語&quot;</span>
+            <span class="n">omitted</span><span class="o">.</span><span class="n">yomi</span> <span class="o">=</span> <span class="s2">&quot;ショウリャクサレルシュゴ&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">omitted</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">omitted</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;(省略)主体&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;sub&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">omitted</span><span class="o">.</span><span class="n">main</span>
@@ -1440,24 +1443,24 @@ table {
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubPassiveObjDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ObjPassiveSubDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">passive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
@@ -1465,7 +1468,7 @@ table {
                         <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                         <span class="n">auxlabel</span> <span class="o">+=</span> <span class="s2">&quot;[{0}]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">EntityTypeDict</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">child</span>
                     <span class="k">elif</span> <span class="ow">not</span> <span class="n">sub</span><span class="p">:</span>
                         <span class="n">sub</span> <span class="o">=</span> <span class="n">child</span>
@@ -1519,6 +1522,7 @@ table {
     <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
         <span class="c1"># Get rep.</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">)</span>
         <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
@@ -1653,6 +1657,7 @@ table {
         <span class="n">omitted</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">omitted</span><span class="o">.</span><span class="n">pro</span> <span class="o">=</span> <span class="mi">7</span>
         <span class="n">omitted</span><span class="o">.</span><span class="n">surface</span> <span class="o">=</span> <span class="s2">&quot;省略される主語&quot;</span>
+        <span class="n">omitted</span><span class="o">.</span><span class="n">yomi</span> <span class="o">=</span> <span class="s2">&quot;ショウリャクサレルシュゴ&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">omitted</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">omitted</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;(省略)主体&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;sub&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">omitted</span><span class="o">.</span><span class="n">main</span>

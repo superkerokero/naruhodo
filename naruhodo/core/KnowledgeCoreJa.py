@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CaboChunk, CabochaClient
-from naruhodo.utils.dicts import MeaninglessDict, AuxDict, SubDict, ObjDict, ObjPassiveSubDict, SubPassiveObjDict, NEList
+from naruhodo.utils.dicts import MeaninglessDict, SubDict, ObjDict, ObjPassiveSubDict, SubPassiveObjDict, NEList, EntityTypeDict
 
 class KnowledgeCoreJa(object):
     """Analyze the input text and store the information into a knowledge structure graph(KSG)."""
@@ -56,6 +56,7 @@ class KnowledgeCoreJa(object):
             omitted.type = 0
             omitted.pro = 7
             omitted.surface = "省略される主語"
+            omitted.yomi = "ショウリャクサレルシュゴ"
             self._addNode(omitted)
             self._addEdge(omitted.main, cabo.chunks[cabo.root].main, label="(省略)主体", etype="sub")
             self.G.nodes[cabo.chunks[cabo.root].main]['sub'] = omitted.main
@@ -81,24 +82,24 @@ class KnowledgeCoreJa(object):
                 obj = child
             elif child.func in SubPassiveObjDict:
                 if parent.passive == 1:
-                    if not obj:
+                    if not obj and child.type in EntityTypeDict:
                         obj = child
-                    elif not sub:
+                    elif not sub and child.type in EntityTypeDict:
                         sub = child
                     else:
                         aux.append(child.id)
                         auxlabel += "[{0}]\n".format(child.surface)
                 else:
-                    if not sub:
+                    if not sub and child.type in EntityTypeDict:
                         sub = child
-                    elif not obj:
+                    elif not obj and child.type in EntityTypeDict:
                         obj = child
                     else:
                         aux.append(child.id)
                         auxlabel += "[{0}]\n".format(child.surface)
             elif child.func in ObjPassiveSubDict:
                 if parent.passive == 1:
-                    if not sub:
+                    if not sub and child.type in EntityTypeDict:
                         sub = child
                     elif not obj:
                         obj = child
@@ -106,7 +107,7 @@ class KnowledgeCoreJa(object):
                         aux.append(child.id)
                         auxlabel += "[{0}]\n".format(child.surface)
                 else:
-                    if not obj:
+                    if not obj and child.type in EntityTypeDict:
                         obj = child
                     elif not sub:
                         sub = child
@@ -160,6 +161,7 @@ class KnowledgeCoreJa(object):
     def _addNode(self, node, sub=''):
         """Add node to node list"""
         # Get rep.
+        print(node.surface, node.yomi)
         bpos = node.main.find("[")
         if bpos == -1:
             rep = node.main

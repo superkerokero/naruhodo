@@ -1205,6 +1205,11 @@ table {
 <span class="sd">        If chunk contains ? 1, else 0.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Contains the yomi of this chunk&#39;s surface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="mi">0</span> 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If chunk has no tense or present 0, elif past -1, elif present continuous 1</span>
@@ -1268,6 +1273,10 @@ table {
         <span class="c1"># if inp[1] != &quot;記号&quot; or inp[0] == &quot;？&quot;:</span>
         <span class="c1">#     self.surface += inp[0]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">surface</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;surface&#39;</span><span class="p">:</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;lemma&#39;</span> <span class="p">:</span> <span class="n">inp</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
@@ -1711,6 +1720,11 @@ table {
 <span class="sd">        If chunk contains ? 1, else 0.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Contains the yomi of this chunk&#39;s surface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="mi">0</span> 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If chunk has no tense or present 0, elif past -1, elif present continuous 1</span>
@@ -1774,6 +1788,10 @@ table {
         <span class="c1"># if inp[1] != &quot;記号&quot; or inp[0] == &quot;？&quot;:</span>
         <span class="c1">#     self.surface += inp[0]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">surface</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;surface&#39;</span><span class="p">:</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;lemma&#39;</span> <span class="p">:</span> <span class="n">inp</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
@@ -2107,6 +2125,10 @@ table {
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If chunk contains ? 1, else 0.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Contains the yomi of this chunk&#39;s surface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tense</span> <span class="o">=</span> <span class="mi">0</span> 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If chunk has no tense or present 0, elif past -1, elif present continuous 1</span>
@@ -2189,6 +2211,10 @@ table {
     <span class="c1"># if inp[1] != &quot;記号&quot; or inp[0] == &quot;？&quot;:</span>
     <span class="c1">#     self.surface += inp[0]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">surface</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yomi</span> <span class="o">+=</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">elem</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;surface&#39;</span><span class="p">:</span> <span class="n">inp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="s1">&#39;lemma&#39;</span> <span class="p">:</span> <span class="n">inp</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
@@ -2565,6 +2591,17 @@ NEtype = NEList[NE].</p>
             
   
     <div class="desc"><p>list of verbs 動詞</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.backends.cabocha.CaboChunk.yomi" class="name">var <span class="ident">yomi</span></p>
+            
+
+            
+  
+    <div class="desc"><p>Contains the yomi of this chunk's surface.</p></div>
   <div class="source_cont">
 </div>
 
