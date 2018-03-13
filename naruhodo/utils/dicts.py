@@ -79,7 +79,10 @@ EdgeType2StyleDict = {
     "aux": "dotted",
     "cause": "dotted",
     "coref": "solid",
-    "synonym": "solid"
+    "synonym": "solid",
+    "para": "solid",
+    "attr": "dotted",
+    "stat": "solid"
 }
 """
 Dict to convert the edge type to edge style.
@@ -93,7 +96,10 @@ EdgeType2ColorDict = {
     "aux": "#ff7777",
     "cause": "#91027e",
     "coref": "#3582ff",
-    "synonym": "#00ffb6"
+    "synonym": "#00ffb6",
+    "para": "#207272",
+    "attr": "#7738ff",
+    "stat": "#66aaee"
 }
 """
 Dict to convert the edge type to edge color.
@@ -127,7 +133,7 @@ Dict that contains functional words of auxilaries.
 """
 
 SubDict = set([
-    "は",
+    "は", "では", "などは"
 ])
 """
 Dict that contains functional words of subjects.
@@ -168,4 +174,11 @@ Dict that contains functional words that has multiple roles.
 EntityTypeDict = set([0, 2])
 """
 Dict of node types that can be potential entities.
+"""
+
+ParallelDict = set([
+    "と", "などと", "や", "やら", "も", "、", "・", "｜"
+])
+"""
+Dict that contains functional words that can be objects. 
 """

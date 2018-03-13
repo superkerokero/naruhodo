@@ -232,7 +232,9 @@ class CaboChunk(object):
             self.main = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
             if len(self.adjs) > 0:
-                self.main += "：" + self.adjs[0]['lemma']
+                if self.adjs[0]['lemma'] == "ない":
+                    self.main += "\n(否定)"
+                    self.negative = 1
             # Corrections for special patterns.
             if self.nouns[0]['labels'][0] == 'サ変接続':
                 if len(self.nouns) > 1 and len(self.verbs) == 0:
@@ -286,6 +288,7 @@ class CaboChunk(object):
             self.main = self.adjs[0]['lemma']
             self.type = 1
             if self.adjs[0]['lemma'] == "ない":
+                self.main += "\n(否定)"
                 self.negative = 1
         elif len(self.verbs) > 0:
             self.main = self.verbs[0]['lemma']
@@ -387,6 +390,7 @@ class CaboChunk(object):
 
         if len(self.signs) > 0:
             for item in self.signs:
+                self.func += item['surface']
                 if item['surface'] ==  '？':
                     self.func += item['surface']
                     self.question = 1

@@ -1,7 +1,7 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CaboChunk, CabochaClient
-from naruhodo.utils.dicts import MeaninglessDict, SubDict, ObjDict, ObjPostDict, ObjPassiveSubDict, SubPassiveObjDict, NEList, EntityTypeDict
+from naruhodo.utils.dicts import MeaninglessDict, SubDict, ObjDict, ObjPostDict, ObjPassiveSubDict, SubPassiveObjDict, NEList, EntityTypeDict, ParallelDict
 
 class KnowledgeCoreJa(object):
     """Analyze the input text and store the information into a knowledge structure graph(KSG)."""
@@ -32,6 +32,7 @@ class KnowledgeCoreJa(object):
     def add(self, inp, pos):
         """Take in a string input and add it to the knowledge structure graph(KSG)."""
         self.pos = pos
+        self.para = list()
         # Call backend for dependency parsing.
         cabo = CabochaClient()
         cabo.add(self.proc.query(inp), self.pos)
@@ -48,14 +49,15 @@ class KnowledgeCoreJa(object):
         for i in range(len(plist)):
             pid = plist[i]
             self._addChildren(pid, cabo.chunks)
+        self._processPara()
         # If root has no subject, add omitted subject node.
         if self.G.nodes[cabo.chunks[cabo.root].main]['sub'] == '':
             omitted = CaboChunk(-1, cabo.root)
-            omitted.main = "省略される主語[{0}@{1}]".format(self.pos, 0)
+            omitted.main = "省略される主体[{0}@{1}]".format(self.pos, 0)
             omitted.func = "(省略)"
             omitted.type = 0
             omitted.pro = 7
-            omitted.surface = "省略される主語"
+            omitted.surface = "省略される主体"
             omitted.yomi = "ショウリャクサレルシュゴ"
             self._addNode(omitted)
             self._addEdge(omitted.main, cabo.chunks[cabo.root].main, label="(省略)主体", etype="sub")
@@ -66,7 +68,58 @@ class KnowledgeCoreJa(object):
             if cabo.chunks[pid].type in [1, 2] and self.G.nodes[cabo.chunks[pid].main]['sub']== "":
                 self._addEdge(self.G.nodes[cabo.chunks[cabo.root].main]['sub'], cabo.chunks[pid].main, label="主体候補", etype="autosub")
                 self.G.nodes[cabo.chunks[pid].main]['sub'] = self.G.nodes[cabo.chunks[cabo.root].main]['sub']
+
     def _addChildren(self, pid, chunks):
+        """Add children following rules."""
+        if chunks[pid].type == 0:
+            self._addEntity(pid, chunks)
+        else:
+            self._addPredicate(pid, chunks)
+
+    def _processPara(self):
+        """Process parallel words pairs."""
+        if self.para:
+            for pair in self.para:
+                # Add A properties to B
+                for key in self.G.successors(pair[0]):
+                    if key != pair[1]:
+                        self._addEdge(pair[1], key, label=self.G.edges[pair[0], key]['label'], etype=self.G.edges[pair[0], key]['type'])
+                # Add B properties to A
+                for key in self.G.successors(pair[1]):
+                    if key != pair[0]:
+                        self._addEdge(pair[0], key, label=self.G.edges[pair[1], key]['label'], etype=self.G.edges[pair[1], key]['type'])
+
+    def _addEntity(self, pid, chunks):
+        """Add parent nodes that are nouns."""
+        parent = chunks[pid]
+        sub = None
+        # Find subject
+        for i in range(len(parent.children)):
+            child = chunks[parent.children[i]]
+            if child.func in SubDict:
+                sub = child
+        if sub:
+            self._addNode(parent, sub=sub.main)
+            self._addEdge(sub.main, parent.main, label="陳述", etype="stat")
+        else:
+            self._addNode(parent)
+        
+        # Lopp through all children
+        for i in range(len(parent.children)):
+            child = chunks[parent.children[i]]
+            # If child is noun
+            if child.func in SubDict:
+                continue
+            elif child.type == 0 and child.func in ParallelDict:
+                self._addNode(child)
+                self._addEdge(child.main, parent.main, label="並列", etype="para")
+                self._addEdge(parent.main, child.main, label="並列", etype="para")
+                self.para.append([child.main, parent.main])
+            else:
+                self._addNode(child)
+                self._addEdge(child.main, parent.main, label=child.func, etype="attr")
+
+    def _addPredicate(self, pid, chunks):
         """Add children following rules."""
         parent = chunks[pid]
         sub = None
@@ -150,7 +203,7 @@ class KnowledgeCoreJa(object):
         self._processAux(aux, parent.main, chunks)        
 
     def _processAux(self, aux, pname, chunks):
-        """Process aux words and vlist if any."""
+        """Process aux list if any."""
         if len(aux) > 0:
             for nid in aux:
                 if not self.G.has_node(chunks[nid].main):

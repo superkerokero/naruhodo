@@ -67,6 +67,9 @@ class parser(object):
                 self.pool = Pool(processes=nproc)
         # load word vectors
         self.wv = None
+        """
+        The word vector dictionary loaded from external model files.
+        """
         if wv != "":
             try:
                 from gensim.models.word2vec import Word2Vec
