@@ -4,11 +4,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
     <title>naruhodo API documentation</title>
-    <meta name="description" content="Naruhodo 0.2.7
+    <meta name="description" content="# Naruhodo 0.2.7
 
-A python library for automatic semantic graph generation from human-readable text.
-
-..." />
+A python library for automatic semantic graph generation from human-readable text...." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -1066,68 +1064,84 @@ table {
 
   <header id="section-intro">
   <h1 class="title"><span class="name">naruhodo</span> module</h1>
-  <p>Naruhodo 0.2.7</p>
+  <h1>Naruhodo 0.2.7</h1>
 <p>A python library for automatic semantic graph generation from human-readable text.</p>
 <h2>Change-Log</h2>
-<h1>0.2.7</h1>
+<h3>0.2.7</h3>
 <ul>
 <li>Added new edge types: "para", "attr", "stat".</li>
 <li>Tweaks for naruhodo-viewer's clustering function. </li>
-<li>0.2.6</li>
+</ul>
+<h3>0.2.6</h3>
+<ul>
 <li>Improved subject &amp; object searching logic.</li>
 <li>Removed some debugging output.</li>
 <li>Added 'yomi' and 'sub' property to nodes.</li>
-<li>0.2.5</li>
+</ul>
+<h3>0.2.5</h3>
+<ul>
 <li>Restricted the source node of 'aux' edges to certain node types(stored in EntityTypeDict).</li>
 <li>Added 'yomi' property to CaboChunks.</li>
 <li>Added word embedding cosine similarity threshold for synonym identification.</li>
-<li>0.2.4</li>
+</ul>
+<h3>0.2.4</h3>
+<ul>
 <li>Refactored KSG core for better code clearance and some bug fixes.</li>
-<li>0.2.3</li>
+</ul>
+<h3>0.2.3</h3>
+<ul>
 <li>Fixed a bug in KSG core causing repetitive nodes added to graph.</li>
-<li>0.2.2</li>
+</ul>
+<h3>0.2.2</h3>
+<ul>
 <li>Tweaks for use with naruhodo-viewer.</li>
-<li>0.2.1</li>
+</ul>
+<h3>0.2.1</h3>
+<ul>
 <li>Primitive coreference resolution for Japanese.</li>
-<li>0.2.0</li>
+</ul>
+<h3>0.2.0</h3>
+<ul>
 <li>Major API change for multi-language support and parallel processing. </li>
 <li>Parallel processing support for parsing using multiprocessing module. </li>
-<li>0.1.0</li>
+</ul>
+<h3>0.1.0</h3>
+<ul>
 <li>Initial version</li>
 </ul>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo" class="source">
     <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Naruhodo 0.2.7</span>
+<span class="sd"># Naruhodo 0.2.7</span>
 
 <span class="sd">A python library for automatic semantic graph generation from human-readable text.</span>
 
 <span class="sd">## Change-Log</span>
 
-<span class="sd"># 0.2.7</span>
+<span class="sd">### 0.2.7</span>
 <span class="sd">  * Added new edge types: &quot;para&quot;, &quot;attr&quot;, &quot;stat&quot;.</span>
 <span class="sd">  * Tweaks for naruhodo-viewer&#39;s clustering function. </span>
-<span class="sd">* 0.2.6</span>
+<span class="sd">### 0.2.6</span>
 <span class="sd">  * Improved subject &amp; object searching logic.</span>
 <span class="sd">  * Removed some debugging output.</span>
 <span class="sd">  * Added &#39;yomi&#39; and &#39;sub&#39; property to nodes.</span>
-<span class="sd">* 0.2.5</span>
+<span class="sd">### 0.2.5</span>
 <span class="sd">  * Restricted the source node of &#39;aux&#39; edges to certain node types(stored in EntityTypeDict).</span>
 <span class="sd">  * Added &#39;yomi&#39; property to CaboChunks.</span>
 <span class="sd">  * Added word embedding cosine similarity threshold for synonym identification.</span>
-<span class="sd">* 0.2.4</span>
+<span class="sd">### 0.2.4</span>
 <span class="sd">  * Refactored KSG core for better code clearance and some bug fixes.</span>
-<span class="sd">* 0.2.3</span>
+<span class="sd">### 0.2.3</span>
 <span class="sd">  * Fixed a bug in KSG core causing repetitive nodes added to graph.</span>
-<span class="sd">* 0.2.2</span>
+<span class="sd">### 0.2.2</span>
 <span class="sd">  * Tweaks for use with naruhodo-viewer.</span>
-<span class="sd">* 0.2.1</span>
+<span class="sd">### 0.2.1</span>
 <span class="sd">  * Primitive coreference resolution for Japanese.</span>
-<span class="sd">* 0.2.0</span>
+<span class="sd">### 0.2.0</span>
 <span class="sd">  * Major API change for multi-language support and parallel processing. </span>
 <span class="sd">  * Parallel processing support for parsing using multiprocessing module. </span>
-<span class="sd">* 0.1.0</span>
+<span class="sd">### 0.1.0</span>
 <span class="sd">  * Initial version</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
