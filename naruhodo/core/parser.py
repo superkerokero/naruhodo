@@ -59,6 +59,14 @@ class parser(object):
         """
         Use multiprocessing or not for parsing.
         """
+        self.corefDict = set()
+        """
+        A set that contains all possible antecedents of pronoun coreferences.
+        """
+        self.synonymDict = set()
+        """
+        A set that contains all roots(the shortest) of synonyms.
+        """
         self._setCore()
         if mp:
             if nproc == 0:
@@ -67,6 +75,9 @@ class parser(object):
                 self.pool = Pool(processes=nproc)
         # load word vectors
         self.wv = None
+        """
+        The word vector dictionary loaded from external model files.
+        """
         if wv != "":
             try:
                 from gensim.models.word2vec import Word2Vec
@@ -118,8 +129,10 @@ class parser(object):
         self.G.clear()
         self.pos = 0
         self.entityList = [dict() for x in range(len(NEList))]
-        # self.posEntityList = [dict() for x in range(len(NEList))]
+        self.posEntityList = [dict() for x in range(len(NEList))]
         self.proList = list()
+        self.corefDict = set()
+        self.synonymDict = set()
 
     def _preprocessText(self, text):
         """Get rid of weird parts from the text that interferes analysis."""
@@ -129,18 +142,9 @@ class parser(object):
         text = text.replace("・", "、").replace("|", "、").replace(" ", "").strip()
         return text.replace("\n", "")
 
-    def exportObj(self, texts=None):
+    def exportObj(self):
         """Export graph to a JSON-like object for external visualization."""
-        gobj = exportToJsonObj(self.G)
-        if texts:
-            ret = dict(
-                nodes = gobj['nodes'],
-                links = gobj['links'],
-                texts = texts
-            )
-        else:
-            ret = gobj
-        return ret
+        return exportToJsonObj(self.G)
 
     def exportJSON(self, filename):
         """Export current graph to a JSON file on disk."""
@@ -247,6 +251,8 @@ class parser(object):
 
     def resolve(self):
         """Resolve coreferences in the given text."""
+        # initialize a graph of synonym
+        GS = nx.Graph()
         # Get flatten entity list
         flatEntityList = list()
         for item in self.entityList:
@@ -268,10 +274,23 @@ class parser(object):
                         sim = 1.
                 if inc == 1 and sim > 0.5:
                     # self.G.nodes[flatEntityList[i]]['count'] += 1
+                    GS.add_edge(flatEntityList[i], flatEntityList[j])
                     self.G.add_edge(flatEntityList[i], flatEntityList[j], weight=1, label="同義語候補", type="synonym")
                 elif inc == -1 and sim > 0.5:
                     # self.G.nodes[flatEntityList[j]]['count'] += 1
+                    GS.add_edge(flatEntityList[i], flatEntityList[j])
                     self.G.add_edge(flatEntityList[j], flatEntityList[i], weight=1, label="同義語候補", type="synonym")
+        # Process GS
+        for subG in nx.connected_components(GS):
+            lshort = 10000
+            nshort = ""
+            for node in subG:
+                if lshort > len(node):
+                    lshort = len(node)
+                    nshort = node
+            self.synonymDict.add(nshort)
+            for node in subG:
+                self.G.nodes[node]['synonym'] = nshort
         # Get position-based entity list
         self.posEntityList = [dict() for x in range(len(NEList))]
         for i in range(len(NEList)):
@@ -311,10 +330,13 @@ class parser(object):
                             NE = 0, 
                             pos = [self.pos - 1], 
                             surface = [antecedent],
-                            sub = "")
+                            sub = "",
+                            meaning = "")
                 else:
                     self.G.nodes[antecedent]['count'] += 1
                 self.G.add_edge(antecedent, pro['name'], weight=1, label="共参照候補", type="coref")
+            # Add antecedent to corefDict
+            self.corefDict.add(antecedent)
 
     def _rresolve(self, pos, NE):
         """Recursively resolve to previous position."""

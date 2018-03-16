@@ -1150,6 +1150,14 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use multiprocessing or not for parsing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A set that contains all possible antecedents of pronoun coreferences.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A set that contains all roots(the shortest) of synonyms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">nproc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1158,6 +1166,9 @@ table {
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">nproc</span><span class="p">)</span>
         <span class="c1"># load word vectors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The word vector dictionary loaded from external model files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">wv</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">gensim.models.word2vec</span> <span class="kn">import</span> <span class="n">Word2Vec</span>
@@ -1209,8 +1220,10 @@ table {
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
-        <span class="c1"># self.posEntityList = [dict() for x in range(len(NEList))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_preprocessText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
@@ -1220,18 +1233,9 @@ table {
         <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;・&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Export graph to a JSON-like object for external visualization.&quot;&quot;&quot;</span>
-        <span class="n">gobj</span> <span class="o">=</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">nodes</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
-                <span class="n">links</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">],</span>
-                <span class="n">texts</span> <span class="o">=</span> <span class="n">texts</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">gobj</span>
-        <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">exportJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Export current graph to a JSON file on disk.&quot;&quot;&quot;</span>
@@ -1338,6 +1342,8 @@ table {
 
     <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Resolve coreferences in the given text.&quot;&quot;&quot;</span>
+        <span class="c1"># initialize a graph of synonym</span>
+        <span class="n">GS</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
         <span class="c1"># Get flatten entity list</span>
         <span class="n">flatEntityList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">:</span>
@@ -1359,10 +1365,23 @@ table {
                         <span class="n">sim</span> <span class="o">=</span> <span class="mf">1.</span>
                 <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
                     <span class="c1"># self.G.nodes[flatEntityList[i]][&#39;count&#39;] += 1</span>
+                    <span class="n">GS</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">inc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
                     <span class="c1"># self.G.nodes[flatEntityList[j]][&#39;count&#39;] += 1</span>
+                    <span class="n">GS</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+        <span class="c1"># Process GS</span>
+        <span class="k">for</span> <span class="n">subG</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">connected_components</span><span class="p">(</span><span class="n">GS</span><span class="p">):</span>
+            <span class="n">lshort</span> <span class="o">=</span> <span class="mi">10000</span>
+            <span class="n">nshort</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">subG</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">lshort</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+                    <span class="n">lshort</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="n">nshort</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nshort</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">subG</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;synonym&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nshort</span>
         <span class="c1"># Get position-based entity list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">)):</span>
@@ -1402,10 +1421,13 @@ table {
                             <span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
                             <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> 
                             <span class="n">surface</span> <span class="o">=</span> <span class="p">[</span><span class="n">antecedent</span><span class="p">],</span>
-                            <span class="n">sub</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                            <span class="n">sub</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">meaning</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">antecedent</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">antecedent</span><span class="p">,</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共参照候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;coref&quot;</span><span class="p">)</span>
+            <span class="c1"># Add antecedent to corefDict</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">antecedent</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_rresolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">NE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Recursively resolve to previous position.&quot;&quot;&quot;</span>
@@ -1604,6 +1626,14 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use multiprocessing or not for parsing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A set that contains all possible antecedents of pronoun coreferences.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A set that contains all roots(the shortest) of synonyms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">nproc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1612,6 +1642,9 @@ table {
                 <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">nproc</span><span class="p">)</span>
         <span class="c1"># load word vectors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The word vector dictionary loaded from external model files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">wv</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">gensim.models.word2vec</span> <span class="kn">import</span> <span class="n">Word2Vec</span>
@@ -1663,8 +1696,10 @@ table {
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
-        <span class="c1"># self.posEntityList = [dict() for x in range(len(NEList))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_preprocessText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
@@ -1674,18 +1709,9 @@ table {
         <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;・&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Export graph to a JSON-like object for external visualization.&quot;&quot;&quot;</span>
-        <span class="n">gobj</span> <span class="o">=</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">nodes</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
-                <span class="n">links</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">],</span>
-                <span class="n">texts</span> <span class="o">=</span> <span class="n">texts</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">gobj</span>
-        <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">exportJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Export current graph to a JSON file on disk.&quot;&quot;&quot;</span>
@@ -1792,6 +1818,8 @@ table {
 
     <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Resolve coreferences in the given text.&quot;&quot;&quot;</span>
+        <span class="c1"># initialize a graph of synonym</span>
+        <span class="n">GS</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
         <span class="c1"># Get flatten entity list</span>
         <span class="n">flatEntityList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">:</span>
@@ -1813,10 +1841,23 @@ table {
                         <span class="n">sim</span> <span class="o">=</span> <span class="mf">1.</span>
                 <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
                     <span class="c1"># self.G.nodes[flatEntityList[i]][&#39;count&#39;] += 1</span>
+                    <span class="n">GS</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">inc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
                     <span class="c1"># self.G.nodes[flatEntityList[j]][&#39;count&#39;] += 1</span>
+                    <span class="n">GS</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+        <span class="c1"># Process GS</span>
+        <span class="k">for</span> <span class="n">subG</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">connected_components</span><span class="p">(</span><span class="n">GS</span><span class="p">):</span>
+            <span class="n">lshort</span> <span class="o">=</span> <span class="mi">10000</span>
+            <span class="n">nshort</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">subG</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">lshort</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+                    <span class="n">lshort</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="n">nshort</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nshort</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">subG</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;synonym&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nshort</span>
         <span class="c1"># Get position-based entity list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">)):</span>
@@ -1856,10 +1897,13 @@ table {
                             <span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
                             <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> 
                             <span class="n">surface</span> <span class="o">=</span> <span class="p">[</span><span class="n">antecedent</span><span class="p">],</span>
-                            <span class="n">sub</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                            <span class="n">sub</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">meaning</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">antecedent</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">antecedent</span><span class="p">,</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共参照候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;coref&quot;</span><span class="p">)</span>
+            <span class="c1"># Add antecedent to corefDict</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">antecedent</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_rresolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">NE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Recursively resolve to previous position.&quot;&quot;&quot;</span>
@@ -2053,6 +2097,14 @@ table {
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Use multiprocessing or not for parsing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A set that contains all possible antecedents of pronoun coreferences.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A set that contains all roots(the shortest) of synonyms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setCore</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">mp</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">nproc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -2061,6 +2113,9 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">nproc</span><span class="p">)</span>
     <span class="c1"># load word vectors</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The word vector dictionary loaded from external model files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">wv</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">gensim.models.word2vec</span> <span class="kn">import</span> <span class="n">Word2Vec</span>
@@ -2213,7 +2268,7 @@ table {
             
   <div class="item">
     <div class="name def" id="naruhodo.core.parser.parser.exportObj">
-    <p>def <span class="ident">exportObj</span>(</p><p>self, texts=None)</p>
+    <p>def <span class="ident">exportObj</span>(</p><p>self)</p>
     </div>
     
 
@@ -2223,18 +2278,9 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.parser.parser.exportObj', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.parser.parser.exportObj" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">exportObj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export graph to a JSON-like object for external visualization.&quot;&quot;&quot;</span>
-    <span class="n">gobj</span> <span class="o">=</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">nodes</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
-            <span class="n">links</span> <span class="o">=</span> <span class="n">gobj</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">],</span>
-            <span class="n">texts</span> <span class="o">=</span> <span class="n">texts</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">gobj</span>
-    <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">return</span> <span class="n">exportToJsonObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -2283,8 +2329,10 @@ table {
     <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
-    <span class="c1"># self.posEntityList = [dict() for x in range(len(NEList))]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">proList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 </pre></div>
 
   </div>
@@ -2307,6 +2355,8 @@ table {
   <div id="source-naruhodo.core.parser.parser.resolve" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Resolve coreferences in the given text.&quot;&quot;&quot;</span>
+    <span class="c1"># initialize a graph of synonym</span>
+    <span class="n">GS</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
     <span class="c1"># Get flatten entity list</span>
     <span class="n">flatEntityList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">:</span>
@@ -2328,10 +2378,23 @@ table {
                     <span class="n">sim</span> <span class="o">=</span> <span class="mf">1.</span>
             <span class="k">if</span> <span class="n">inc</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
                 <span class="c1"># self.G.nodes[flatEntityList[i]][&#39;count&#39;] += 1</span>
+                <span class="n">GS</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">inc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
                 <span class="c1"># self.G.nodes[flatEntityList[j]][&#39;count&#39;] += 1</span>
+                <span class="n">GS</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">flatEntityList</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">flatEntityList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;同義語候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;synonym&quot;</span><span class="p">)</span>
+    <span class="c1"># Process GS</span>
+    <span class="k">for</span> <span class="n">subG</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">connected_components</span><span class="p">(</span><span class="n">GS</span><span class="p">):</span>
+        <span class="n">lshort</span> <span class="o">=</span> <span class="mi">10000</span>
+        <span class="n">nshort</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">subG</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">lshort</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+                <span class="n">lshort</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="n">nshort</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synonymDict</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nshort</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">subG</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s1">&#39;synonym&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nshort</span>
     <span class="c1"># Get position-based entity list</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">posEntityList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">))]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NEList</span><span class="p">)):</span>
@@ -2371,10 +2434,13 @@ table {
                         <span class="n">NE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
                         <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> 
                         <span class="n">surface</span> <span class="o">=</span> <span class="p">[</span><span class="n">antecedent</span><span class="p">],</span>
-                        <span class="n">sub</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                        <span class="n">sub</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">meaning</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">antecedent</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">antecedent</span><span class="p">,</span> <span class="n">pro</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;共参照候補&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;coref&quot;</span><span class="p">)</span>
+        <span class="c1"># Add antecedent to corefDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corefDict</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">antecedent</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -2414,6 +2480,17 @@ table {
   
     <div class="desc"><p>Graph object of the parser.
 It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.core.parser.parser.corefDict" class="name">var <span class="ident">corefDict</span></p>
+            
+
+            
+  
+    <div class="desc"><p>A set that contains all possible antecedents of pronoun coreferences.</p></div>
   <div class="source_cont">
 </div>
 
@@ -2500,11 +2577,23 @@ It is actually a networkx directed graph object(DiGraph), so you can apply all o
 
             </div>
             <div class="item">
+            <p id="naruhodo.core.parser.parser.synonymDict" class="name">var <span class="ident">synonymDict</span></p>
+            
+
+            
+  
+    <div class="desc"><p>A set that contains all roots(the shortest) of synonyms.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
             <p id="naruhodo.core.parser.parser.wv" class="name">var <span class="ident">wv</span></p>
             
 
             
   
+    <div class="desc"><p>The word vector dictionary loaded from external model files.</p></div>
   <div class="source_cont">
 </div>
 

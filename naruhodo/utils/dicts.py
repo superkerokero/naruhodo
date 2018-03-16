@@ -79,7 +79,10 @@ EdgeType2StyleDict = {
     "aux": "dotted",
     "cause": "dotted",
     "coref": "solid",
-    "synonym": "solid"
+    "synonym": "solid",
+    "para": "solid",
+    "attr": "dotted",
+    "stat": "solid"
 }
 """
 Dict to convert the edge type to edge style.
@@ -93,7 +96,10 @@ EdgeType2ColorDict = {
     "aux": "#ff7777",
     "cause": "#91027e",
     "coref": "#3582ff",
-    "synonym": "#00ffb6"
+    "synonym": "#00ffb6",
+    "para": "#207272",
+    "attr": "#7738ff",
+    "stat": "#66aaee"
 }
 """
 Dict to convert the edge type to edge color.
@@ -103,8 +109,8 @@ Dict to convert the edge type to edge color.
 MeaninglessDict = set([
     "前", "後", "こと", "事", "もの", "物", "者", "ため", "爲", "為", "為め", "爲め", 
     "意", "上", "うえ", "中", "なか", "下", "した", "なる", "成る", "ある", "よる", "する", 
-    "ない", "無い", "から", "だから", "場合", 
-    "問題", "もんだい", "内容", "ないよう", "範囲", "やつ"
+    "ない", "無い", "から", "だから", "場合", "とき", "時", "程度", 
+    "問題", "もんだい", "内容", "ないよう", "範囲", "やつ", "くる", "来る"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
@@ -127,7 +133,7 @@ Dict that contains functional words of auxilaries.
 """
 
 SubDict = set([
-    "は",
+    "は", "では", "などは"
 ])
 """
 Dict that contains functional words of subjects.
@@ -168,4 +174,11 @@ Dict that contains functional words that has multiple roles.
 EntityTypeDict = set([0, 2])
 """
 Dict of node types that can be potential entities.
+"""
+
+ParallelDict = set([
+    "と", "などと", "や", "やら", "も", "、", "・", "｜"
+])
+"""
+Dict that contains functional words that can be objects. 
 """

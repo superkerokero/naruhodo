@@ -172,6 +172,11 @@ class CaboChunk(object):
          6: inclusive
          7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.
         """
+        self.meaning = ""
+        """
+        If the main of this chunk is in MeaninglessDict, 
+        this variable will be set to the main of its child node that contains its meaning. 
+        """
     
     def add(self, inp):
         """Add components to chunk lists."""
@@ -232,7 +237,9 @@ class CaboChunk(object):
             self.main = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
             if len(self.adjs) > 0:
-                self.main += "：" + self.adjs[0]['lemma']
+                if self.adjs[0]['lemma'] == "ない":
+                    self.main += "\n(否定)"
+                    self.negative = 1
             # Corrections for special patterns.
             if self.nouns[0]['labels'][0] == 'サ変接続':
                 if len(self.nouns) > 1 and len(self.verbs) == 0:
@@ -286,6 +293,7 @@ class CaboChunk(object):
             self.main = self.adjs[0]['lemma']
             self.type = 1
             if self.adjs[0]['lemma'] == "ない":
+                self.main += "\n(否定)"
                 self.negative = 1
         elif len(self.verbs) > 0:
             self.main = self.verbs[0]['lemma']
@@ -387,6 +395,7 @@ class CaboChunk(object):
 
         if len(self.signs) > 0:
             for item in self.signs:
+                self.func += item['surface']
                 if item['surface'] ==  '？':
                     self.func += item['surface']
                     self.question = 1
@@ -460,6 +469,7 @@ class CabochaClient(object):
         for i in range(nck):
             if self.re_parentheses.sub("", self.chunks[i].main).replace("\n", "") in MeaninglessDict:
                 if len(self.childrenList[i]) > 0:
+                    self.chunks[i].meaning = self.chunks[self.childrenList[i][-1]].main
                     self.chunks[i].main = "({0})\n{1}".format(
                         self.chunks[self.childrenList[i][-1]].surface,
                         self.chunks[i].main
