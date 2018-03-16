@@ -6,7 +6,8 @@ A python library for automatic semantic graph generation from human-readable tex
 ## Change-Log
 
 # 0.2.7
-  * Added new edge type: "para", "attr", "stat".
+  * Added new edge types: "para", "attr", "stat".
+  * Tweaks for naruhodo-viewer's clustering function. 
 * 0.2.6
   * Improved subject & object searching logic.
   * Removed some debugging output.

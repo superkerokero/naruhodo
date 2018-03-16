@@ -110,7 +110,7 @@ MeaninglessDict = set([
     "前", "後", "こと", "事", "もの", "物", "者", "ため", "爲", "為", "為め", "爲め", 
     "意", "上", "うえ", "中", "なか", "下", "した", "なる", "成る", "ある", "よる", "する", 
     "ない", "無い", "から", "だから", "場合", "とき", "時", "程度", 
-    "問題", "もんだい", "内容", "ないよう", "範囲", "やつ"
+    "問題", "もんだい", "内容", "ないよう", "範囲", "やつ", "くる", "来る"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.

@@ -163,6 +163,9 @@ pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
   | cause   | Edge from potential cause to result        |
   | coref   | Edge from potential antecedent to pronoun  |
   | synonym | Edge from potential synonym to an entity   |
+  | para    | Edge between parallel entities             |
+  | attr    | Edge from potential attribute to an entity |
+  | stat    | Edge from potential subject to a statement |
 
 ## チュートリアル
 

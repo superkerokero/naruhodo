@@ -1267,6 +1267,11 @@ table {
 <span class="sd">         6: inclusive</span>
 <span class="sd">         7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meaning</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If the main of this chunk is in MeaninglessDict, </span>
+<span class="sd">        this variable will be set to the main of its child node that contains its meaning. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
     
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add components to chunk lists.&quot;&quot;&quot;</span>
@@ -1327,7 +1332,9 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;非自立&#39;</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;：&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ない&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">(否定)&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">negative</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="c1"># Corrections for special patterns.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;サ変接続&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verbs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1381,6 +1388,7 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ない&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">(否定)&quot;</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">negative</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verbs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span>
@@ -1482,6 +1490,7 @@ table {
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s1">&#39;？&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1555,6 +1564,7 @@ table {
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nck</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">meaning</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">main</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;({0})</span><span class="se">\n</span><span class="s2">{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span>
@@ -1782,6 +1792,11 @@ table {
 <span class="sd">         6: inclusive</span>
 <span class="sd">         7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meaning</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If the main of this chunk is in MeaninglessDict, </span>
+<span class="sd">        this variable will be set to the main of its child node that contains its meaning. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
     
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add components to chunk lists.&quot;&quot;&quot;</span>
@@ -1842,7 +1857,9 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;非自立&#39;</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;：&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ない&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">(否定)&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">negative</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="c1"># Corrections for special patterns.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;サ変接続&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nouns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verbs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1896,6 +1913,7 @@ table {
             <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ない&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">(否定)&quot;</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">negative</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verbs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;lemma&#39;</span><span class="p">]</span>
@@ -1997,6 +2015,7 @@ table {
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s1">&#39;？&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">+=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="mi">1</span>
@@ -2185,6 +2204,11 @@ table {
 <span class="sd">     5: indefinite</span>
 <span class="sd">     6: inclusive</span>
 <span class="sd">     7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">meaning</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If the main of this chunk is in MeaninglessDict, </span>
+<span class="sd">    this variable will be set to the main of its child node that contains its meaning. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </pre></div>
 
@@ -2432,6 +2456,18 @@ NEtype = NEList[NE].</p>
 
             </div>
             <div class="item">
+            <p id="naruhodo.backends.cabocha.CaboChunk.meaning" class="name">var <span class="ident">meaning</span></p>
+            
+
+            
+  
+    <div class="desc"><p>If the main of this chunk is in MeaninglessDict, 
+this variable will be set to the main of its child node that contains its meaning.</p></div>
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
             <p id="naruhodo.backends.cabocha.CaboChunk.negative" class="name">var <span class="ident">negative</span></p>
             
 
@@ -2673,6 +2709,7 @@ NEtype = NEList[NE].</p>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nck</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">re_parentheses</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">meaning</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">main</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;({0})</span><span class="se">\n</span><span class="s2">{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">childrenList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">main</span>

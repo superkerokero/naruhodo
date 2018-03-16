@@ -155,7 +155,7 @@ Support for other parsers such as `KNP` is planned in the future.
 
   | Type    | Description                                |
   |---------|--------------------------------------------|
-  | none    | Unknown type(also used in DSG edges)       |
+  | none    | Unknown type(also used as DSG edges)       |
   | sub     | Edge from a subject to predicate           |
   | autosub | Edge from a potential subject to predicate |
   | obj     | Edge from a predicate to object            |
@@ -163,6 +163,9 @@ Support for other parsers such as `KNP` is planned in the future.
   | cause   | Edge from potential cause to result        |
   | coref   | Edge from potential antecedent to pronoun  |
   | synonym | Edge from potential synonym to an entity   |
+  | para    | Edge between parallel entities             |
+  | attr    | Edge from potential attribute to an entity |
+  | stat    | Edge from potential subject to a statement |
 
 ## Tutorial
 

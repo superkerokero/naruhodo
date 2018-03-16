@@ -172,6 +172,11 @@ class CaboChunk(object):
          6: inclusive
          7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.
         """
+        self.meaning = ""
+        """
+        If the main of this chunk is in MeaninglessDict, 
+        this variable will be set to the main of its child node that contains its meaning. 
+        """
     
     def add(self, inp):
         """Add components to chunk lists."""
@@ -464,6 +469,7 @@ class CabochaClient(object):
         for i in range(nck):
             if self.re_parentheses.sub("", self.chunks[i].main).replace("\n", "") in MeaninglessDict:
                 if len(self.childrenList[i]) > 0:
+                    self.chunks[i].meaning = self.chunks[self.childrenList[i][-1]].main
                     self.chunks[i].main = "({0})\n{1}".format(
                         self.chunks[self.childrenList[i][-1]].surface,
                         self.chunks[i].main
