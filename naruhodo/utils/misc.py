@@ -5,6 +5,7 @@ import json
 from math import sqrt
 import numpy as np
 import networkx as nx
+from nxpd import draw
 from naruhodo.utils.dicts import NodeType2StyleDict, NodeType2ColorDict, NodeType2FontColorDict, EdgeType2StyleDict, EdgeType2ColorDict
 
 def exportToJsonObj(G):
@@ -67,3 +68,20 @@ def harmonicSim(AG, B):
     for i in range(size):
         ret += 1. / cosSimilarity(AG[i], B)
     return float(size) / ret
+
+def decorate(G):
+    """Generate temporal graph with drawing properties added for nxpd."""
+    ret = nx.DiGraph()
+    for key, val in G.nodes.items():
+        ret.add_node(key, **getNodeProperties(val))
+    for key, val in G.edges.items():
+        ret.add_edge(*key, **getEdgeProperties(val))
+    return ret
+
+def show(G):
+    """Decorate and draw given graph using nxpd in notebook."""
+    return draw(decorate(G), show='ipynb')
+
+def plotToFile(G, filename):
+    """Output given graph to a png file using nxpd."""
+    return draw(decorate(G), filename=filename)

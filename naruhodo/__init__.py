@@ -1,10 +1,15 @@
 """
-# Naruhodo 0.2.7
+# Naruhodo 0.2.8
 
 A python library for automatic semantic graph generation from human-readable text.
 
 ## Change-Log
 
+### 0.2.8
+  * Added new node properties: "passive", "negative", "compulsory", "question", "tense".
+  * Added coref variable in parser class to turn automatic synonym/coreference resulution ON/OFF.
+  * Added path plotting capability to parser.show. Now this function accepts an optional path(list of nodes) and will plot it if given.
+  * Added new function parser.toText. This function takes in a path and generate texts from it. If no path is given, it will generate texts using the entire graph.
 ### 0.2.7
   * Added new edge types: "para", "attr", "stat".
   * Tweaks for naruhodo-viewer's clustering function. 

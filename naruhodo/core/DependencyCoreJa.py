@@ -78,20 +78,31 @@ class DependencyCoreJa(object):
                 self.entityList[node.NE][node.main] = [self.pos]
         # Add to graph.
         if self.G.has_node(node.main):
-            if self.pos not in self.G.nodes[node.main]['pos']:
-                self.G.nodes[node.main]['pos'].append(self.pos)
-                self.G.nodes[node.main]['surface'].append(node.surface)
-                self.G.nodes[node.main]['count'] += 1
+            if self.pos in self.G.nodes[node.main]['pos'] and node.id == self.G.nodes[node.main]['lpos'][self.G.nodes[node.main]['pos'].index(self.pos)]:
+                return
+            self.G.nodes[node.main]['pos'].append(self.pos)
+            self.G.nodes[node.main]['func'].append(node.func)
+            self.G.nodes[node.main]['lpos'].append(node.id)
+            self.G.nodes[node.main]['surface'].append(node.surface)
+            self.G.nodes[node.main]['yomi'].append(node.yomi)
+            self.G.nodes[node.main]['count'] += 1
         else:
             self.G.add_node(node.main, 
-                            count = 1, 
-                            func = node.func, 
-                            type = node.type, 
+                            count = 1,
+                            pos = [self.pos],
+                            lpos = [node.id],
+                            func = [node.func],
+                            surface = [node.surface],
+                            yomi = [node.yomi], 
+                            type = node.type,
+                            type2 = node.type2, 
                             label = rep, 
                             pro = node.pro, 
                             NE = node.NE, 
-                            pos = [self.pos], 
-                            surface = [node.surface],
-                            yomi = node.yomi,
                             sub = sub,
-                            meaning = node.meaning)
+                            meaning = node.meaning,
+                            negative = node.negative,
+                            question = node.question,
+                            passive = node.passive,
+                            compulsory = node.compulsory,
+                            tense = node.tense)

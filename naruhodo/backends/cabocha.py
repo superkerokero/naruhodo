@@ -80,6 +80,11 @@ class CaboChunk(object):
         Main component of the chunk.
         """
 
+        self.main_surface = ""
+        """
+        Surface of the main component.
+        """
+
         self.func = "" 
         """
         Functional component of the chunk.
@@ -234,7 +239,8 @@ class CaboChunk(object):
     def _getMain(self):
         """Get the main component of the chunk."""
         if len(self.nouns) > 0 and self.nouns[0]['labels'][0] not in ['非自立', '接尾']:
-            self.main = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
+            self.main = "".join([x['lemma'] for x in self.nouns if x['labels'][0] != '非自立'])
+            self.main_surface = "".join([x['surface'] for x in self.nouns if x['labels'][0] != '非自立'])
             self.type = 0
             if len(self.adjs) > 0:
                 if self.adjs[0]['lemma'] == "ない":
@@ -282,64 +288,70 @@ class CaboChunk(object):
                 else:
                     pass
             elif self.nouns[0]['labels'][0] == '数':
-                self.main = "".join([x['surface'] for x in self.nouns])
+                self.main = "".join([x['lemma'] for x in self.nouns])
+                self.main_surface = "".join([x['surface'] for x in self.nouns])
                 self.NE = 4
             else:
                 pass
         elif len(self.nouns) > 0 and self.nouns[0]['surface'] == 'こと':
-            self.main = self.nouns[0]['surface']
+            self.main = self.nouns[0]['lemma']
+            self.main_surface = self.nouns[0]['surface']
             self.type = 0
         elif len(self.adjs) > 0:
             self.main = self.adjs[0]['lemma']
+            self.main_surface = self.adjs[0]['surface']
             self.type = 1
             if self.adjs[0]['lemma'] == "ない":
                 self.main += "\n(否定)"
                 self.negative = 1
         elif len(self.verbs) > 0:
             self.main = self.verbs[0]['lemma']
+            self.main_surface = self.verbs[0]['surface']
             self.type = 2
-        elif len(self.nouns) > 0 and self.nouns[0]['labels'][0] == '非自立':
-            self.main = self.nouns[0]['surface']
-            self.type = 0
         elif len(self.advs) > 0:
             self.main = self.advs[0]['lemma']
+            self.main_surface = self.advs[0]['surface']
             self.type = 5
         elif len(self.conjs) > 0:
             self.main = self.conjs[0]['lemma']
+            self.main_surface = self.conjs[0]['surface']
             self.type = 3
         elif len(self.interjs) > 0:
             self.main = self.interjs[0]['lemma']
+            self.main_surface = self.interjs[0]['surface']
             self.type = 4
         elif len(self.connects) > 0:
             self.main = self.connects[0]['lemma']
+            self.main_surface = self.connects[0]['surface']
             self.type = 6
         elif len(self.postps) > 0:
             self.main = self.postps[0]['lemma']
+            self.main_surface = self.postps[0]['surface']
         elif len(self.auxvs) > 0:
             self.main = self.auxvs[0]['lemma']
+            self.main_surface = self.auxvs[0]['surface']
         elif len(self.signs) > 0:
             if len(self.nouns) > 0:
                 self.main = self.nouns[0]['lemma']
+                self.main_surface = self.nouns[0]['surface']
             else:
                 self.main = self.signs[0]['lemma']
+                self.main_surface = self.signs[0]['surface']
+        elif len(self.nouns) > 0 and self.nouns[0]['labels'][0] == '非自立':
+            self.main = self.nouns[0]['lemma']
+            self.main_surface = self.nouns[0]['surface']
+            self.type = 0
         else:
             self.main = 'UNKNOWN'
         if len(self.headings) > 0:
-            self.main = "\n".join([x['surface'] for x in self.headings]) + self.main
+            self.main = "\n".join([x['lemma'] for x in self.headings]) + self.main
+            self.main_surface = "\n".join([x['surface'] for x in self.headings]) + self.main_surface
         
     def _getFunc(self):
         """Get the func component of the chunk."""
-        # if len(self.nouns) > 0 and self.nouns[0]['labels'][0] != '非自立':
-        #     if len(self.verbs) > 1 and len(self.postps) > 0:
-        #         for item in self.verbs:
-        #             if item['labels'][0] == '接尾':
-        #                 self.func += self.postps[0]['surface'] + item['surface']
-        #             else:
-        #                 self.func += item['surface']
-        #     elif len(self.postps) > 0:
-        #         self.func = self.postps[0]['surface'] + "".join([x['surface'] for x in self.verbs])
-        #     else:
-        #         self.func = "".join([x['surface'] for x in self.verbs])
+        # Get func by excluding main from surface.
+        self.func = self.surface.replace(self.main_surface, "")
+        # Process func to get properties
         if len(self.verbs) > 0:
             for item in self.verbs:
                 if item['labels'][0] == '接尾':
@@ -349,19 +361,11 @@ class CaboChunk(object):
                     elif item['lemma'] == "させる":
                         self.compulsory = 1
                         self.main += "\n(強制)"
-                    self.func += item['surface']
-                elif len(self.nouns) > 0 and item['labels'][0] == '自立':
-                    self.func += item['surface']
                 elif item['labels'][0] == "非自立":
-                    self.func += item['surface']
                     if item['lemma'] == "いる":
                         self.tense = 1
                         self.main += "\n(現在)"
         if len(self.auxvs) > 0:
-            self.func += "・".join([x['surface'] for x in self.auxvs])
-            for elem in self.postps:
-                if elem['labels'][0] in ["終助詞", "副助詞／並立助詞／終助詞"]:
-                    self.func += "~" + elem['lemma']
             neg = sum([
                 [x['lemma'] for x in self.auxvs].count('ん'), 
                 [x['lemma'] for x in self.auxvs].count('ない'),
@@ -384,26 +388,20 @@ class CaboChunk(object):
             if any([self.auxvs[x]['lemma'] == "た" for x in range(len(self.auxvs))]):
                 self.tense = -1
                 self.main += "\n(過去)"
-        if len(self.postps) > 0:
-            for elem in self.postps:
-                if elem['labels'][0] not in  ["終助詞", "副助詞／並立助詞／終助詞"]:
-                    self.func += elem['lemma']
 
         # Fix for nouns used as verbs.
-        if self.func in VerbLikeFuncDict:
-            self.type = 2
+        for item in VerbLikeFuncDict:
+            if self.func.find(item) != -1:
+                self.type = 2
 
         if len(self.signs) > 0:
             for item in self.signs:
-                self.func += item['surface']
                 if item['surface'] ==  '？':
-                    self.func += item['surface']
                     self.question = 1
 
         # Fix for special words.
         if self.main == "できる" and self.func not in ["た", "ます", "いるて"]:
             self.type = 5
-        # self.func += "".join([x['surface'] for x in self.signs])
         
     def processChunk(self, pos, npro):
         """Process the chunk to get main and func component of it."""
