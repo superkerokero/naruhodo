@@ -2,12 +2,14 @@ import networkx as nx
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CaboChunk, CabochaClient
 from naruhodo.utils.dicts import MeaninglessDict, SubDict, ObjDict, ObjPostDict, ObjPassiveSubDict, SubPassiveObjDict, NEList, EntityTypeDict, ParallelDict
+from naruhodo.core.DependencyCoreJa import DependencyCoreJa
 
-class KnowledgeCoreJa(object):
+class KnowledgeCoreJa(DependencyCoreJa):
     """Analyze the input text and store the information into a knowledge structure graph(KSG)."""
-    def __init__(self):
+    def __init__(self, autosub=False):
         """Initialize an analyzer for KSG."""
         self.G = nx.DiGraph()
+        self.autosub = autosub
         """
         Graph object of this analyzer.
         It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.
@@ -50,6 +52,10 @@ class KnowledgeCoreJa(object):
             pid = plist[i]
             self._addChildren(pid, cabo.chunks)
         self._processPara()
+
+        # Return here if self.autosub is False.
+        if not self.autosub:
+            return
         # If root has no subject, add omitted subject node.
         if self.G.nodes[cabo.chunks[cabo.root].main]['sub'] == '':
             omitted = CaboChunk(-1, cabo.root)
@@ -110,7 +116,7 @@ class KnowledgeCoreJa(object):
             # If child is noun
             if child.func in SubDict:
                 continue
-            elif child.type == 0 and child.func in ParallelDict:
+            elif child.type == 0 and child.func in ParallelDict and child.id + 1 == parent.id and parent.func not in ["で"]:
                 self._addNode(child)
                 self._addEdge(child.main, parent.main, label="並列", etype="para")
                 self._addEdge(parent.main, child.main, label="並列", etype="para")
@@ -212,59 +218,3 @@ class KnowledgeCoreJa(object):
                     self._addEdge(chunks[nid].main, pname, label="因果関係候補", etype="cause")
                 else:
                     self._addEdge(chunks[nid].main, pname, label=chunks[nid].func, etype="aux")
-            
-    def _addEdge(self, parent, child, label="", etype="none"):
-        """Add edge to edge list"""
-        if self.G.has_edge(parent, child):
-            if parent not in MeaninglessDict and child not in MeaninglessDict:
-                self.G.edges[parent, child]['weight'] +=1
-            else:
-                self.G.edges[parent, child]['weight'] == 1
-        else:
-            if label == "":
-                label = " " # Assign a space to empty label to avoid problem in certain javascript libraries.
-            self.G.add_edge(parent, child, weight=1, label=label, type=etype)
-            
-    def _addNode(self, node, sub=''):
-        """Add node to node list"""
-        # Get rep.
-        bpos = node.main.find("[")
-        if bpos == -1:
-            rep = node.main
-        else:
-            rep = node.main[:bpos]
-        # Add to proList.
-        if node.pro != -1:
-            proid = int(node.main[bpos+1:-1].split("@")[1])
-            self.proList.append(dict(
-                id = proid,
-                name = node.main,
-                rep = rep,
-                type = node.pro,
-                pos = self.pos
-            ))
-        # Add to entityList.
-        elif node.type == 0:
-            if node.main in self.entityList[node.NE] and self.pos not in self.entityList[node.NE][node.main]:
-                self.entityList[node.NE][node.main].append(self.pos)
-            else:
-                self.entityList[node.NE][node.main] = [self.pos]
-        # Add to graph.
-        if self.G.has_node(node.main):
-            if self.pos not in self.G.nodes[node.main]['pos']:
-                self.G.nodes[node.main]['pos'].append(self.pos)
-                self.G.nodes[node.main]['surface'].append(node.surface)
-                self.G.nodes[node.main]['count'] += 1
-        else:
-            self.G.add_node(node.main, 
-                            count = 1, 
-                            func = node.func, 
-                            type = node.type, 
-                            label = rep, 
-                            pro = node.pro, 
-                            NE = node.NE, 
-                            pos = [self.pos], 
-                            surface = [node.surface],
-                            yomi = node.yomi,
-                            sub = sub,
-                            meaning = node.meaning)

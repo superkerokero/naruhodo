@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'naruhodo',
     packages = find_packages(exclude=['contrib', 'docs', 'test']),
-    version = '0.2.7',
+    version = '0.2.8',
     description = 'A python library for automatic semantic graph generation from human-readable text.',
     long_description = """
     For detailed documentation and tutorials, visit https://github.com/superkerokero/naruhodo

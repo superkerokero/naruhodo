@@ -1092,12 +1092,14 @@ table {
 <span class="kn">from</span> <span class="nn">naruhodo.utils.communication</span> <span class="kn">import</span> <span class="n">Subprocess</span>
 <span class="kn">from</span> <span class="nn">naruhodo.backends.cabocha</span> <span class="kn">import</span> <span class="n">CaboChunk</span><span class="p">,</span> <span class="n">CabochaClient</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span><span class="p">,</span> <span class="n">SubDict</span><span class="p">,</span> <span class="n">ObjDict</span><span class="p">,</span> <span class="n">ObjPostDict</span><span class="p">,</span> <span class="n">ObjPassiveSubDict</span><span class="p">,</span> <span class="n">SubPassiveObjDict</span><span class="p">,</span> <span class="n">NEList</span><span class="p">,</span> <span class="n">EntityTypeDict</span><span class="p">,</span> <span class="n">ParallelDict</span>
+<span class="kn">from</span> <span class="nn">naruhodo.core.DependencyCoreJa</span> <span class="kn">import</span> <span class="n">DependencyCoreJa</span>
 
-<span class="k">class</span> <span class="nc">KnowledgeCoreJa</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">KnowledgeCoreJa</span><span class="p">(</span><span class="n">DependencyCoreJa</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge structure graph(KSG).&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">autosub</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize an analyzer for KSG.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autosub</span> <span class="o">=</span> <span class="n">autosub</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graph object of this analyzer.</span>
 <span class="sd">        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
@@ -1140,6 +1142,10 @@ table {
             <span class="n">pid</span> <span class="o">=</span> <span class="n">plist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addChildren</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processPara</span><span class="p">()</span>
+
+        <span class="c1"># Return here if self.autosub is False.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">autosub</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="c1"># If root has no subject, add omitted subject node.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;sub&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="n">omitted</span> <span class="o">=</span> <span class="n">CaboChunk</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
@@ -1200,7 +1206,7 @@ table {
             <span class="c1"># If child is noun</span>
             <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubDict</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ParallelDict</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ParallelDict</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">id</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;で&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;並列&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;para&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;並列&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;para&quot;</span><span class="p">)</span>
@@ -1302,62 +1308,6 @@ table {
                     <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;因果関係候補&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;cause&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">chunks</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;aux&quot;</span><span class="p">)</span>
-            
-    <span class="k">def</span> <span class="nf">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add edge to edge list&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span> <span class="ow">and</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span><span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="c1"># Assign a space to empty label to avoid problem in certain javascript libraries.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">etype</span><span class="p">)</span>
-            
-    <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
-        <span class="c1"># Get rep.</span>
-        <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[:</span><span class="n">bpos</span><span class="p">]</span>
-        <span class="c1"># Add to proList.</span>
-        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">proid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[</span><span class="n">bpos</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
-                <span class="nb">id</span> <span class="o">=</span> <span class="n">proid</span><span class="p">,</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">,</span>
-                <span class="n">rep</span> <span class="o">=</span> <span class="n">rep</span><span class="p">,</span>
-                <span class="nb">type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span><span class="p">,</span>
-                <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
-            <span class="p">))</span>
-        <span class="c1"># Add to entityList.</span>
-        <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">]</span>
-        <span class="c1"># Add to graph.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> 
-                            <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> 
-                            <span class="n">func</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> 
-                            <span class="nb">type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> 
-                            <span class="n">label</span> <span class="o">=</span> <span class="n">rep</span><span class="p">,</span> 
-                            <span class="n">pro</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span><span class="p">,</span> 
-                            <span class="n">NE</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">,</span> 
-                            <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">],</span> 
-                            <span class="n">surface</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">],</span>
-                            <span class="n">yomi</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">,</span>
-                            <span class="n">sub</span> <span class="o">=</span> <span class="n">sub</span><span class="p">,</span>
-                            <span class="n">meaning</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">meaning</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1450,11 +1400,12 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">KnowledgeCoreJa</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">KnowledgeCoreJa</span><span class="p">(</span><span class="n">DependencyCoreJa</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a knowledge structure graph(KSG).&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">autosub</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize an analyzer for KSG.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autosub</span> <span class="o">=</span> <span class="n">autosub</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graph object of this analyzer.</span>
 <span class="sd">        It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
@@ -1497,6 +1448,10 @@ table {
             <span class="n">pid</span> <span class="o">=</span> <span class="n">plist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addChildren</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processPara</span><span class="p">()</span>
+
+        <span class="c1"># Return here if self.autosub is False.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">autosub</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="c1"># If root has no subject, add omitted subject node.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;sub&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="n">omitted</span> <span class="o">=</span> <span class="n">CaboChunk</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
@@ -1557,7 +1512,7 @@ table {
             <span class="c1"># If child is noun</span>
             <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">SubDict</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ParallelDict</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">func</span> <span class="ow">in</span> <span class="n">ParallelDict</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">id</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;で&quot;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addNode</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;並列&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;para&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;並列&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;para&quot;</span><span class="p">)</span>
@@ -1659,62 +1614,6 @@ table {
                     <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;因果関係候補&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;cause&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_addEdge</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">chunks</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;aux&quot;</span><span class="p">)</span>
-            
-    <span class="k">def</span> <span class="nf">_addEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add edge to edge list&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span> <span class="ow">and</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MeaninglessDict</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span><span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="c1"># Assign a space to empty label to avoid problem in certain javascript libraries.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">etype</span><span class="p">)</span>
-            
-    <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
-        <span class="c1"># Get rep.</span>
-        <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[:</span><span class="n">bpos</span><span class="p">]</span>
-        <span class="c1"># Add to proList.</span>
-        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">proid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[</span><span class="n">bpos</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
-                <span class="nb">id</span> <span class="o">=</span> <span class="n">proid</span><span class="p">,</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">,</span>
-                <span class="n">rep</span> <span class="o">=</span> <span class="n">rep</span><span class="p">,</span>
-                <span class="nb">type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span><span class="p">,</span>
-                <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
-            <span class="p">))</span>
-        <span class="c1"># Add to entityList.</span>
-        <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">entityList</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">]</span>
-        <span class="c1"># Add to graph.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> 
-                            <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> 
-                            <span class="n">func</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> 
-                            <span class="nb">type</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> 
-                            <span class="n">label</span> <span class="o">=</span> <span class="n">rep</span><span class="p">,</span> 
-                            <span class="n">pro</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span><span class="p">,</span> 
-                            <span class="n">NE</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">NE</span><span class="p">,</span> 
-                            <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">],</span> 
-                            <span class="n">surface</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">surface</span><span class="p">],</span>
-                            <span class="n">yomi</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">yomi</span><span class="p">,</span>
-                            <span class="n">sub</span> <span class="o">=</span> <span class="n">sub</span><span class="p">,</span>
-                            <span class="n">meaning</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">meaning</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1725,13 +1624,14 @@ table {
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
           <li><a href="#naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa">KnowledgeCoreJa</a></li>
+          <li>naruhodo.core.DependencyCoreJa.DependencyCoreJa</li>
           <li>builtins.object</li>
           </ul>
           <h3>Static methods</h3>
             
   <div class="item">
     <div class="name def" id="naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self)</p>
+    <p>def <span class="ident">__init__</span>(</p><p>self, autosub=False)</p>
     </div>
     
 
@@ -1741,9 +1641,10 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa.__init__', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa.__init__" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">autosub</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize an analyzer for KSG.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autosub</span> <span class="o">=</span> <span class="n">autosub</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Graph object of this analyzer.</span>
 <span class="sd">    It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.</span>
@@ -1805,6 +1706,9 @@ table {
         <span class="n">pid</span> <span class="o">=</span> <span class="n">plist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addChildren</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_processPara</span><span class="p">()</span>
+    <span class="c1"># Return here if self.autosub is False.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">autosub</span><span class="p">:</span>
+        <span class="k">return</span>
     <span class="c1"># If root has no subject, add omitted subject node.</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">]</span><span class="o">.</span><span class="n">main</span><span class="p">][</span><span class="s1">&#39;sub&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="n">omitted</span> <span class="o">=</span> <span class="n">CaboChunk</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cabo</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
@@ -1833,6 +1737,16 @@ table {
           <h3>Instance variables</h3>
             <div class="item">
             <p id="naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa.G" class="name">var <span class="ident">G</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="naruhodo.core.KnowledgeCoreJa.KnowledgeCoreJa.autosub" class="name">var <span class="ident">autosub</span></p>
             
 
             

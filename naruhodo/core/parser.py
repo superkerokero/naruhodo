@@ -6,41 +6,48 @@ from nxpd import draw
 from naruhodo.utils.scraper import NScraper
 from naruhodo.utils.dicts import NEList
 from naruhodo.utils.misc import exportToJsonObj, exportToJsonFile
-from naruhodo.utils.misc import getNodeProperties, getEdgeProperties, inclusive, harmonicSim, cosSimilarity
+from naruhodo.utils.misc import inclusive, harmonicSim, cosSimilarity, show, plotToFile
+from naruhodo.utils.misc import _mergeGraph, _mergeEntityList, _mergeProList, _mergeAll
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
 from naruhodo.core.KnowledgeCoreJa import KnowledgeCoreJa
 
 class parser(object):
     """The general parser for naruhodo."""
-    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0, wv=""):
+    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0, wv="", coref=False):
         """Constructor."""
         self.G = nx.DiGraph()
         """
         Graph object of the parser.
         It is actually a networkx directed graph object(DiGraph), so you can apply all operations available to DiGraph object using networkx.
         """
+
         self.entityList = [dict() for x in range(len(NEList))]
         """
         List of entities appeared during this analysis.
         """
+
         self.proList = list()
         """
         List of pronouns appeared during this analysis.
         """
+
         self.pos = 0
         """
         Position of sentences added to the parser.
         """
+
         self.re_sent = re.compile(r'([^　！？。]*[！？。])')
         """
         Precompiled regular expression for separating sentences.
         """
+
         self._re1 = re.compile(r'\（.*?\）')
         self._re2 = re.compile(r'\[.*?\]')
         self._re3 = re.compile(r'\(.*?\)')
         """
         Precompiled regular expressions for getting rid of parenthesis.
         """
+
         self.lang = lang
         """
         Chosen language of the parser.
@@ -48,6 +55,7 @@ class parser(object):
         'ja': Japanese
         'en': English(WIP)
         """
+
         self.gtype = gtype
         """
         Chosen graph type of the parser.
@@ -55,18 +63,27 @@ class parser(object):
         'd': dependency structure graph(DSG)
         'k': knowledge structure graph(KSG)
         """
+
         self.mp = mp
         """
         Use multiprocessing or not for parsing.
         """
+
+        self.coref = coref
+        """
+        If set to True, automatically resolve synonyms and coreferences after adding contexts.
+        """
+
         self.corefDict = set()
         """
         A set that contains all possible antecedents of pronoun coreferences.
         """
+
         self.synonymDict = set()
         """
         A set that contains all roots(the shortest) of synonyms.
         """
+
         self._setCore()
         if mp:
             if nproc == 0:
@@ -98,7 +115,7 @@ class parser(object):
             if self.gtype == "d":
                 self.core = DependencyCoreJa()
             elif self.gtype == "k":
-                self.core = KnowledgeCoreJa()
+                self.core = KnowledgeCoreJa(autosub=self.coref)
             else:
                 raise ValueError("Unknown graph type: {0}".format(self.gtype))
         else:
@@ -150,22 +167,99 @@ class parser(object):
         """Export current graph to a JSON file on disk."""
         exportToJsonFile(self.G, filename)
 
-    def _decorate(self):
-        """Generate temporal graph with drawing properties added for nxpd."""
-        ret = nx.DiGraph()
-        for key, val in self.G.nodes.items():
-            ret.add_node(key, **getNodeProperties(val))
-        for key, val in self.G.edges.items():
-            ret.add_edge(*key, **getEdgeProperties(val))
-        return ret
+    def _path2Graph(self, path):
+        """
+        Generate a subgraph from the given path.
+        """
+        G = nx.DiGraph()
+        for i in range(len(path)):
+            if self.G.has_node(path[i]):
+                G.add_node(path[i], **self.G.nodes[path[i]])
+                # Add given edges
+                try:
+                    G.add_node(path[i+1], **self.G.nodes[path[i]])
+                    G.add_edge(path[i], path[i+1], **self.G.edges[path[i], path[i+1]])
+                except:
+                    pass
+                # Add predecessors and successors(KSG only)
+                if self.gtype != "k":
+                    continue
+                for pred in self.G.predecessors(path[i]):
+                    if self.G.edges[pred, path[i]]['type'] in ['sub', 'aux', 'cause']:
+                        G.add_node(pred, **self.G.nodes[pred])
+                        G.add_edge(pred, path[i], **self.G.edges[pred, path[i]])
+                for succ in self.G.successors(path[i]):
+                    if self.G.edges[path[i], succ]['type'] in ['obj', 'stat', 'attr']:
+                        G.add_node(succ, **self.G.nodes[succ])
+                        G.add_edge(path[i], succ, **self.G.edges[path[i], succ])
+            else:
+                print("'{0}' is not in generated graph!".format(path[i]))
+        return G
 
-    def show(self):
-        '''Plot directional graph in jupyter notebook using nxpd.'''
-        return draw(self._decorate(), show='ipynb')
-    
-    def plotToFile(self, filename):
-        '''Output directional graph to a png file using nxpd.'''
-        return draw(self._decorate(), filename=filename)
+    @staticmethod
+    def _graph2Text(G):
+        """
+        Convert given semantic graph back to texts.
+        """
+        # Get distribution of sent positions in the graph as a dict.
+        pdict = dict()
+        for node in G.nodes:
+            for pos in G.nodes[node]['pos']:
+                try:
+                    pdict[pos] += 1
+                except KeyError:
+                    pdict[pos] = 1
+        # Sort dpos and get rid of sent positions that appeared only once.
+        plist = sorted([pos for pos in pdict.keys() if pdict[pos] > 1])
+        tdict = dict()
+        # Get texts based on sent positions.
+        for node in G.nodes:
+            for i in range(len(G.nodes[node]['pos'])):
+                if G.nodes[node]['pos'][i] in plist:
+                    try:
+                        tdict[G.nodes[node]['pos'][i]].append((G.nodes[node]['lpos'][i], G.nodes[node]['surface'][i]))
+                    except KeyError:
+                        tdict[G.nodes[node]['pos'][i]] = [(G.nodes[node]['lpos'][i], G.nodes[node]['surface'][i])]
+        # Generate text based on local positions.
+        ret = list()
+        for key, val in tdict.items():
+            raw = sorted(val, key=lambda x:x[0])
+            ret.append([key, "".join([item[1] for item in raw])])
+        return sorted(ret, key=lambda x:x[0])
+
+    def toText(self, path=None):
+        """
+        If path is given, generate texts from the given path.
+        Otherwise, generate texts using the entire graph.
+        """
+        if path:
+            return self._graph2Text(self._path2Graph(path))
+        else:
+            return self._graph2Text(self.G)
+
+    def show(self, path=None, depth=False):
+        """
+        If given a path, plot the subgraph generated from path.
+        Otherwise, plot the entire graph.
+        """
+        # Sanity check for depth
+        if depth and self.gtype != "d":
+            print("Only dependency structure graph can be plotted with depth!")
+            return
+        if path:
+            return show(self._path2Graph(path), depth=depth)
+        else:
+            return show(self.G, depth=depth)
+
+    def plotToFile(self, path=None, filename=None):
+        """
+        If given a path, plot the subgraph generated from path to (png) file with given filename.
+        Otherwise, plot the entire graph to (png) file with given filename.
+        """
+        if path:
+            return plotToFile(self._path2Graph(path), filename)
+        else:
+            return plotToFile(self.G, filename)
 
     def addUrls(self, urls):
         """Add the information from given urls to KSG."""
@@ -180,13 +274,14 @@ class parser(object):
             return [inp]
         self.core.add(inp, self.pos)
         self.pos += 1
-        self.G = self._mergeGraph(self.G, self.core.G)
+        self.G = _mergeGraph(self.G, self.core.G)
         self.core.G.clear()
-        self.entityList = self._mergeEntityList(self.entityList, self.core.entityList)
+        self.entityList = _mergeEntityList(self.entityList, self.core.entityList)
         self.core.entityList = [dict() for x in range(len(NEList))]
-        self.proList = self._mergeProList(self.proList, self.core.proList)
+        self.proList = _mergeProList(self.proList, self.core.proList)
         self.core.proList = list()
-        self.resolve()
+        if self.coref:
+            self.resolve()
         return [inp]
 
     def addAll(self, inps):
@@ -195,7 +290,8 @@ class parser(object):
             self._addAllMP(inps)
         else:
             self._addAllSP(inps)
-        self.resolve()
+        if self.coref:
+            self.resolve()
 
     def _addAllSP(self, inps):
         """Standard implementation of addAll function."""
@@ -205,11 +301,11 @@ class parser(object):
                 continue
             self.core.add(inp, self.pos)
             self.pos += 1
-        self.G = self._mergeGraph(self.G, self.core.G)
+        self.G = _mergeGraph(self.G, self.core.G)
         self.core.G.clear()
-        self.entityList = self._mergeEntityList(self.entityList, self.core.entityList)
+        self.entityList = _mergeEntityList(self.entityList, self.core.entityList)
         self.core.entityList = [dict() for x in range(len(NEList))]
-        self.proList = self._mergeProList(self.proList, self.core.proList)
+        self.proList = _mergeProList(self.proList, self.core.proList)
         self.core.proList = list()
 
     def _addAllMP(self, inps):
@@ -226,9 +322,9 @@ class parser(object):
             raise ValueError("Unsupported language: {0}".format(self.lang))
         self.pos += len(inps)
         final = self._reduce(results)
-        self.G = self._mergeGraph(self.G, final[0])
-        self.entityList = self._mergeEntityList(self.entityList, final[1])
-        self.proList = self._mergeProList(self.proList, final[2])
+        self.G = _mergeGraph(self.G, final[0])
+        self.entityList = _mergeEntityList(self.entityList, final[1])
+        self.proList = _mergeProList(self.proList, final[2])
 
     def _reduce(self, results):
         """Reduce the results from multiprocessing to final result."""
@@ -236,16 +332,16 @@ class parser(object):
         if len(results) == 1:
             return results[0]
         if len(results) == 2:
-            return self._mergeAll(*results)
+            return _mergeAll(*results)
         elif len(results) % 2 == 0:
             for i in range(int(len(results) / 2)):
                 args.append([results[i * 2], results[i * 2 + 1]])
-            ret = self.pool.starmap(self._mergeAll, args)
+            ret = self.pool.starmap(_mergeAll, args)
             return self._reduce(ret)
         else:
             for i in range(int((len(results) - 1) / 2)):
                 args.append([results[i * 2], results[i * 2 + 1]])
-            ret = self.pool.starmap(self._mergeAll, args)
+            ret = self.pool.starmap(_mergeAll, args)
             ret.append(results[-1])
             return self._reduce(ret)
 
@@ -391,70 +487,4 @@ class parser(object):
         """Static version of add for KSG parsing in Japanese."""
         core = KnowledgeCoreJa()
         core.add(inp, pos)
-        return core.G, core.entityList, core.proList
-
-    @staticmethod
-    def _mergeGraph(A, B):
-        """Return the merged graph of A and B."""
-        for key, val in B.nodes.items():
-            if A.has_node(key):
-                A.nodes[key]['count'] += val['count']
-                for i in range(len(val['pos'])):
-                    if val['pos'][i] not in A.nodes[key]['pos']:
-                        A.nodes[key]['pos'].append(val['pos'][i])
-                        A.nodes[key]['surface'].append(val['surface'][i])
-            else:
-                A.add_node(key, **val)
-        for key, val in B.edges.items():
-            if A.has_edge(*key):
-                A.edges[key[0], key[1]]['weight'] += val['weight']
-            else:
-                A.add_edge(*key, **val)
-        return A
-
-    @staticmethod
-    def _mergeEntityList(A, B):
-        """Return merged entityList os A and B."""
-        for i in range(len(B)):
-            for key, val in B[i].items():
-                if key in A[i]:
-                    for item in val:
-                        A[i][key].append(item)
-                else:
-                    A[i][key] = val
-        return A
-
-    @staticmethod
-    def _mergeProList(A, B):
-        """Return merged proList os A and B."""
-        for item in B:
-            A.append(item)
-        return A
-
-    @staticmethod
-    def _mergeAll(A, B):
-        """Return merged result of graph, entity list and pronoun list."""
-        # merge graph
-        for key, val in B[0].nodes.items():
-            if A[0].has_node(key):
-                A[0].nodes[key]['count'] += val['count']
-            else:
-                A[0].add_node(key, **val)
-        for key, val in B[0].edges.items():
-            if A[0].has_edge(*key):
-                A[0].edges[key[0], key[1]]['weight'] += val['weight']
-            else:
-                A[0].add_edge(*key, **val)
-        # merge entity list
-        for i in range(len(B[1])):
-            for key, val in B[1][i].items():
-                if key in A[1][i]:
-                    for item in val:
-                        A[1][i][key].append(item)
-                else:
-                    A[1][i][key] = val
-        # merge pronoun list
-        for item in B[2]:
-            A[2].append(item)
-        return A
-        
+        return core.G, core.entityList, core.proList        

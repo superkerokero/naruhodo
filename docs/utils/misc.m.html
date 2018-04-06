@@ -1055,13 +1055,19 @@ table {
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
+    <li class="mono"><a href="#naruhodo.utils.misc.clamp">clamp</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.cosSimilarity">cosSimilarity</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.decorate">decorate</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.exportToJsonFile">exportToJsonFile</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.exportToJsonObj">exportToJsonObj</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.getEdgeProperties">getEdgeProperties</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.getNodeProperties">getNodeProperties</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.harmonicSim">harmonicSim</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.hex2Rgb">hex2Rgb</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.inclusive">inclusive</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.plotToFile">plotToFile</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.rgb2Hex">rgb2Hex</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.show">show</a></li>
   </ul>
 
     </li>
@@ -1090,6 +1096,7 @@ table {
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">nxpd</span> <span class="kn">import</span> <span class="n">draw</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NodeType2StyleDict</span><span class="p">,</span> <span class="n">NodeType2ColorDict</span><span class="p">,</span> <span class="n">NodeType2FontColorDict</span><span class="p">,</span> <span class="n">EdgeType2StyleDict</span><span class="p">,</span> <span class="n">EdgeType2ColorDict</span>
 
 <span class="k">def</span> <span class="nf">exportToJsonObj</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
@@ -1101,7 +1108,7 @@ table {
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">exportToJsonObj</span><span class="p">(</span><span class="n">G</span><span class="p">),</span> <span class="n">outfile</span><span class="p">)</span>
     
-<span class="k">def</span> <span class="nf">getNodeProperties</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">getNodeProperties</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert node properties for node drawing using nxpd.&quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
@@ -1113,6 +1120,16 @@ table {
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">20.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.75</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">depth</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">])</span> <span class="c1"># Average depth of the node</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mf">5.</span><span class="p">)</span> <span class="c1"># Normalize d to a range of [0, 6]</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Base reference color at start</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span> <span class="c1"># Base reference color at end</span>
+        <span class="n">cn</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Average depth scaled node color</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">cn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="nb">int</span><span class="p">((</span><span class="n">ct</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">cs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="mf">5.</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rgb2Hex</span><span class="p">(</span><span class="n">cn</span><span class="p">)</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#000000&#39;</span>
     <span class="k">return</span> <span class="n">ret</span>
     
 <span class="k">def</span> <span class="nf">getEdgeProperties</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
@@ -1152,6 +1169,88 @@ table {
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">+=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">cosSimilarity</span><span class="p">(</span><span class="n">AG</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">/</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate temporal graph with drawing properties added for nxpd.&quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getNodeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getEdgeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorate and draw given graph using nxpd in notebook.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Output given graph to a png file using nxpd.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_mergeGraph</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the merged graph of A and B.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">])):</span>
+                <span class="k">if</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]:</span>
+                    <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;lpos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;lpos&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;surface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;surface&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;yomi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;yomi&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="s1">&#39;depth&#39;</span> <span class="ow">in</span> <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                        <span class="n">A</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">):</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">A</span>
+
+<span class="k">def</span> <span class="nf">_mergeEntityList</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return merged entityList os A and B.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+    <span class="k">return</span> <span class="n">A</span>
+
+<span class="k">def</span> <span class="nf">_mergeProList</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return merged proList os A and B.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">B</span><span class="p">:</span>
+        <span class="n">A</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">A</span>
+
+<span class="k">def</span> <span class="nf">_mergeAll</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return merged result of graph, entity list and pronoun list.&quot;&quot;&quot;</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">_mergeGraph</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">B</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">_mergeEntityList</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">_mergeProList</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">B</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">A</span>
+
+<span class="k">def</span> <span class="nf">hex2Rgb</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert hex color in #XXXXXX format to RGB list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]</span>
+
+<span class="k">def</span> <span class="nf">rgb2Hex</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert color in RGB format to hex format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;#{0:02x}{1:02x}{2:02x}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">clamp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">clamp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">clamp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+<span class="k">def</span> <span class="nf">clamp</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> 
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clamp x to 0 &lt;= x &lt;= 255.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
 </pre></div>
 
   </div>
@@ -1204,6 +1303,31 @@ table {
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.clamp">
+    <p>def <span class="ident">clamp</span>(</p><p>x)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Clamp x to 0 &lt;= x &lt;= 255.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.clamp', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.clamp" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">clamp</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> 
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clamp x to 0 &lt;= x &lt;= 255.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="naruhodo.utils.misc.cosSimilarity">
     <p>def <span class="ident">cosSimilarity</span>(</p><p>A, B)</p>
     </div>
@@ -1218,6 +1342,34 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cosSimilarity</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute the cosine similarity between vectors A and B.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">B</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.decorate">
+    <p>def <span class="ident">decorate</span>(</p><p>G, depth=False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Generate temporal graph with drawing properties added for nxpd.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.decorate', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.decorate" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate temporal graph with drawing properties added for nxpd.&quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getNodeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getEdgeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
   </div>
@@ -1304,7 +1456,7 @@ table {
       
   <div class="item">
     <div class="name def" id="naruhodo.utils.misc.getNodeProperties">
-    <p>def <span class="ident">getNodeProperties</span>(</p><p>info)</p>
+    <p>def <span class="ident">getNodeProperties</span>(</p><p>info, depth=False)</p>
     </div>
     
 
@@ -1314,7 +1466,7 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.getNodeProperties', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.utils.misc.getNodeProperties" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getNodeProperties</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getNodeProperties</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert node properties for node drawing using nxpd.&quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeType2StyleDict</span><span class="p">[</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span>
@@ -1326,6 +1478,16 @@ table {
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">20.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.75</span>
     <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">depth</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">])</span> <span class="c1"># Average depth of the node</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mf">5.</span><span class="p">)</span> <span class="c1"># Normalize d to a range of [0, 6]</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Base reference color at start</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span> <span class="c1"># Base reference color at end</span>
+        <span class="n">cn</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Average depth scaled node color</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">cn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="nb">int</span><span class="p">((</span><span class="n">ct</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">cs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="mf">5.</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fillcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rgb2Hex</span><span class="p">(</span><span class="n">cn</span><span class="p">)</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;fontcolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#000000&#39;</span>
     <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
@@ -1363,6 +1525,31 @@ table {
   
       
   <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.hex2Rgb">
+    <p>def <span class="ident">hex2Rgb</span>(</p><p>c)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Convert hex color in #XXXXXX format to RGB list.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.hex2Rgb', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.hex2Rgb" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">hex2Rgb</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert hex color in #XXXXXX format to RGB list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="naruhodo.utils.misc.inclusive">
     <p>def <span class="ident">inclusive</span>(</p><p>A, B)</p>
     </div>
@@ -1389,6 +1576,77 @@ table {
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.plotToFile">
+    <p>def <span class="ident">plotToFile</span>(</p><p>G, filename)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Output given graph to a png file using nxpd.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.plotToFile', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.plotToFile" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Output given graph to a png file using nxpd.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.rgb2Hex">
+    <p>def <span class="ident">rgb2Hex</span>(</p><p>c)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Convert color in RGB format to hex format.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.rgb2Hex', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.rgb2Hex" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">rgb2Hex</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert color in RGB format to hex format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;#{0:02x}{1:02x}{2:02x}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">clamp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">clamp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">clamp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.show">
+    <p>def <span class="ident">show</span>(</p><p>G, depth=False)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Decorate and draw given graph using nxpd in notebook.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.show', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.show" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorate and draw given graph using nxpd in notebook.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
 </pre></div>
 
   </div>

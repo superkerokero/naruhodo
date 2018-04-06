@@ -4,7 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
     <title>naruhodo API documentation</title>
-    <meta name="description" content="# Naruhodo 0.2.7
+    <meta name="description" content="# Naruhodo 0.2.8
 
 A python library for automatic semantic graph generation from human-readable text...." />
 
@@ -1064,9 +1064,17 @@ table {
 
   <header id="section-intro">
   <h1 class="title"><span class="name">naruhodo</span> module</h1>
-  <h1>Naruhodo 0.2.7</h1>
+  <h1>Naruhodo 0.2.8</h1>
 <p>A python library for automatic semantic graph generation from human-readable text.</p>
 <h2>Change-Log</h2>
+<h3>0.2.8</h3>
+<ul>
+<li>Added new node properties: "passive", "negative", "compulsory", "question", "tense".</li>
+<li>Added coref variable in parser class to turn automatic synonym/coreference resulution ON/OFF.</li>
+<li>Added path plotting capability to parser.show. Now this function accepts an optional path(list of nodes) and will plot it if given.</li>
+<li>Added new function parser.toText. This function takes in a path and generate texts from it. If no path is given, it will generate texts using the entire graph.</li>
+<li>Added "depth" option to show functions for plotting with depth information(DSG only).</li>
+</ul>
 <h3>0.2.7</h3>
 <ul>
 <li>Added new edge types: "para", "attr", "stat".</li>
@@ -1113,12 +1121,18 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo" class="source">
     <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd"># Naruhodo 0.2.7</span>
+<span class="sd"># Naruhodo 0.2.8</span>
 
 <span class="sd">A python library for automatic semantic graph generation from human-readable text.</span>
 
 <span class="sd">## Change-Log</span>
 
+<span class="sd">### 0.2.8</span>
+<span class="sd">  * Added new node properties: &quot;passive&quot;, &quot;negative&quot;, &quot;compulsory&quot;, &quot;question&quot;, &quot;tense&quot;.</span>
+<span class="sd">  * Added coref variable in parser class to turn automatic synonym/coreference resulution ON/OFF.</span>
+<span class="sd">  * Added path plotting capability to parser.show. Now this function accepts an optional path(list of nodes) and will plot it if given.</span>
+<span class="sd">  * Added new function parser.toText. This function takes in a path and generate texts from it. If no path is given, it will generate texts using the entire graph.</span>
+<span class="sd">  * Added &quot;depth&quot; option to show functions for plotting with depth information(DSG only).</span>
 <span class="sd">### 0.2.7</span>
 <span class="sd">  * Added new edge types: &quot;para&quot;, &quot;attr&quot;, &quot;stat&quot;.</span>
 <span class="sd">  * Tweaks for naruhodo-viewer&#39;s clustering function. </span>
