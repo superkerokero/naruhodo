@@ -97,7 +97,7 @@ class CaboChunk(object):
 
         self.negative = 0 
         """
-        If chunk is negative 1, elif chunk double negtive(strong positive) -1, else 0 
+        If chunk is negative 1, elif chunk double negtive(strongly positive) -1, else 0 
         """
 
         self.passive = 0 
@@ -346,6 +346,9 @@ class CaboChunk(object):
         if len(self.headings) > 0:
             self.main = "\n".join([x['lemma'] for x in self.headings]) + self.main
             self.main_surface = "\n".join([x['surface'] for x in self.headings]) + self.main_surface
+        # Convert main with no lemma to surface
+        if self.main.find("*") != -1:
+                self.main = self.main_surface
         
     def _getFunc(self):
         """Get the func component of the chunk."""
@@ -364,12 +367,16 @@ class CaboChunk(object):
                 elif item['labels'][0] == "非自立":
                     if item['lemma'] == "いる":
                         self.tense = 1
-                        self.main += "\n(現在)"
+        if len(self.postps) > 0:
+            for item in self.postps:
+                if item['lemma'] in ["の", "か"]:
+                    self.question = 1
         if len(self.auxvs) > 0:
             neg = sum([
                 [x['lemma'] for x in self.auxvs].count('ん'), 
                 [x['lemma'] for x in self.auxvs].count('ない'),
-                [x['lemma'] for x in self.auxvs].count('ぬ')
+                [x['lemma'] for x in self.auxvs].count('ぬ'),
+                [x['lemma'] for x in self.auxvs].count('まい')
             ])
             if neg == 1:
                 if len(self.signs) > 0 and any([self.signs[x]['surface'] == '？' for x in range(len(self.signs))]):
@@ -387,7 +394,6 @@ class CaboChunk(object):
                 pass
             if any([self.auxvs[x]['lemma'] == "た" for x in range(len(self.auxvs))]):
                 self.tense = -1
-                self.main += "\n(過去)"
 
         # Fix for nouns used as verbs.
         for item in VerbLikeFuncDict:
@@ -402,6 +408,12 @@ class CaboChunk(object):
         # Fix for special words.
         if self.main == "できる" and self.func not in ["た", "ます", "いるて"]:
             self.type = 5
+
+        # Add tense label to main
+        if self.tense == -1:
+            self.main += "\n(過去)"
+        elif self.tense == 1:
+            self.main += "\n(現在)"
         
     def processChunk(self, pos, npro):
         """Process the chunk to get main and func component of it."""

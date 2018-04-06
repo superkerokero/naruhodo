@@ -100,9 +100,15 @@ pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
   | label     | A string that stores the normalized representation of the node. This is the node name you see from the visualizations.                   |
   | pro      | An integer representing the pronoun type of this node. For meanings of integers, refer to the table of pronoun types below.     |
   | NE       | An integer representing the named-entity(NE) type of this node. For meanings of integers, refer to the table of NE types below. |
-  | pos      | A list of integers representing the id of sentences where this node appears.                                                    |
-  | surface  | A list of strings that stores the surfaces of this node(original form as it appears in the text).                                         |
-  | yomi  | A string that stores the yomi of the surface of this node.                    |
+  | negative | If chunk is negative 1, elif chunk double negtive(strongly positive) -1, else 0  |
+  | question | If chunk contains ? 1, else 0. |
+  | passive | If chunk is passive 1, else 0. |
+  | compulsory  | If chunk is compulsory 1, else 0. |
+  | tense | If chunk has no tense or present 0, elif past -1, elif present continuous 1 |
+  | pos[0:n-1]      | A list of integers representing the id of sentences where this node appears.                                                    |
+  | lpos[0:n-1]      | A list of integers representing the id of chunk in the sentence it appears.                                                    |
+  | surface[0:n-1]  | A list of strings that stores the surfaces of this node(original form as it appears in the text).                                         |
+  | yomi[0:n-1]  | A list of strings that stores the yomi of the corresponding surface of this node.                    |   |
   | sub  | A string that stores the subject of this node(if none it will be an empty string).                    |
 
 * **ノードのタイプ**

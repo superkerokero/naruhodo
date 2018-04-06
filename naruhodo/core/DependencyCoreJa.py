@@ -35,10 +35,20 @@ class DependencyCoreJa(object):
         cabo = CabochaClient()
         self.pos = pos
         cabo.add(self.proc.query(inp), self.pos)
+        root = "" # Initialize root id.
         for chunk in cabo.chunks:
             self._addNode(chunk)
+            if chunk.parent == -1:
+                root = chunk.main
         for chunk in cabo.chunks:
             self._addEdge(chunk.main, cabo.chunks[chunk.parent].main, label=chunk.func)
+        # Add depth attribute to newly added nodes.
+        if root:
+            for chunk in cabo.chunks:
+                if 'depth' in self.G.nodes[chunk.main]:
+                    self.G.nodes[chunk.main]['depth'].append(nx.shortest_path_length(self.G, source=chunk.main, target=root))
+                else:
+                    self.G.nodes[chunk.main]['depth'] = [nx.shortest_path_length(self.G, source=chunk.main, target=root)]
 
     def _addEdge(self, parent, child, label="", etype="none"):
         """Add edge to edge list"""
