@@ -1,4 +1,4 @@
-from naruhodo.utils.dicts import ProDict, MeaninglessDict, VerbLikeFuncDict
+from naruhodo.utils.dicts import ProDict, MeaninglessDict, VerbLikeFuncDict, VerbLikeExclude
 import re
 
 class CaboChunk(object):
@@ -161,6 +161,7 @@ class CaboChunk(object):
         2: location
         3: organization
         4: number
+        5: general
         """
         
         self.pro = -1
@@ -267,6 +268,8 @@ class CaboChunk(object):
                     self.NE = 2
                 elif self.nouns[0]['labels'][1] == '組織':
                     self.NE = 3
+                elif self.nouns[0]['labels'][1] == '一般':
+                    self.NE = 5
                 else:
                     pass
             # Pronoun identification(for correference analysis.)
@@ -397,7 +400,7 @@ class CaboChunk(object):
 
         # Fix for nouns used as verbs.
         for item in VerbLikeFuncDict:
-            if self.func.find(item) != -1:
+            if self.func.find(item) != -1 and self.func not in VerbLikeExclude:
                 self.type = 2
 
         if len(self.signs) > 0:

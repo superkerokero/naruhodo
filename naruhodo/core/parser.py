@@ -13,7 +13,7 @@ from naruhodo.core.KnowledgeCoreJa import KnowledgeCoreJa
 
 class parser(object):
     """The general parser for naruhodo."""
-    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0, wv="", coref=False):
+    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0, wv="", coref=False, synonym=False):
         """Constructor."""
         self.G = nx.DiGraph()
         """
@@ -71,12 +71,24 @@ class parser(object):
 
         self.coref = coref
         """
-        If set to True, automatically resolve synonyms and coreferences after adding contexts.
+        If set to True, automatically resolve coreferences after adding contexts.
+        """
+
+        self.synonym = synonym
+        """
+        If set to True, automatically resolve synonyms after adding contexts.
         """
 
         self.corefDict = set()
         """
         A set that contains all possible antecedents of pronoun coreferences.
+        """
+
+        self.coref_1stPerson = set()
+        self.coref_3rdPersonM = set()
+        self.coref_3rdPersonF = set()
+        """
+        Sets of individual coref types. Used for distinguishing existing antecedents.
         """
 
         self.synonymDict = set()
@@ -280,8 +292,11 @@ class parser(object):
         self.core.entityList = [dict() for x in range(len(NEList))]
         self.proList = _mergeProList(self.proList, self.core.proList)
         self.core.proList = list()
+        flatEntityList = None
+        if self.synonym:
+            flatEntityList = self.resolveSynonym()
         if self.coref:
-            self.resolve()
+            self.resolveCoref(flatEntityList)
         return [inp]
 
     def addAll(self, inps):
@@ -290,8 +305,11 @@ class parser(object):
             self._addAllMP(inps)
         else:
             self._addAllSP(inps)
+        flatEntityList = None
+        if self.synonym:
+            flatEntityList = self.resolveSynonym()
         if self.coref:
-            self.resolve()
+            self.resolveCoref(flatEntityList)
 
     def _addAllSP(self, inps):
         """Standard implementation of addAll function."""
@@ -345,14 +363,15 @@ class parser(object):
             ret.append(results[-1])
             return self._reduce(ret)
 
-    def resolve(self):
-        """Resolve coreferences in the given text."""
+    def resolveSynonym(self):
+        """Resolve synonyms in the given text."""
         # initialize a graph of synonym
         GS = nx.Graph()
         # Get flatten entity list
         flatEntityList = list()
-        for item in self.entityList:
-            for key in item.keys():
+        # Add person and organization to flatEntityList
+        for i in [1, 3]:
+            for key in self.entityList[i].keys():
                 flatEntityList.append(key)
         # Find syntatic synonyms
         for i in range(len(flatEntityList)):
@@ -387,6 +406,10 @@ class parser(object):
             self.synonymDict.add(nshort)
             for node in subG:
                 self.G.nodes[node]['synonym'] = nshort
+        return flatEntityList
+
+    def resolveCoref(self, flatEntityList=None):
+        """Resolve coreferences in the given text."""
         # Get position-based entity list
         self.posEntityList = [dict() for x in range(len(NEList))]
         for i in range(len(NEList)):
@@ -402,13 +425,57 @@ class parser(object):
             antecedent = ""
             if pro['type'] == 0:
                 antecedent = self._rresolve(pro['pos'] - 1, 2)
-            elif pro['type'] in [2, 4]:
-                antecedent = self._rresolve(pro['pos'] - 1, 1)
+            elif pro['type'] == 2:
+                antecedent = self._rresolve(pro['pos'] - 1, 1, invalid_antecedents=self.coref_3rdPersonF.union(self.coref_3rdPersonM))
+                if antecedent == "":
+                    antecedent = self._rresolve(pro['pos'] - 1, 5, invalid_antecedents=self.coref_3rdPersonF.union(self.coref_3rdPersonM))
+                if antecedent == "" and pro['pos'] in self.posEntityList[1]:
+                    for i, x in enumerate(self.posEntityList[1][pro['pos']]):
+                        if x not in self.coref_3rdPersonF.union(self.coref_3rdPersonM):
+                            antecedent = x
+                if antecedent == "" and pro['pos'] in self.posEntityList[5]:
+                    for i, x in enumerate(self.posEntityList[5][pro['pos']]):
+                        if x not in self.coref_3rdPersonF.union(self.coref_3rdPersonM):
+                            antecedent = x
+                if antecedent != "":
+                    self.coref_1stPerson.add(antecedent)
+            elif pro['type'] == 4:
+                if pro['name'] in ['彼女']:
+                    antecedent = self._rresolve(pro['pos'] - 1, 1, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonM))
+                    if antecedent == "":
+                        antecedent = self._rresolve(pro['pos'] - 1, 5, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonM))
+                    if antecedent == "" and pro['pos'] in self.posEntityList[1]:
+                        for i, x in enumerate(self.posEntityList[1][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonM):
+                                antecedent = x
+                    if antecedent == "" and pro['pos'] in self.posEntityList[5]:
+                        for i, x in enumerate(self.posEntityList[5][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonM):
+                                antecedent = x
+                    if antecedent != "":
+                        self.coref_3rdPersonF.add(antecedent)
+                else:
+                    antecedent = self._rresolve(pro['pos'] - 1, 1, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonF))
+                    if antecedent == "":
+                        antecedent = self._rresolve(pro['pos'] - 1, 5, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonF))
+                    if antecedent == "" and pro['pos'] in self.posEntityList[1]:
+                        for i, x in enumerate(self.posEntityList[1][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonF):
+                                antecedent = x
+                    if antecedent == "" and pro['pos'] in self.posEntityList[5]:
+                        for i, x in enumerate(self.posEntityList[5][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonF):
+                                antecedent = x
+                    if antecedent != "":
+                        self.coref_3rdPersonM.add(antecedent)
             elif pro['type'] == 7:
-                if not self.wv:
-                    print("Word vector model is not set correctly. Skipping part of coreference resolution.")
+                if not self.wv or not flatEntityList:
+                    print("Word vector model is not set correctly or entity list is empty. Skipping part of coreference resolution.")
+                    continue
                 else:
                     antecedent = self._wvResolve(pro['name'], flatEntityList)
+            else:
+                continue
             # Process antecedent
             if antecedent != "":
                 self.G.nodes[antecedent]['count'] += 1
@@ -434,15 +501,21 @@ class parser(object):
             # Add antecedent to corefDict
             self.corefDict.add(antecedent)
 
-    def _rresolve(self, pos, NE):
+    def _rresolve(self, pos, NE, invalid_antecedents=None):
         """Recursively resolve to previous position."""
         if pos == -1:
             return ""
         else:
             if pos in self.posEntityList[NE]:
-                return self.posEntityList[NE][pos][-1]
+                if invalid_antecedents:
+                    for i, x in enumerate(self.posEntityList[NE][pos][::-1]):
+                        if x not in invalid_antecedents:
+                            return x
+                    return self._rresolve(pos - 1, NE, invalid_antecedents)
+                else:
+                    return self.posEntityList[NE][pos][-1]
             else:
-                return self._rresolve(pos - 1, NE)
+                return self._rresolve(pos - 1, NE, invalid_antecedents)
 
     def _wvResolve(self, proname, flatEntityList):
         """Resolve using word vector similarities."""
@@ -468,7 +541,7 @@ class parser(object):
                     if sim < score:
                         sim = score
                         ret = item
-            if sim > 0.5:
+            if sim > 0.7:
                 return ret
             else:
                 return ""        

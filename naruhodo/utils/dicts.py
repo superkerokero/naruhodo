@@ -8,7 +8,7 @@ ProDict = {
     'demonstrative-obj': ["これ", "それ", "あれ", "そう", "こう", "こんな", "そんな", "あんな"],
     'personal1st': ["私", "わたし", "俺", "おれ", "オレ", "僕", "ぼく", "僕ら", "ぼくら", "ボク", "我ら", "我々"],
     'personal2nd': ["君", "きみ", "キミ", "あなた", "貴方", "お前"],
-    'personal3rd': ["やつ", "奴", "彼", "彼女", "こいつ", "そいつ", "あいつ"],
+    'personal3rd': ["やつ", "奴", "彼", "彼女", "こいつ", "そいつ", "あいつ", "同氏", "先生"],
     'indefinite': ["どこ", "どれ", "どっち", "どなた", "どちら"],
     'inclusive': ["皆", "みんな", "みな"],
     'omitted': ["省略される主語"]
@@ -24,7 +24,7 @@ Dict of word types.
 """
 
 
-NEList = ['NONE', 'PERSON', 'LOCATION', 'ORGANIZATION', 'NUMBER']
+NEList = ['NONE', 'PERSON', 'LOCATION', 'ORGANIZATION', 'NUMBER', 'GENERAL']
 """
 Dict of named entity types.
 """
@@ -123,8 +123,15 @@ VerbLikeFuncDict = set([
 Dict that contains verb-like functional words.
 """
 
+VerbLikeExclude = set([
+    "として"
+])
+"""
+Dict that contains verb-like functional words exceptions.
+"""
+
 SubDict = set([
-    "は", "では", "などは", "のは", "のが"
+    "は", "では", "などは", "のは", "のが", "は、", "では、", "などは、", "のは、", "のが、"
 ])
 """
 Dict that contains functional words of subjects.

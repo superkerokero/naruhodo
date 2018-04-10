@@ -191,21 +191,40 @@ class KnowledgeCoreJa(DependencyCoreJa):
                 aux.append(child.id)
                 auxlabel += "[{0}]\n".format(child.surface)
 
-        # Add parent and subject.
-        if sub:
-            parent.main = "{0}\n[{1}]".format(parent.main, sub.main)
-            self._addNode(parent, sub=sub.main)
-            if not self.G.has_node(sub.main):
-                self._addNode(sub)
-            self._addEdge(sub.main, parent.main, label="主体", etype="sub")
+        if parent.passive == 0:
+            # Add parent and subject.
+            if sub:
+                parent.main = "{0}\n[{1}]".format(parent.main, sub.main)
+                self._addNode(parent, sub=sub.main)
+                if not self.G.has_node(sub.main):
+                    self._addNode(sub)
+                self._addEdge(sub.main, parent.main, label="主体\n", etype="sub")
+            else:
+                self._addNode(parent)
+            # Add object.
+            if obj:
+                if not self.G.has_node(obj.main):
+                    self._addNode(obj)
+                self._addEdge(parent.main, obj.main, label="客体\n" + auxlabel, etype="obj")
         else:
-            # parent.main = "{0}\n[{1}]".format(parent.main, "")
-            self._addNode(parent)
-        # Add object.
-        if obj:
-            if not self.G.has_node(obj.main):
-                self._addNode(obj)
-            self._addEdge(parent.main, obj.main, label="客体\n" + auxlabel, etype="obj")
+            # Add obj as sub
+            if obj:
+                parent.main = "{0}\n[{1}]".format(parent.main, obj.main)
+                self._addNode(parent, sub=obj.main)
+                if not self.G.has_node(obj.main):
+                    self._addNode(obj)
+                self._addEdge(obj.main, parent.main, label="主体\n", etype="sub")
+            else:
+                self._addNode(parent)
+            # Add sub as obj
+            if sub:
+                if not self.G.has_node(sub.main):
+                    self._addNode(sub)
+                self._addEdge(parent.main, sub.main, label="客体\n", etype="obj")
+            # # Add obj as aux.
+            # if obj:
+            #     aux.append(obj.id)
+            #     auxlabel += "[{0}]\n".format(obj.surface)
         self._processAux(aux, parent.main, chunks)        
 
     def _processAux(self, aux, pname, chunks):
