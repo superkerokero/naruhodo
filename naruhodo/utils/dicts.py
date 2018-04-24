@@ -6,9 +6,9 @@ This module contains various dicts used in naruhodo.
 ProDict = {
     'demonstrative-loc': ["ここ", "そこ", "あそこ", "こっち", "そっち", "あっち", "こちら", "そちら", "あちら"],
     'demonstrative-obj': ["これ", "それ", "あれ", "そう", "こう", "こんな", "そんな", "あんな"],
-    'personal1st': ["私", "わたし", "俺", "おれ", "オレ", "僕", "ぼく", "僕ら", "ぼくら", "ボク", "我ら", "我々"],
+    'personal1st': ["私", "わたし", "俺", "おれ", "オレ", "僕", "ぼく", "僕ら", "ぼくら", "ボク", "我", "ワレ", "妾", "我ら", "我々", "わし", "儂"],
     'personal2nd': ["君", "きみ", "キミ", "あなた", "貴方", "お前"],
-    'personal3rd': ["やつ", "奴", "彼", "彼女", "こいつ", "そいつ", "あいつ"],
+    'personal3rd': ["やつ", "奴", "彼", "彼女", "こいつ", "そいつ", "あいつ", "同氏", "先生"],
     'indefinite': ["どこ", "どれ", "どっち", "どなた", "どちら"],
     'inclusive': ["皆", "みんな", "みな"],
     'omitted': ["省略される主語"]
@@ -24,7 +24,7 @@ Dict of word types.
 """
 
 
-NEList = ['NONE', 'PERSON', 'LOCATION', 'ORGANIZATION', 'NUMBER']
+NEList = ['NONE', 'PERSON', 'LOCATION', 'ORGANIZATION', 'NUMBER', 'GENERAL']
 """
 Dict of named entity types.
 """
@@ -110,7 +110,7 @@ MeaninglessDict = set([
     "前", "後", "こと", "事", "もの", "物", "者", "ため", "爲", "為", "為め", "爲め", 
     "意", "上", "うえ", "中", "なか", "下", "した", "なる", "成る", "ある", "よる", "する", 
     "ない", "無い", "から", "だから", "場合", "とき", "時", "程度", "逆", "いう",
-    "問題", "もんだい", "内容", "ないよう", "範囲", "やつ", "くる", "来る", "ところ"
+    "問題", "もんだい", "内容", "ないよう", "範囲", "やつ", "くる", "来る", "ところ", "所"
 ])
 """
 Dict that contains meaningless entities that has to be integrated with its child properties to remain meaningful in the graph.
@@ -123,8 +123,15 @@ VerbLikeFuncDict = set([
 Dict that contains verb-like functional words.
 """
 
+VerbLikeExclude = set([
+    "として"
+])
+"""
+Dict that contains verb-like functional words exceptions.
+"""
+
 SubDict = set([
-    "は", "では", "などは", "のは", "のが"
+    "は", "では", "などは", "というのは", "というのが", "は、", "などは、", "というのは、", "というのが、"
 ])
 """
 Dict that contains functional words of subjects.
@@ -138,7 +145,7 @@ Dict that contains functional words of objects.
 """
 
 ObjPostDict = set([
-    "へ", "に",
+    # "へ", "に",
 ])
 """
 Dict that contains functional words that can be objects. 
@@ -164,8 +171,16 @@ Dict of node types that can be potential entities.
 """
 
 ParallelDict = set([
-    "と", "などと", "や", "やら", "も", "、", "・", "｜"
+    "や", "やら", "も", "、", "・", "｜"
 ])
 """
 Dict that contains functional words that can be objects. 
 """
+
+StrongAuxDict = set([
+    "すごい", "凄い", "最も", "もっとも", "かなり", "非常に", "特に", "とっても", "とても"
+])
+
+WeakAuxDict = set([
+    "ちょっと", "少し", "すこし", "かすかに", "微かに", "微妙に"
+])

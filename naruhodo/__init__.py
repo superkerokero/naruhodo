@@ -1,10 +1,15 @@
 """
-# Naruhodo 0.2.8
+# Naruhodo 0.2.9
 
 A python library for automatic semantic graph generation from human-readable text.
 
 ## Change-Log
 
+### 0.2.9
+  * Some bug fix in KSG.
+  * Moved parser._preprocessText() to utils.misc.preprocessText().
+  * Change sub to obj when adding passive predicates in KSG.
+  * Modified synonym/coreference resolution for better accuracy in some situations(still not recomended though). 
 ### 0.2.8
   * Added new node properties: "passive", "negative", "compulsory", "question", "tense".
   * Added coref variable in parser class to turn automatic synonym/coreference resulution ON/OFF.

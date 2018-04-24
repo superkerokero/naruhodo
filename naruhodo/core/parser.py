@@ -6,14 +6,14 @@ from nxpd import draw
 from naruhodo.utils.scraper import NScraper
 from naruhodo.utils.dicts import NEList
 from naruhodo.utils.misc import exportToJsonObj, exportToJsonFile
-from naruhodo.utils.misc import inclusive, harmonicSim, cosSimilarity, show, plotToFile
+from naruhodo.utils.misc import inclusive, harmonicSim, cosSimilarity, show, plotToFile, preprocessText, parseToSents
 from naruhodo.utils.misc import _mergeGraph, _mergeEntityList, _mergeProList, _mergeAll
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
 from naruhodo.core.KnowledgeCoreJa import KnowledgeCoreJa
 
 class parser(object):
     """The general parser for naruhodo."""
-    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0, wv="", coref=False):
+    def __init__(self, lang="ja", gtype="k", mp=False, nproc=0, wv="", coref=False, synonym=False, autosub=False):
         """Constructor."""
         self.G = nx.DiGraph()
         """
@@ -34,18 +34,6 @@ class parser(object):
         self.pos = 0
         """
         Position of sentences added to the parser.
-        """
-
-        self.re_sent = re.compile(r'([^　！？。]*[！？。])')
-        """
-        Precompiled regular expression for separating sentences.
-        """
-
-        self._re1 = re.compile(r'\（.*?\）')
-        self._re2 = re.compile(r'\[.*?\]')
-        self._re3 = re.compile(r'\(.*?\)')
-        """
-        Precompiled regular expressions for getting rid of parenthesis.
         """
 
         self.lang = lang
@@ -71,12 +59,29 @@ class parser(object):
 
         self.coref = coref
         """
-        If set to True, automatically resolve synonyms and coreferences after adding contexts.
+        If set to True, automatically resolve coreferences after adding contexts.
+        """
+
+        self.synonym = synonym
+        """
+        If set to True, automatically resolve synonyms after adding contexts.
+        """
+
+        self.autosub = autosub
+        """
+        If set to True, automatically link potential subject to none-subject predicates in the same sentence.
         """
 
         self.corefDict = set()
         """
         A set that contains all possible antecedents of pronoun coreferences.
+        """
+
+        self.coref_1stPerson = set()
+        self.coref_3rdPersonM = set()
+        self.coref_3rdPersonF = set()
+        """
+        Sets of individual coref types. Used for distinguishing existing antecedents.
         """
 
         self.synonymDict = set()
@@ -115,15 +120,11 @@ class parser(object):
             if self.gtype == "d":
                 self.core = DependencyCoreJa()
             elif self.gtype == "k":
-                self.core = KnowledgeCoreJa(autosub=self.coref)
+                self.core = KnowledgeCoreJa(autosub=self.autosub)
             else:
                 raise ValueError("Unknown graph type: {0}".format(self.gtype))
         else:
             raise ValueError("Unsupported language: {0}".format(self.lang))
-
-    def _parseToSents(self, context):
-        """Parse given context into list of individual sentences."""
-        return [sent.strip().replace('*', "-") for sent in self.re_sent.split(context) if sent.strip() != ""]
 
     def _grabTextFromUrls(self, urls):
         """Parse given url(or a list of urls) and return the text content of the it."""
@@ -138,7 +139,7 @@ class parser(object):
             text = scpr.getUrlContent(url)
             for block in text:
                 for line in block.splitlines():
-                    ret = list(itertools.chain(ret, self._parseToSents(line)))
+                    ret = list(itertools.chain(ret, parseToSents(line)))
         return ret
 
     def reset(self):
@@ -150,14 +151,6 @@ class parser(object):
         self.proList = list()
         self.corefDict = set()
         self.synonymDict = set()
-
-    def _preprocessText(self, text):
-        """Get rid of weird parts from the text that interferes analysis."""
-        text = self._re1.sub("", text)
-        text = self._re2.sub("", text)
-        text = self._re3.sub("", text)
-        text = text.replace("・", "、").replace("|", "、").replace(" ", "").strip()
-        return text.replace("\n", "")
 
     def exportObj(self):
         """Export graph to a JSON-like object for external visualization."""
@@ -237,7 +230,7 @@ class parser(object):
         else:
             return self._graph2Text(self.G)
 
-    def show(self, path=None, depth=False):
+    def show(self, path=None, depth=False, rankdir='TB'):
         """
         If given a path, plot the subgraph generated from path.
         Otherwise, plot the entire graph.
@@ -247,29 +240,29 @@ class parser(object):
             print("Only dependency structure graph can be plotted with depth!")
             return
         if path:
-            return show(self._path2Graph(path), depth=depth)
+            return show(self._path2Graph(path), depth=depth, rankdir=rankdir)
         else:
-            return show(self.G, depth=depth)
+            return show(self.G, depth=depth, rankdir=rankdir)
 
-    def plotToFile(self, path=None, filename=None):
+    def plotToFile(self, path=None, filename=None, depth=False, rankdir='TB'):
         """
         If given a path, plot the subgraph generated from path to (png) file with given filename.
         Otherwise, plot the entire graph to (png) file with given filename.
         """
         if path:
-            return plotToFile(self._path2Graph(path), filename)
+            return plotToFile(self._path2Graph(path), filename, depth=depth, rankdir=rankdir)
         else:
-            return plotToFile(self.G, filename)
+            return plotToFile(self.G, filename, depth=depth, rankdir=rankdir)
 
     def addUrls(self, urls):
         """Add the information from given urls to KSG."""
         context = self._grabTextFromUrls(urls)
         self.addAll(context)
-        return [self._preprocessText(item) for item in context]
+        return [preprocessText(item) for item in context]
 
     def add(self, inp):
         """Add a sentence to graph."""
-        inp = self._preprocessText(inp)
+        inp = preprocessText(inp)
         if inp == "":
             return [inp]
         self.core.add(inp, self.pos)
@@ -280,8 +273,11 @@ class parser(object):
         self.core.entityList = [dict() for x in range(len(NEList))]
         self.proList = _mergeProList(self.proList, self.core.proList)
         self.core.proList = list()
+        flatEntityList = None
+        if self.synonym:
+            flatEntityList = self.resolveSynonym()
         if self.coref:
-            self.resolve()
+            self.resolveCoref(flatEntityList)
         return [inp]
 
     def addAll(self, inps):
@@ -290,31 +286,36 @@ class parser(object):
             self._addAllMP(inps)
         else:
             self._addAllSP(inps)
+        flatEntityList = None
+        if self.synonym:
+            flatEntityList = self.resolveSynonym()
         if self.coref:
-            self.resolve()
+            self.resolveCoref(flatEntityList)
 
     def _addAllSP(self, inps):
         """Standard implementation of addAll function."""
         for inp in inps:
-            inp = self._preprocessText(inp)
-            if inp == "":
-                continue
-            self.core.add(inp, self.pos)
-            self.pos += 1
-        self.G = _mergeGraph(self.G, self.core.G)
-        self.core.G.clear()
-        self.entityList = _mergeEntityList(self.entityList, self.core.entityList)
-        self.core.entityList = [dict() for x in range(len(NEList))]
-        self.proList = _mergeProList(self.proList, self.core.proList)
-        self.core.proList = list()
+            self.add(inp)
+        #     inp = preprocessText(inp)
+        #     if inp == "":
+        #         continue
+        #     self.core.add(inp, self.pos)
+        #     self.pos += 1
+        # self.G = _mergeGraph(self.G, self.core.G)
+        # self.core.G.clear()
+        # self.entityList = _mergeEntityList(self.entityList, self.core.entityList)
+        # self.core.entityList = [dict() for x in range(len(NEList))]
+        # self.proList = _mergeProList(self.proList, self.core.proList)
+        # self.core.proList = list()
 
     def _addAllMP(self, inps):
         """Parallel implementation of addAll function."""
-        inps = [[self.pos + x, self._preprocessText(inps[x])] for x in range(len(inps))]
         if self.lang == "ja":
             if self.gtype == "d":
+                inps = [[self.pos + x, preprocessText(inps[x])] for x in range(len(inps))]
                 results = self.pool.starmap(self._addMP_ja_d, inps)
             elif self.gtype == "k":
+                inps = [[self.pos + x, preprocessText(inps[x]), self.autosub] for x in range(len(inps))]
                 results = self.pool.starmap(self._addMP_ja_k, inps)
             else:
                 raise ValueError("Unknown graph type: {0}".format(self.gtype))
@@ -345,20 +346,21 @@ class parser(object):
             ret.append(results[-1])
             return self._reduce(ret)
 
-    def resolve(self):
-        """Resolve coreferences in the given text."""
+    def resolveSynonym(self):
+        """Resolve synonyms in the given text."""
         # initialize a graph of synonym
         GS = nx.Graph()
         # Get flatten entity list
         flatEntityList = list()
-        for item in self.entityList:
-            for key in item.keys():
+        # Add person and organization to flatEntityList
+        for i in [1, 3]:
+            for key in self.entityList[i].keys():
                 flatEntityList.append(key)
         # Find syntatic synonyms
         for i in range(len(flatEntityList)):
             for j in range(i + 1, len(flatEntityList)):
-                A = self._preprocessText(flatEntityList[i])
-                B = self._preprocessText(flatEntityList[j])
+                A = preprocessText(flatEntityList[i])
+                B = preprocessText(flatEntityList[j])
                 inc = inclusive(A, B)
                 if not self.wv:
                     sim = 1.
@@ -387,6 +389,10 @@ class parser(object):
             self.synonymDict.add(nshort)
             for node in subG:
                 self.G.nodes[node]['synonym'] = nshort
+        return flatEntityList
+
+    def resolveCoref(self, flatEntityList=None):
+        """Resolve coreferences in the given text."""
         # Get position-based entity list
         self.posEntityList = [dict() for x in range(len(NEList))]
         for i in range(len(NEList)):
@@ -402,13 +408,57 @@ class parser(object):
             antecedent = ""
             if pro['type'] == 0:
                 antecedent = self._rresolve(pro['pos'] - 1, 2)
-            elif pro['type'] in [2, 4]:
-                antecedent = self._rresolve(pro['pos'] - 1, 1)
+            elif pro['type'] == 2:
+                antecedent = self._rresolve(pro['pos'] - 1, 1, invalid_antecedents=self.coref_3rdPersonF.union(self.coref_3rdPersonM))
+                if antecedent == "":
+                    antecedent = self._rresolve(pro['pos'] - 1, 5, invalid_antecedents=self.coref_3rdPersonF.union(self.coref_3rdPersonM))
+                if antecedent == "" and pro['pos'] in self.posEntityList[1]:
+                    for i, x in enumerate(self.posEntityList[1][pro['pos']]):
+                        if x not in self.coref_3rdPersonF.union(self.coref_3rdPersonM):
+                            antecedent = x
+                if antecedent == "" and pro['pos'] in self.posEntityList[5]:
+                    for i, x in enumerate(self.posEntityList[5][pro['pos']]):
+                        if x not in self.coref_3rdPersonF.union(self.coref_3rdPersonM):
+                            antecedent = x
+                if antecedent != "":
+                    self.coref_1stPerson.add(antecedent)
+            elif pro['type'] == 4:
+                if pro['name'] in ['彼女']:
+                    antecedent = self._rresolve(pro['pos'] - 1, 1, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonM))
+                    if antecedent == "":
+                        antecedent = self._rresolve(pro['pos'] - 1, 5, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonM))
+                    if antecedent == "" and pro['pos'] in self.posEntityList[1]:
+                        for i, x in enumerate(self.posEntityList[1][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonM):
+                                antecedent = x
+                    if antecedent == "" and pro['pos'] in self.posEntityList[5]:
+                        for i, x in enumerate(self.posEntityList[5][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonM):
+                                antecedent = x
+                    if antecedent != "":
+                        self.coref_3rdPersonF.add(antecedent)
+                else:
+                    antecedent = self._rresolve(pro['pos'] - 1, 1, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonF))
+                    if antecedent == "":
+                        antecedent = self._rresolve(pro['pos'] - 1, 5, invalid_antecedents=self.coref_1stPerson.union(self.coref_3rdPersonF))
+                    if antecedent == "" and pro['pos'] in self.posEntityList[1]:
+                        for i, x in enumerate(self.posEntityList[1][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonF):
+                                antecedent = x
+                    if antecedent == "" and pro['pos'] in self.posEntityList[5]:
+                        for i, x in enumerate(self.posEntityList[5][pro['pos']]):
+                            if x not in self.coref_1stPerson.union(self.coref_3rdPersonF):
+                                antecedent = x
+                    if antecedent != "":
+                        self.coref_3rdPersonM.add(antecedent)
             elif pro['type'] == 7:
-                if not self.wv:
-                    print("Word vector model is not set correctly. Skipping part of coreference resolution.")
+                if not self.wv or not flatEntityList:
+                    print("Word vector model is not set correctly or entity list is empty. Skipping part of coreference resolution.")
+                    continue
                 else:
                     antecedent = self._wvResolve(pro['name'], flatEntityList)
+            else:
+                continue
             # Process antecedent
             if antecedent != "":
                 self.G.nodes[antecedent]['count'] += 1
@@ -434,15 +484,21 @@ class parser(object):
             # Add antecedent to corefDict
             self.corefDict.add(antecedent)
 
-    def _rresolve(self, pos, NE):
+    def _rresolve(self, pos, NE, invalid_antecedents=None):
         """Recursively resolve to previous position."""
         if pos == -1:
             return ""
         else:
             if pos in self.posEntityList[NE]:
-                return self.posEntityList[NE][pos][-1]
+                if invalid_antecedents:
+                    for i, x in enumerate(self.posEntityList[NE][pos][::-1]):
+                        if x not in invalid_antecedents:
+                            return x
+                    return self._rresolve(pos - 1, NE, invalid_antecedents)
+                else:
+                    return self.posEntityList[NE][pos][-1]
             else:
-                return self._rresolve(pos - 1, NE)
+                return self._rresolve(pos - 1, NE, invalid_antecedents)
 
     def _wvResolve(self, proname, flatEntityList):
         """Resolve using word vector similarities."""
@@ -451,24 +507,24 @@ class parser(object):
         svecs = list()
         sim = 0.
         for key in self.G.successors(proname):
-            name = self._preprocessText(key)
+            name = preprocessText(key)
             if name in self.wv:
                 snames.append(name)
                 svecs.append(self.wv[name])
             for key2 in self.G.successors(key):
-                name = self._preprocessText(key2)
+                name = preprocessText(key2)
                 if name in self.wv:
                     snames.append(name)
                     svecs.append(self.wv[name])
         if len(svecs) > 0:
             for item in flatEntityList:
-                rawitem = self._preprocessText(item)
+                rawitem = preprocessText(item)
                 if rawitem not in snames and rawitem in self.wv:
                     score = harmonicSim(svecs, self.wv[rawitem])
                     if sim < score:
                         sim = score
                         ret = item
-            if sim > 0.5:
+            if sim > 0.7:
                 return ret
             else:
                 return ""        
@@ -483,8 +539,8 @@ class parser(object):
         return core.G, core.entityList, core.proList
 
     @staticmethod
-    def _addMP_ja_k(pos, inp):
+    def _addMP_ja_k(pos, inp, autosub=False):
         """Static version of add for KSG parsing in Japanese."""
-        core = KnowledgeCoreJa()
+        core = KnowledgeCoreJa(autosub=autosub)
         core.add(inp, pos)
-        return core.G, core.entityList, core.proList        
+        return core.G, core.entityList, core.proList

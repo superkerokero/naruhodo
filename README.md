@@ -148,6 +148,8 @@ Support for other parsers such as `KNP` is planned in the future.
   | 2     | Location                     |
   | 3     | Organization                 |
   | 4     | Number/Date                  |
+  | 5     | General                      |
+
 
 * **Edge properties**
 

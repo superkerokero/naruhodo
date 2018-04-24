@@ -1,4 +1,5 @@
-from naruhodo.utils.dicts import ProDict, MeaninglessDict, VerbLikeFuncDict
+from naruhodo.utils.dicts import ProDict, MeaninglessDict, VerbLikeFuncDict, VerbLikeExclude
+from naruhodo.utils.misc import preprocessText
 import re
 
 class CaboChunk(object):
@@ -161,6 +162,7 @@ class CaboChunk(object):
         2: location
         3: organization
         4: number
+        5: general
         """
         
         self.pro = -1
@@ -177,6 +179,12 @@ class CaboChunk(object):
          6: inclusive
          7: omitted *This type is assigned by naruhodo.core.KnowledgeCoreJa.
         """
+
+        self.npro = 0
+        """
+        Rank of this pronoun in the sentence it appears.
+        """
+
         self.meaning = ""
         """
         If the main of this chunk is in MeaninglessDict, 
@@ -244,7 +252,6 @@ class CaboChunk(object):
             self.type = 0
             if len(self.adjs) > 0:
                 if self.adjs[0]['lemma'] == "ない":
-                    self.main += "\n(否定)"
                     self.negative = 1
             # Corrections for special patterns.
             if self.nouns[0]['labels'][0] == 'サ変接続':
@@ -267,6 +274,8 @@ class CaboChunk(object):
                     self.NE = 2
                 elif self.nouns[0]['labels'][1] == '組織':
                     self.NE = 3
+                elif self.nouns[0]['labels'][1] == '一般':
+                    self.NE = 5
                 else:
                     pass
             # Pronoun identification(for correference analysis.)
@@ -293,16 +302,18 @@ class CaboChunk(object):
                 self.NE = 4
             else:
                 pass
-        elif len(self.nouns) > 0 and self.nouns[0]['surface'] == 'こと':
-            self.main = self.nouns[0]['lemma']
-            self.main_surface = self.nouns[0]['surface']
+        elif len(self.nouns) > 0 and self.nouns[0]['lemma'] in MeaninglessDict:
+            if len(self.verbs) > 0:
+                self.main = self.verbs[0]['surface']
+                self.main_surface = self.verbs[0]['surface']
+            self.main += self.nouns[0]['lemma']
+            self.main_surface += self.nouns[0]['surface']
             self.type = 0
         elif len(self.adjs) > 0:
             self.main = self.adjs[0]['lemma']
             self.main_surface = self.adjs[0]['surface']
             self.type = 1
             if self.adjs[0]['lemma'] == "ない":
-                self.main += "\n(否定)"
                 self.negative = 1
         elif len(self.verbs) > 0:
             self.main = self.verbs[0]['lemma']
@@ -360,17 +371,16 @@ class CaboChunk(object):
                 if item['labels'][0] == '接尾':
                     if item['lemma'] == "れる" or item['lemma'] == "られる":
                         self.passive = 1
-                        self.main += "\n(受動)"
                     elif item['lemma'] == "させる":
                         self.compulsory = 1
-                        self.main += "\n(強制)"
                 elif item['labels'][0] == "非自立":
                     if item['lemma'] == "いる":
                         self.tense = 1
         if len(self.postps) > 0:
-            for item in self.postps:
-                if item['lemma'] in ["の", "か"]:
-                    self.question = 1
+            if self.parent == -1:
+                for item in self.postps:
+                    if item['lemma'] in ["の", "なの", "か"]:
+                        self.question = 1
         if len(self.auxvs) > 0:
             neg = sum([
                 [x['lemma'] for x in self.auxvs].count('ん'), 
@@ -382,14 +392,12 @@ class CaboChunk(object):
                 if len(self.signs) > 0 and any([self.signs[x]['surface'] == '？' for x in range(len(self.signs))]):
                     pass
                 else:
-                    self.main += "\n(否定)"
                     self.negative = 1
             elif neg > 1:
                 if neg % 2 == 0:
-                    self.main += "\n(二重否定)"
                     self.negative = -1
                 else:
-                    self.main += "\n(多重否定)"
+                    self.negative = 1
             else:
                 pass
             if any([self.auxvs[x]['lemma'] == "た" for x in range(len(self.auxvs))]):
@@ -397,7 +405,7 @@ class CaboChunk(object):
 
         # Fix for nouns used as verbs.
         for item in VerbLikeFuncDict:
-            if self.func.find(item) != -1:
+            if self.func.find(item) != -1 and self.func not in VerbLikeExclude:
                 self.type = 2
 
         if len(self.signs) > 0:
@@ -408,27 +416,40 @@ class CaboChunk(object):
         # Fix for special words.
         if self.main == "できる" and self.func not in ["た", "ます", "いるて"]:
             self.type = 5
-
-        # Add tense label to main
-        if self.tense == -1:
-            self.main += "\n(過去)"
-        elif self.tense == 1:
-            self.main += "\n(現在)"
         
     def processChunk(self, pos, npro):
         """Process the chunk to get main and func component of it."""
         self._getMain()
         self._getFunc()
+        # Modify pronouns
         if self.pro != -1:
             self.main += "[{0}@{1}]".format(pos, npro)
+            self.npro = npro
+        # Add tense label to main
+        if self.tense == -1:
+            self.main += "\n(過去)"
+        elif self.tense == 1:
+            self.main += "\n(現在)"
+        # Add compulsory label to main
+        if self.compulsory == 1:
+            self.main += "\n(強制)"
+        if self.passive == 1:
+            self.main += "\n(被動)"
+        # Add question label to main
+        if self.question == 1:
+            self.main += "\n(質問)"
+        # Add negative label to main
+        if self.negative == 1:
+            self.main += "\n(否定)"
+        elif self.negative == -1:
+            self.main += "\n(二重否定)"
         self._cleanUp()
-    
+
 class CabochaClient(object):
     """Class for CaboCha backend."""
     def __init__(self):
         """Initialize a native database."""
         self.rsplit = re.compile(r'[,]+|\t')
-        self.re_parentheses = re.compile(r'\(.*?\)')
         self.chunks = list()
         self.root = None
         self.npro = 0
@@ -477,7 +498,7 @@ class CabochaClient(object):
         """This function makes meaningless words tagged with its meaning."""
         nck = len(self.chunks)
         for i in range(nck):
-            if self.re_parentheses.sub("", self.chunks[i].main).replace("\n", "") in MeaninglessDict:
+            if preprocessText(self.chunks[i].main) in MeaninglessDict:
                 if len(self.childrenList[i]) > 0:
                     self.chunks[i].meaning = self.chunks[self.childrenList[i][-1]].main
                     self.chunks[i].main = "({0})\n{1}".format(
@@ -489,6 +510,9 @@ class CabochaClient(object):
         """This function makes the words that has negative child tagged negative."""
         nck = len(self.chunks)
         for i in range(nck):
-            if self.chunks[i].main in ["ない", ]:
-                pid = self.chunks[i].parent
-                self.chunks[pid].main += "\n(否定)"
+            if preprocessText(self.chunks[i].main) in ["ない", ]:
+                if len(self.childrenList[i]) > 0:
+                    self.chunks[self.childrenList[i][-1]].main += "\n(否定)"
+                    self.chunks[self.childrenList[i][-1]].negative = 1
+                    self.chunks[i].meaning = self.chunks[self.childrenList[i][-1]].main
+                self.chunks[i].main = self.chunks[i].main.replace("\n(否定)", "")

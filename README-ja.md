@@ -148,6 +148,7 @@ pip install https://github.com/superkerokero/naruhodo/archive/dev.zip
   | 2     | Location                     |
   | 3     | Organization                 |
   | 4     | Number/Date                  |
+  | 5     | General                      |
 
 * **エッジの属性**
 

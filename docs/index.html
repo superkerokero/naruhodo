@@ -4,7 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
     <title>naruhodo API documentation</title>
-    <meta name="description" content="# Naruhodo 0.2.8
+    <meta name="description" content="# Naruhodo 0.2.9
 
 A python library for automatic semantic graph generation from human-readable text...." />
 
@@ -1064,9 +1064,16 @@ table {
 
   <header id="section-intro">
   <h1 class="title"><span class="name">naruhodo</span> module</h1>
-  <h1>Naruhodo 0.2.8</h1>
+  <h1>Naruhodo 0.2.9</h1>
 <p>A python library for automatic semantic graph generation from human-readable text.</p>
 <h2>Change-Log</h2>
+<h3>0.2.9</h3>
+<ul>
+<li>Some bug fix in KSG.</li>
+<li>Moved parser._preprocessText() to utils.misc.preprocessText().</li>
+<li>Change sub to obj when adding passive predicates in KSG.</li>
+<li>Modified synonym/coreference resolution for better accuracy in some situations(still not recomended though). </li>
+</ul>
 <h3>0.2.8</h3>
 <ul>
 <li>Added new node properties: "passive", "negative", "compulsory", "question", "tense".</li>
@@ -1121,12 +1128,17 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo" class="source">
     <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd"># Naruhodo 0.2.8</span>
+<span class="sd"># Naruhodo 0.2.9</span>
 
 <span class="sd">A python library for automatic semantic graph generation from human-readable text.</span>
 
 <span class="sd">## Change-Log</span>
 
+<span class="sd">### 0.2.9</span>
+<span class="sd">  * Some bug fix in KSG.</span>
+<span class="sd">  * Moved parser._preprocessText() to utils.misc.preprocessText().</span>
+<span class="sd">  * Change sub to obj when adding passive predicates in KSG.</span>
+<span class="sd">  * Modified synonym/coreference resolution for better accuracy in some situations(still not recomended though). </span>
 <span class="sd">### 0.2.8</span>
 <span class="sd">  * Added new node properties: &quot;passive&quot;, &quot;negative&quot;, &quot;compulsory&quot;, &quot;question&quot;, &quot;tense&quot;.</span>
 <span class="sd">  * Added coref variable in parser class to turn automatic synonym/coreference resulution ON/OFF.</span>

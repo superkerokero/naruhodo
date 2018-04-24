@@ -1065,7 +1065,9 @@ table {
     <li class="mono"><a href="#naruhodo.utils.misc.harmonicSim">harmonicSim</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.hex2Rgb">hex2Rgb</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.inclusive">inclusive</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.parseToSents">parseToSents</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.plotToFile">plotToFile</a></li>
+    <li class="mono"><a href="#naruhodo.utils.misc.preprocessText">preprocessText</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.rgb2Hex">rgb2Hex</a></li>
     <li class="mono"><a href="#naruhodo.utils.misc.show">show</a></li>
   </ul>
@@ -1092,12 +1094,39 @@ table {
     <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Module for miscellaneous utility functions.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">nxpd</span> <span class="kn">import</span> <span class="n">draw</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NodeType2StyleDict</span><span class="p">,</span> <span class="n">NodeType2ColorDict</span><span class="p">,</span> <span class="n">NodeType2FontColorDict</span><span class="p">,</span> <span class="n">EdgeType2StyleDict</span><span class="p">,</span> <span class="n">EdgeType2ColorDict</span>
+
+
+<span class="n">_re_sent</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;([^　！？。]*[！？。])&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Precompiled regular expression for separating sentences.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">_re1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\（.*?\）&#39;</span><span class="p">)</span>
+<span class="n">_re2</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[.*?\]&#39;</span><span class="p">)</span>
+<span class="n">_re3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\(.*?\)&#39;</span><span class="p">)</span>
+<span class="n">_re4</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\&lt;.*?\&gt;&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Precompiled regular expressions for getting rid of parenthesis.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">def</span> <span class="nf">preprocessText</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re1</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re2</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re4</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span>
+
+<span class="k">def</span> <span class="nf">parseToSents</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse given context into list of individual sentences.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">sent</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">_re_sent</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="k">if</span> <span class="n">sent</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">exportToJsonObj</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export given networkx graph to JSON object(dict object in python).&quot;&quot;&quot;</span>
@@ -1170,22 +1199,23 @@ table {
         <span class="n">ret</span> <span class="o">+=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">cosSimilarity</span><span class="p">(</span><span class="n">AG</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">/</span> <span class="n">ret</span>
 
-<span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rankdir</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate temporal graph with drawing properties added for nxpd.&quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s1">&#39;rankdir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rankdir</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getNodeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getEdgeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">ret</span>
 
-<span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rankdir</span><span class="o">=</span><span class="s1">&#39;TB&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Decorate and draw given graph using nxpd in notebook.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rankdir</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rankdir</span><span class="o">=</span><span class="s1">&#39;TB&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Output given graph to a png file using nxpd.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rankdir</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_mergeGraph</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the merged graph of A and B.&quot;&quot;&quot;</span>
@@ -1352,7 +1382,7 @@ table {
       
   <div class="item">
     <div class="name def" id="naruhodo.utils.misc.decorate">
-    <p>def <span class="ident">decorate</span>(</p><p>G, depth=False)</p>
+    <p>def <span class="ident">decorate</span>(</p><p>G, depth, rankdir)</p>
     </div>
     
 
@@ -1362,9 +1392,10 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.decorate', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.utils.misc.decorate" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rankdir</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate temporal graph with drawing properties added for nxpd.&quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s1">&#39;rankdir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rankdir</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">getNodeProperties</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1585,8 +1616,31 @@ table {
   
       
   <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.parseToSents">
+    <p>def <span class="ident">parseToSents</span>(</p><p>context)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Parse given context into list of individual sentences.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.parseToSents', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.parseToSents" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">parseToSents</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse given context into list of individual sentences.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">sent</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">_re_sent</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="k">if</span> <span class="n">sent</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="naruhodo.utils.misc.plotToFile">
-    <p>def <span class="ident">plotToFile</span>(</p><p>G, filename)</p>
+    <p>def <span class="ident">plotToFile</span>(</p><p>G, filename, depth=False, rankdir=&#39;TB&#39;)</p>
     </div>
     
 
@@ -1596,9 +1650,37 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.plotToFile', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.utils.misc.plotToFile" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">plotToFile</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rankdir</span><span class="o">=</span><span class="s1">&#39;TB&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Output given graph to a png file using nxpd.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rankdir</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.misc.preprocessText">
+    <p>def <span class="ident">preprocessText</span>(</p><p>text)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Get rid of weird parts from the text that interferes analysis.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.preprocessText', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.misc.preprocessText" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">preprocessText</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get rid of weird parts from the text that interferes analysis.&quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">,</span> <span class="s2">&quot;、&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re1</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re2</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re3</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_re4</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span>
 </pre></div>
 
   </div>
@@ -1634,7 +1716,7 @@ table {
       
   <div class="item">
     <div class="name def" id="naruhodo.utils.misc.show">
-    <p>def <span class="ident">show</span>(</p><p>G, depth=False)</p>
+    <p>def <span class="ident">show</span>(</p><p>G, depth=False, rankdir=&#39;TB&#39;)</p>
     </div>
     
 
@@ -1644,9 +1726,9 @@ table {
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.misc.show', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.utils.misc.show" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rankdir</span><span class="o">=</span><span class="s1">&#39;TB&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Decorate and draw given graph using nxpd in notebook.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">draw</span><span class="p">(</span><span class="n">decorate</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rankdir</span><span class="p">),</span> <span class="n">show</span><span class="o">=</span><span class="s1">&#39;ipynb&#39;</span><span class="p">)</span>
 </pre></div>
 
   </div>
