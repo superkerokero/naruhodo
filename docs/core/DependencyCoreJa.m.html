@@ -1082,10 +1082,10 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.core.DependencyCoreJa', this);">Show source &equiv;</a></p>
   <div id="source-naruhodo.core.DependencyCoreJa" class="source">
     <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NEList</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">NEList</span><span class="p">,</span> <span class="n">MeaninglessDict</span>
 <span class="kn">from</span> <span class="nn">naruhodo.utils.communication</span> <span class="kn">import</span> <span class="n">Subprocess</span>
 <span class="kn">from</span> <span class="nn">naruhodo.backends.cabocha</span> <span class="kn">import</span> <span class="n">CabochaClient</span>
-<span class="kn">from</span> <span class="nn">naruhodo.utils.dicts</span> <span class="kn">import</span> <span class="n">MeaninglessDict</span>
+<span class="kn">from</span> <span class="nn">naruhodo.utils.misc</span> <span class="kn">import</span> <span class="n">_re2</span><span class="p">,</span> <span class="n">_re4</span><span class="p">,</span> <span class="n">preprocessText</span>
 
 <span class="k">class</span> <span class="nc">DependencyCoreJa</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Analyze the input text and store the information into a dependency structure graph(DSG).&quot;&quot;&quot;</span>
@@ -1147,15 +1147,13 @@ table {
             
     <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
+        <span class="c1"># node.main = preprocessText(node.main)</span>
         <span class="c1"># Get rep.</span>
-        <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[:</span><span class="n">bpos</span><span class="p">]</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="n">_re2</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="n">_re4</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">rep</span><span class="p">)</span>
         <span class="c1"># Add to proList.</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">proid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[</span><span class="n">bpos</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">proid</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">npro</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
                 <span class="nb">id</span> <span class="o">=</span> <span class="n">proid</span><span class="p">,</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">,</span>
@@ -1295,15 +1293,13 @@ table {
             
     <span class="k">def</span> <span class="nf">_addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add node to node list&quot;&quot;&quot;</span>
+        <span class="c1"># node.main = preprocessText(node.main)</span>
         <span class="c1"># Get rep.</span>
-        <span class="n">bpos</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">bpos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rep</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[:</span><span class="n">bpos</span><span class="p">]</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="n">_re2</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">)</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="n">_re4</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">rep</span><span class="p">)</span>
         <span class="c1"># Add to proList.</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">pro</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">proid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">[</span><span class="n">bpos</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">proid</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">npro</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
                 <span class="nb">id</span> <span class="o">=</span> <span class="n">proid</span><span class="p">,</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main</span><span class="p">,</span>

@@ -3,8 +3,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>naruhodo.utils API documentation</title>
-    <meta name="description" content="Utility module" />
+    <title>naruhodo.utils.polarity API documentation</title>
+    <meta name="description" content="This module contains polarity related functionalities." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -1042,16 +1042,22 @@ table {
     <ul id="index">
 
 
-
-    <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
+    <li class="set"><h3><a href="#header-classes">Classes</a></h3>
       <ul>
-        <li class="mono"><a href="communication.m.html">naruhodo.utils.communication</a></li>
-        <li class="mono"><a href="dicts.m.html">naruhodo.utils.dicts</a></li>
-        <li class="mono"><a href="misc.m.html">naruhodo.utils.misc</a></li>
-        <li class="mono"><a href="polarity.m.html">naruhodo.utils.polarity</a></li>
-        <li class="mono"><a href="scraper.m.html">naruhodo.utils.scraper</a></li>
+        <li class="mono">
+        <span class="class_name"><a href="#naruhodo.utils.polarity.polarity">polarity</a></span>
+        
+          
+  <ul>
+    <li class="mono"><a href="#naruhodo.utils.polarity.polarity.__init__">__init__</a></li>
+    <li class="mono"><a href="#naruhodo.utils.polarity.polarity.load">load</a></li>
+    <li class="mono"><a href="#naruhodo.utils.polarity.polarity.save">save</a></li>
+  </ul>
+
+        </li>
       </ul>
     </li>
+
     </ul>
   </div>
 
@@ -1063,14 +1069,47 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">naruhodo.utils</span> module</h1>
-  <p>Utility module</p>
+  <h1 class="title"><span class="name">naruhodo.utils.polarity</span> module</h1>
+  <p>This module contains polarity related functionalities.</p>
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils', this);">Show source &equiv;</a></p>
-  <div id="source-naruhodo.utils" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.polarity', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.polarity" class="source">
     <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Utility module</span>
+<span class="sd">This module contains polarity related functionalities.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">class</span> <span class="nc">polarity</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for word and phrase polarity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s1">&#39;ja&#39;</span><span class="p">,</span> <span class="n">pdict</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor. If no pdict given, will initialize with an empty pdict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">lang</span>
+        <span class="k">if</span> <span class="n">pdict</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load saved polarity dict from file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">pdict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Failed loading pdict file: {0}. Please check the file path.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save polarity dict to file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1080,43 +1119,157 @@ table {
   <section id="section-items">
 
 
-
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
+    <h2 class="section-title" id="header-classes">Classes</h2>
+      
       <div class="item">
-      <p class="name"><a href="communication.m.html">naruhodo.utils.communication</a></p>
+      <p id="naruhodo.utils.polarity.polarity" class="name">class <span class="ident">polarity</span></p>
       
   
-    <div class="desc"><p>This module provides communication capabilities with external program using subprocess.</p></div>
+    <div class="desc"><p>Class for word and phrase polarity.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.polarity.polarity', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.polarity.polarity" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">polarity</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for word and phrase polarity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s1">&#39;ja&#39;</span><span class="p">,</span> <span class="n">pdict</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor. If no pdict given, will initialize with an empty pdict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">lang</span>
+        <span class="k">if</span> <span class="n">pdict</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="dicts.m.html">naruhodo.utils.dicts</a></p>
-      
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load saved polarity dict from file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">pdict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Failed loading pdict file: {0}. Please check the file path.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save polarity dict to file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#naruhodo.utils.polarity.polarity">polarity</a></li>
+          <li>builtins.object</li>
+          </ul>
+          <h3>Static methods</h3>
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.polarity.polarity.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self, lang=&#39;ja&#39;, pdict=&#39;&#39;)</p>
+    </div>
+    
+
+    
   
-    <div class="desc"><p>This module contains various dicts used in naruhodo.</p></div>
+    <div class="desc"><p>Constructor. If no pdict given, will initialize with an empty pdict.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.polarity.polarity.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.polarity.polarity.__init__" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="s1">&#39;ja&#39;</span><span class="p">,</span> <span class="n">pdict</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor. If no pdict given, will initialize with an empty pdict.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">lang</span>
+    <span class="k">if</span> <span class="n">pdict</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</pre></div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="misc.m.html">naruhodo.utils.misc</a></p>
-      
+  </div>
+</div>
+
+  </div>
   
-    <div class="desc"><p>Module for miscellaneous utility functions.</p></div>
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.polarity.polarity.load">
+    <p>def <span class="ident">load</span>(</p><p>self, fname)</p>
+    </div>
+    
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="polarity.m.html">naruhodo.utils.polarity</a></p>
-      
+    
   
-    <div class="desc"><p>This module contains polarity related functionalities.</p></div>
+    <div class="desc"><p>Load saved polarity dict from file.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.polarity.polarity.load', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.polarity.polarity.load" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load saved polarity dict from file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">pdict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Failed loading pdict file: {0}. Please check the file path.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+</pre></div>
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="scraper.m.html">naruhodo.utils.scraper</a></p>
-      
+  </div>
+</div>
+
+  </div>
   
-    <div class="desc"><p>This module contains basic scraping functions.</p></div>
+            
+  <div class="item">
+    <div class="name def" id="naruhodo.utils.polarity.polarity.save">
+    <p>def <span class="ident">save</span>(</p><p>self, fname)</p>
+    </div>
+    
 
+    
+  
+    <div class="desc"><p>Save polarity dict to file.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-naruhodo.utils.polarity.polarity.save', this);">Show source &equiv;</a></p>
+  <div id="source-naruhodo.utils.polarity.polarity.save" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save polarity dict to file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="naruhodo.utils.polarity.polarity.lang" class="name">var <span class="ident">lang</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
       </div>
+      </div>
+
   </section>
 
     </article>

@@ -1,8 +1,8 @@
 import networkx as nx
-from naruhodo.utils.dicts import NEList
+from naruhodo.utils.dicts import NEList, MeaninglessDict
 from naruhodo.utils.communication import Subprocess
 from naruhodo.backends.cabocha import CabochaClient
-from naruhodo.utils.dicts import MeaninglessDict
+from naruhodo.utils.misc import _re2, _re4, preprocessText
 
 class DependencyCoreJa(object):
     """Analyze the input text and store the information into a dependency structure graph(DSG)."""
@@ -64,15 +64,13 @@ class DependencyCoreJa(object):
             
     def _addNode(self, node, sub=''):
         """Add node to node list"""
+        # node.main = preprocessText(node.main)
         # Get rep.
-        bpos = node.main.find("[")
-        if bpos == -1:
-            rep = node.main
-        else:
-            rep = node.main[:bpos]
+        rep = _re2.sub("", node.main)
+        rep = _re4.sub("", rep)
         # Add to proList.
         if node.pro != -1:
-            proid = int(node.main[bpos+1:-1].split("@")[1])
+            proid = node.npro
             self.proList.append(dict(
                 id = proid,
                 name = node.main,

@@ -1,5 +1,6 @@
 import networkx as nx
 from naruhodo.utils.communication import Subprocess
+from naruhodo.utils.misc import preprocessText
 from naruhodo.backends.cabocha import CaboChunk, CabochaClient
 from naruhodo.utils.dicts import MeaninglessDict, SubDict, ObjDict, ObjPostDict, ObjPassiveSubDict, SubPassiveObjDict, NEList, EntityTypeDict, ParallelDict
 from naruhodo.core.DependencyCoreJa import DependencyCoreJa
@@ -77,7 +78,7 @@ class KnowledgeCoreJa(DependencyCoreJa):
 
     def _addChildren(self, pid, chunks):
         """Add children following rules."""
-        if chunks[pid].type == 0:
+        if chunks[pid].type in [0, -1]:
             self._addEntity(pid, chunks)
         else:
             self._addPredicate(pid, chunks)
@@ -90,10 +91,16 @@ class KnowledgeCoreJa(DependencyCoreJa):
                 for key in self.G.successors(pair[0]):
                     if key != pair[1]:
                         self._addEdge(pair[1], key, label=self.G.edges[pair[0], key]['label'], etype=self.G.edges[pair[0], key]['type'])
+                for key in self.G.predecessors(pair[0]):
+                    if key != pair[1]:
+                        self._addEdge(key, pair[1], label=self.G.edges[key, pair[0]]['label'], etype=self.G.edges[key, pair[0]]['type'])
                 # Add B properties to A
                 for key in self.G.successors(pair[1]):
                     if key != pair[0]:
                         self._addEdge(pair[0], key, label=self.G.edges[pair[1], key]['label'], etype=self.G.edges[pair[1], key]['type'])
+                for key in self.G.predecessors(pair[1]):
+                    if key != pair[0]:
+                        self._addEdge(key, pair[0], label=self.G.edges[key, pair[1]]['label'], etype=self.G.edges[key, pair[1]]['type'])
 
     def _addEntity(self, pid, chunks):
         """Add parent nodes that are nouns."""
@@ -104,6 +111,11 @@ class KnowledgeCoreJa(DependencyCoreJa):
             child = chunks[parent.children[i]]
             if child.func in SubDict:
                 sub = child
+                if child.func == "では":
+                    if child.negative != 0 or any([val.negative != 0 for key, val in self.G.successors(child.main)]):
+                        pass
+                    else:
+                        sub = None
         if sub:
             self._addNode(parent, sub=sub.main)
             self._addEdge(sub.main, parent.main, label="陳述", etype="stat")
@@ -115,8 +127,18 @@ class KnowledgeCoreJa(DependencyCoreJa):
             child = chunks[parent.children[i]]
             # If child is noun
             if child.func in SubDict:
-                continue
-            elif child.type == 0 and child.func in ParallelDict and child.id + 1 == parent.id and parent.func not in ["で"]:
+                if child.func == "では":
+                    if child.negative != 0 or any([val.negative != 0 for key, val in self.G.successors(child.main)]):
+                        pass
+                    else:
+                        self._addNode(child)
+                        self._addEdge(child.main, parent.main, label=child.func, etype="attr")
+            elif child.type == 0 and child.func in ["と", "などと"] and child.id + 1 == parent.id and preprocessText(chunks[parent.parent].main) not in ["交代", "交換"]:
+                self._addNode(child)
+                self._addEdge(child.main, parent.main, label="並列", etype="para")
+                self._addEdge(parent.main, child.main, label="並列", etype="para")
+                self.para.append([child.main, parent.main])
+            elif child.type == 0 and child.func in ParallelDict and child.id + 1 == parent.id:
                 self._addNode(child)
                 self._addEdge(child.main, parent.main, label="並列", etype="para")
                 self._addEdge(parent.main, child.main, label="並列", etype="para")
@@ -193,8 +215,14 @@ class KnowledgeCoreJa(DependencyCoreJa):
 
         if parent.passive == 0:
             # Add parent and subject.
+            # if sub and obj:
+            #     parent.main = "<{0}>[{2}]{1}".format(sub.main, parent.main, obj.main)
+            # elif sub:
+            #     parent.main = "<{0}>[NONE]{1}".format(sub.main, parent.main)
+            # elif obj:
+            #     parent.main = "<NONE>[{1}]{0}".format(parent.main, obj.main)
             if sub:
-                parent.main = "{0}\n[{1}]".format(parent.main, sub.main)
+                parent.main = "<{0}>{1}".format(sub.main, parent.main)
                 self._addNode(parent, sub=sub.main)
                 if not self.G.has_node(sub.main):
                     self._addNode(sub)
@@ -208,8 +236,14 @@ class KnowledgeCoreJa(DependencyCoreJa):
                 self._addEdge(parent.main, obj.main, label="客体\n" + auxlabel, etype="obj")
         else:
             # Add obj as sub
+            # if sub and obj:
+            #     parent.main = "<{0}>[{2}]{1}".format(sub.main, parent.main, obj.main)
+            # elif obj:
+            #     parent.main = "<{0}>[NONE]{1}".format(obj.main, parent.main)
+            # elif sub:
+            #     parent.main = "<NONE>[{1}]{0}".format(parent.main, sub.main)
             if obj:
-                parent.main = "{0}\n[{1}]".format(parent.main, obj.main)
+                parent.main = "<{0}>{1}".format(obj.main, parent.main)
                 self._addNode(parent, sub=obj.main)
                 if not self.G.has_node(obj.main):
                     self._addNode(obj)

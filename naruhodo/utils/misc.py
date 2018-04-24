@@ -1,12 +1,39 @@
 """
 Module for miscellaneous utility functions.
 """
+import re
 import json
 from math import sqrt
 import numpy as np
 import networkx as nx
 from nxpd import draw
 from naruhodo.utils.dicts import NodeType2StyleDict, NodeType2ColorDict, NodeType2FontColorDict, EdgeType2StyleDict, EdgeType2ColorDict
+
+
+_re_sent = re.compile(r'([^　！？。]*[！？。])')
+"""
+Precompiled regular expression for separating sentences.
+"""
+_re1 = re.compile(r'\（.*?\）')
+_re2 = re.compile(r'\[.*?\]')
+_re3 = re.compile(r'\(.*?\)')
+_re4 = re.compile(r'\<.*?\>')
+"""
+Precompiled regular expressions for getting rid of parenthesis.
+"""
+
+def preprocessText(text):
+    """Get rid of weird parts from the text that interferes analysis."""
+    text = text.replace("\n", "").replace("|", "、").replace(" ", "").strip()
+    text = _re1.sub("", text)
+    text = _re2.sub("", text)
+    text = _re3.sub("", text)
+    text = _re4.sub("", text)
+    return text
+
+def parseToSents(context):
+        """Parse given context into list of individual sentences."""
+        return [sent.strip().replace('*', "-") for sent in _re_sent.split(context) if sent.strip() != ""]
 
 def exportToJsonObj(G):
     """Export given networkx graph to JSON object(dict object in python)."""
@@ -79,22 +106,23 @@ def harmonicSim(AG, B):
         ret += 1. / cosSimilarity(AG[i], B)
     return float(size) / ret
 
-def decorate(G, depth=False):
+def decorate(G, depth, rankdir):
     """Generate temporal graph with drawing properties added for nxpd."""
     ret = nx.DiGraph()
+    ret.graph['rankdir'] = rankdir
     for key, val in G.nodes.items():
         ret.add_node(key, **getNodeProperties(val, depth))
     for key, val in G.edges.items():
         ret.add_edge(*key, **getEdgeProperties(val))
     return ret
 
-def show(G, depth=False):
+def show(G, depth=False, rankdir='TB'):
     """Decorate and draw given graph using nxpd in notebook."""
-    return draw(decorate(G, depth), show='ipynb')
+    return draw(decorate(G, depth, rankdir), show='ipynb')
 
-def plotToFile(G, filename):
+def plotToFile(G, filename, depth=False, rankdir='TB'):
     """Output given graph to a png file using nxpd."""
-    return draw(decorate(G), filename=filename)
+    return draw(decorate(G, depth, rankdir), filename=filename)
 
 def _mergeGraph(A, B):
     """Return the merged graph of A and B."""
