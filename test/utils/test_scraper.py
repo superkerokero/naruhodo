@@ -1,4 +1,4 @@
-かimport unittest
+import unittest
 from naruhodo.utils.scraper import NScraper
 
 class TestScraper(unittest.TestCase):
