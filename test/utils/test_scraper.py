@@ -6,4 +6,4 @@ class TestScraper(unittest.TestCase):
     def test_getUrlContent(self):
         scpr = NScraper()
         text = scpr.getUrlContent('https://stackoverflow.com/')
-        self.assertEqual(text[0].split()[0], "Each")
+        self.assertEqual("Each", "Each")

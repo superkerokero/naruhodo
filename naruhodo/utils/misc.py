@@ -122,7 +122,7 @@ def show(G, depth=False, rankdir='TB'):
 
 def plotToFile(G, filename, depth=False, rankdir='TB'):
     """Output given graph to a png file using nxpd."""
-    return draw(decorate(G, depth, rankdir), filename=filename)
+    return draw(decorate(G, depth, rankdir), filename=filename, show=False)
 
 def _mergeGraph(A, B):
     """Return the merged graph of A and B."""
